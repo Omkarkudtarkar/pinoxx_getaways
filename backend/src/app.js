@@ -1,0 +1,74 @@
+import cors from "cors";
+import dotenv from "dotenv";
+import express from "express";
+import helmet from "helmet";
+import rateLimit from "express-rate-limit";
+import morgan from "morgan";
+import path from "path";
+import { fileURLToPath } from "url";
+import { adminRouter } from "./routes/admin.js";
+import { authRouter } from "./routes/auth.js";
+import { availabilityRouter } from "./routes/availability.js";
+import { bookingsRouter } from "./routes/bookings.js";
+import { chatbotRouter } from "./routes/chatbot.js";
+import { contactRouter } from "./routes/contact.js";
+import { createMemoryRouter } from "./routes/memory.js";
+import { resortsRouter } from "./routes/resorts.js";
+
+dotenv.config();
+dotenv.config({ path: path.resolve(process.cwd(), "../.env") });
+
+export const app = express();
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+app.set("trust proxy", 1);
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: "cross-origin" }
+}));
+app.use(cors({
+  origin: process.env.CLIENT_URL?.split(",") || "http://localhost:5173",
+  credentials: true
+}));
+app.use(express.json({ limit: "1mb" }));
+app.use(express.urlencoded({ extended: true }));
+app.use(morgan("dev"));
+app.use(rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 300,
+  standardHeaders: "draft-8",
+  legacyHeaders: false
+}));
+
+app.use("/uploads", express.static(path.resolve(__dirname, "../uploads")));
+
+app.get("/health", (_req, res) => {
+  res.json({
+    ok: true,
+    service: "pinoxx-api",
+    dataMode: process.env.USE_MEMORY_DB === "true" ? "memory" : "mongo"
+  });
+});
+
+if (process.env.USE_MEMORY_DB === "true") {
+  app.use(createMemoryRouter());
+}
+
+app.use("/api/auth", authRouter);
+app.use("/api/resorts", resortsRouter);
+app.use("/api/availability", availabilityRouter);
+app.use("/api/bookings", bookingsRouter);
+app.use("/api/admin", adminRouter);
+app.use("/api/contact", contactRouter);
+app.use("/api/chatbot", chatbotRouter);
+
+app.use((req, res) => {
+  res.status(404).json({ message: `Route not found: ${req.method} ${req.originalUrl}` });
+});
+
+app.use((error, _req, res, _next) => {
+  console.error(error);
+  const status = error.status || 500;
+  res.status(status).json({
+    message: error.message || "Internal server error"
+  });
+});
