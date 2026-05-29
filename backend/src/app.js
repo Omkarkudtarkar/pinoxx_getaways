@@ -20,6 +20,7 @@ dotenv.config({ path: path.resolve(process.cwd(), "../.env") });
 
 export const app = express();
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const servicePrefix = "/_/backend";
 
 app.set("trust proxy", 1);
 app.use(helmet({
@@ -39,9 +40,12 @@ app.use(rateLimit({
   legacyHeaders: false
 }));
 
-app.use("/uploads", express.static(path.resolve(__dirname, "../uploads")));
+app.use(
+  ["/uploads", "/api/uploads", `${servicePrefix}/uploads`, `${servicePrefix}/api/uploads`],
+  express.static(path.resolve(__dirname, "../uploads"))
+);
 
-app.get("/health", (_req, res) => {
+app.get(["/health", `${servicePrefix}/health`], (_req, res) => {
   res.json({
     ok: true,
     service: "pinoxx-api",
@@ -51,15 +55,16 @@ app.get("/health", (_req, res) => {
 
 if (process.env.USE_MEMORY_DB === "true") {
   app.use(createMemoryRouter());
+  app.use(servicePrefix, createMemoryRouter());
 }
 
-app.use("/api/auth", authRouter);
-app.use("/api/resorts", resortsRouter);
-app.use("/api/availability", availabilityRouter);
-app.use("/api/bookings", bookingsRouter);
-app.use("/api/admin", adminRouter);
-app.use("/api/contact", contactRouter);
-app.use("/api/chatbot", chatbotRouter);
+app.use(["/api/auth", `${servicePrefix}/api/auth`], authRouter);
+app.use(["/api/resorts", `${servicePrefix}/api/resorts`], resortsRouter);
+app.use(["/api/availability", `${servicePrefix}/api/availability`], availabilityRouter);
+app.use(["/api/bookings", `${servicePrefix}/api/bookings`], bookingsRouter);
+app.use(["/api/admin", `${servicePrefix}/api/admin`], adminRouter);
+app.use(["/api/contact", `${servicePrefix}/api/contact`], contactRouter);
+app.use(["/api/chatbot", `${servicePrefix}/api/chatbot`], chatbotRouter);
 
 app.use((req, res) => {
   res.status(404).json({ message: `Route not found: ${req.method} ${req.originalUrl}` });
@@ -72,3 +77,5 @@ app.use((error, _req, res, _next) => {
     message: error.message || "Internal server error"
   });
 });
+
+export default app;

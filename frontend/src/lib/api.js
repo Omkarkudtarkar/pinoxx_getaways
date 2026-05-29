@@ -1,8 +1,11 @@
 import axios from "axios";
 import { sampleResorts, sampleReviews } from "./sampleData";
 
+const defaultApiUrl = import.meta.env.PROD ? "/_/backend/api" : "http://localhost:5000/api";
+const apiBaseUrl = import.meta.env.VITE_API_URL || defaultApiUrl;
+
 export const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || "http://localhost:5000/api"
+  baseURL: apiBaseUrl
 });
 
 api.interceptors.request.use((config) => {
@@ -16,7 +19,7 @@ api.interceptors.request.use((config) => {
 export function assetUrl(url) {
   if (!url) return "";
   if (url.startsWith("http")) return url;
-  const base = (import.meta.env.VITE_API_URL || "http://localhost:5000/api").replace(/\/api$/, "");
+  const base = apiBaseUrl.replace(/\/api$/, "");
   return `${base}${url}`;
 }
 
