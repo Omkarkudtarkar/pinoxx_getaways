@@ -5,7 +5,7 @@ import { useParams } from "react-router-dom";
 import { AdminResortPanel } from "../components/AdminResortPanel";
 import { BookingForm } from "../components/BookingForm";
 import { ReviewForm } from "../components/ReviewForm";
-import { assetUrl, getResort } from "../lib/api";
+import { getResort, resortImageUrl, useFallbackResortImage } from "../lib/api";
 import { formatCurrency } from "../lib/constants";
 import { Seo } from "../lib/Seo";
 
@@ -132,7 +132,7 @@ export function ResortDetail() {
                 openViewer(heroGallery, active, resort.name);
               }}
             >
-              <img src={assetUrl(heroGallery[active]?.url)} alt={heroGallery[active]?.alt || resort.name} className="h-full w-full object-cover" />
+              <img src={resortImageUrl(heroGallery[active]?.url)} alt={heroGallery[active]?.alt || resort.name} className="h-full w-full object-cover" onError={useFallbackResortImage} />
             </button>
             {heroGallery.length > 0 && (
               <div className="mt-4">
@@ -153,7 +153,7 @@ export function ResortDetail() {
                       type="button"
                       onClick={() => setActive(index)}
                     >
-                      <img src={assetUrl(image.url)} alt={image.alt || resort.name} className="h-full w-full object-cover" />
+                      <img src={resortImageUrl(image.url)} alt={image.alt || resort.name} className="h-full w-full object-cover" onError={useFallbackResortImage} />
                     </button>
                   ))}
                 </div>
@@ -279,9 +279,10 @@ export function ResortDetail() {
                         onClick={() => openViewer(room.images?.length ? room.images : gallery.slice(0, 2), index, room.name)}
                       >
                         <img
-                          src={assetUrl(image.url || gallery[0]?.url)}
+                          src={resortImageUrl(image.url || gallery[0]?.url)}
                           alt={image.alt || room.name}
                           className="aspect-[4/3] h-full w-full object-cover"
+                          onError={useFallbackResortImage}
                         />
                       </button>
                     ))}
@@ -357,7 +358,7 @@ export function ResortDetail() {
                               className="overflow-hidden rounded-lg bg-slate-100"
                               onClick={() => openViewer(review.images, index, `${review.user?.name || "Guest"} review`)}
                             >
-                              <img src={assetUrl(image.url)} alt={image.alt || "Review"} className="aspect-square w-full object-cover" />
+                              <img src={resortImageUrl(image.url)} alt={image.alt || "Review"} className="aspect-square w-full object-cover" onError={useFallbackResortImage} />
                             </button>
                           ))}
                         </div>
@@ -407,7 +408,7 @@ export function ResortDetail() {
             <button className="absolute left-3 grid h-11 w-11 place-items-center rounded-full bg-white/15 text-white backdrop-blur" onClick={() => moveViewer(-1)} aria-label="Previous image">
               <ChevronLeft size={28} />
             </button>
-            <img src={assetUrl(viewer.images[viewer.index]?.url)} alt={viewer.images[viewer.index]?.alt || viewer.title} className="max-h-full max-w-full object-contain" />
+            <img src={resortImageUrl(viewer.images[viewer.index]?.url)} alt={viewer.images[viewer.index]?.alt || viewer.title} className="max-h-full max-w-full object-contain" onError={useFallbackResortImage} />
             <button className="absolute right-3 grid h-11 w-11 place-items-center rounded-full bg-white/15 text-white backdrop-blur" onClick={() => moveViewer(1)} aria-label="Next image">
               <ChevronRight size={28} />
             </button>

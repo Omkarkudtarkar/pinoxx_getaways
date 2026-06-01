@@ -3,6 +3,7 @@ import { sampleResorts, sampleReviews } from "./sampleData";
 
 const defaultApiUrl = import.meta.env.PROD ? "/api" : "http://localhost:5000/api";
 const apiBaseUrl = import.meta.env.VITE_API_URL || defaultApiUrl;
+export const fallbackResortImage = "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1400&q=80";
 
 export const api = axios.create({
   baseURL: apiBaseUrl
@@ -21,6 +22,16 @@ export function assetUrl(url) {
   if (url.startsWith("http")) return url;
   const base = apiBaseUrl.replace(/\/api$/, "");
   return `${base}${url}`;
+}
+
+export function resortImageUrl(url) {
+  return assetUrl(url) || fallbackResortImage;
+}
+
+export function useFallbackResortImage(event) {
+  if (event.currentTarget.src !== fallbackResortImage) {
+    event.currentTarget.src = fallbackResortImage;
+  }
 }
 
 export async function getResorts(params) {

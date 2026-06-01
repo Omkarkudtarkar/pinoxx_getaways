@@ -1,6 +1,6 @@
 import { MapPin, Star } from "lucide-react";
 import { Link } from "react-router-dom";
-import { assetUrl } from "../lib/api";
+import { resortImageUrl, useFallbackResortImage } from "../lib/api";
 import { formatCurrency } from "../lib/constants";
 
 const resortTypeLabels = {
@@ -20,10 +20,11 @@ export function ResortCard({ resort }) {
     >
       <div className="aspect-[4/3] overflow-hidden bg-slate-100">
         <img
-          src={assetUrl(image)}
+          src={resortImageUrl(image)}
           alt={resort.images?.[0]?.alt || resort.name}
           className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
           loading="lazy"
+          onError={useFallbackResortImage}
         />
       </div>
       <div className="grid gap-3 p-4">

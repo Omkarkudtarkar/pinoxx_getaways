@@ -24,6 +24,19 @@ const frontendDistPath = path.resolve(__dirname, "../../frontend/dist");
 
 app.set("trust proxy", 1);
 app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      "default-src": ["'self'"],
+      "script-src": ["'self'"],
+      "style-src": ["'self'", "'unsafe-inline'"],
+      "img-src": ["'self'", "data:", "blob:", "https:"],
+      "font-src": ["'self'", "data:"],
+      "connect-src": ["'self'", "https:"],
+      "object-src": ["'none'"],
+      "base-uri": ["'self'"],
+      "frame-ancestors": ["'self'"]
+    }
+  },
   crossOriginResourcePolicy: { policy: "cross-origin" }
 }));
 app.use(cors({
