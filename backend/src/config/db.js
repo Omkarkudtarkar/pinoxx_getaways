@@ -4,7 +4,7 @@ export async function connectDb({ allowMemoryFallback = false } = {}) {
   const uri = process.env.MONGODB_URI;
 
   if (!uri) {
-    if (allowMemoryFallback && process.env.NODE_ENV !== "production") {
+    if (allowMemoryFallback) {
       return enableMemoryDb("MONGODB_URI is not configured");
     }
     throw new Error("MONGODB_URI is required");
@@ -18,7 +18,7 @@ export async function connectDb({ allowMemoryFallback = false } = {}) {
     console.log("MongoDB connected");
     return { mode: "mongo" };
   } catch (error) {
-    if (allowMemoryFallback && process.env.NODE_ENV !== "production") {
+    if (allowMemoryFallback) {
       return enableMemoryDb(error.message);
     }
     throw error;
