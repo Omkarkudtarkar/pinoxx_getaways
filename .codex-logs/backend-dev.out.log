@@ -1,0 +1,22 @@
+
+> pinoxx-backend@1.0.0 dev
+> nodemon src/server.js
+
+[33m[nodemon] 3.1.14[39m
+[33m[nodemon] to restart at any time, enter `rs`[39m
+[33m[nodemon] watching path(s): *.*[39m
+[33m[nodemon] watching extensions: js,mjs,cjs,json[39m
+[32m[nodemon] starting `node src/server.js`[39m
+◇ injected env (0) from .env // tip: ⌁ auth for agents [www.vestauth.com]
+◇ injected env (16) from ..\.env // tip: ⌘ custom filepath { path: '/custom/path/.env' }
+◇ injected env (0) from .env // tip: ◈ encrypted .env [www.dotenvx.com]
+◇ injected env (0) from ..\.env // tip: ◈ encrypted .env [www.dotenvx.com]
+Pinoxx API running on port 5000
+[0mGET /api/resorts [32m200[0m 9.648 ms - 5553[0m
+[0mGET /api/resorts [36m304[0m 1.556 ms - -[0m
+[0mGET /api/health [33m404[0m 2.360 ms - 46[0m
+[0mPOST /api/chatbot [32m200[0m 25.143 ms - 284[0m
+[0mGET /api/resorts [36m304[0m 1.133 ms - -[0m
+[0mGET /api/resorts [36m304[0m 1.132 ms - -[0m
+[0mGET /api/resorts [36m304[0m 0.766 ms - -[0m
+[0mGET /api/resorts [36m304[0m 0.989 ms - -[0m
