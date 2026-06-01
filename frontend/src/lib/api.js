@@ -1,11 +1,8 @@
 import axios from "axios";
 import { sampleResorts, sampleReviews } from "./sampleData";
 
-const defaultApiUrl = import.meta.env.PROD ? "/_/backend/api" : "http://localhost:5000/api";
-const apiBaseUrl = import.meta.env.VITE_API_URL || defaultApiUrl;
-
 export const api = axios.create({
-  baseURL: apiBaseUrl
+  baseURL: import.meta.env.VITE_API_URL || "http://localhost:5000/api"
 });
 
 api.interceptors.request.use((config) => {
@@ -19,7 +16,7 @@ api.interceptors.request.use((config) => {
 export function assetUrl(url) {
   if (!url) return "";
   if (url.startsWith("http")) return url;
-  const base = apiBaseUrl.replace(/\/api$/, "");
+  const base = (import.meta.env.VITE_API_URL || "http://localhost:5000/api").replace(/\/api$/, "");
   return `${base}${url}`;
 }
 
@@ -28,8 +25,28 @@ export async function getResorts(params) {
     const { data } = await api.get("/resorts", { params });
     return data.resorts;
   } catch {
-    return sampleResorts;
+    return filterLocalResorts(sampleResorts, params);
   }
+}
+
+function filterLocalResorts(resorts, params = {}) {
+  return [...resorts]
+    .filter((resort) => {
+      const price = Number(resort.startingPrice || 0);
+      const minPrice = Number(params.minPrice || 0);
+      const maxPrice = Number(params.maxPrice || 0);
+      const rating = Number(params.rating || 0);
+      const location = params.location?.toLowerCase();
+      const resortType = params.resortType;
+
+      if (minPrice && price < minPrice) return false;
+      if (maxPrice && price > maxPrice) return false;
+      if (rating && Number(resort.rating || 0) < rating) return false;
+      if (location && !resort.location?.toLowerCase().includes(location)) return false;
+      if (resortType && resort.resortType !== resortType) return false;
+      return resort.isActive !== false;
+    })
+    .sort((first, second) => Number(second.rating || 0) - Number(first.rating || 0) || Number(first.startingPrice || 0) - Number(second.startingPrice || 0));
 }
 
 export async function getResort(slug) {
@@ -241,7 +258,7 @@ function buildLocalExtraActivitiesAnswer(message) {
 
 export async function askChatbot(message) {
   try {
-    const { data } = await api.post("/chatbot", { message });
+    const { data } = await api.post("/chatbot", { message }, { timeout: 700 });
     return data.answer;
   } catch {
     const text = message.toLowerCase();
@@ -253,12 +270,10 @@ export async function askChatbot(message) {
       text.includes("comport") ||
       text.includes("premium")
     ) {
-      const resorts = await getResorts();
-      return buildLocalPriceAnswer(resorts, message);
+      return buildLocalPriceAnswer(sampleResorts, message);
     }
     if (text.includes("distance") || text.includes("bus") || text.includes("pickup") || text.includes("route")) {
-      const resorts = await getResorts();
-      return buildLocalDistanceAnswer(resorts, message);
+      return buildLocalDistanceAnswer(sampleResorts, message);
     }
     if (isExtraActivitiesQuestion(text)) return buildLocalExtraActivitiesAnswer(message);
     if (text.includes("rafting")) return buildLocalRaftingAnswer(message);

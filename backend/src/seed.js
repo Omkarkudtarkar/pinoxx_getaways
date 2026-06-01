@@ -28,9 +28,13 @@ const resorts = [
     shortDescription: "Riverside stay with rafting access, meals, bonfire space, and family rooms.",
     description:
       "A calm river-facing resort for families, student groups, and corporate weekend plans. Pinoxx coordinates availability, activity slots, food preferences, and local guidance from inquiry to check-out.",
+    resortType: "premium",
     startingPrice: 1799,
+    sharingPrice: 1799,
+    couplePrice: 3499,
     rating: 4.8,
     distanceFromBusStandKm: 3.2,
+    distanceToWaterActivitiesKm: 1.4,
     amenities: ["River view", "Meals", "Parking", "Bonfire", "Swimming pool", "Power backup", "Guide support"],
     activities: ["River rafting", "Kayaking", "Zipline", "Jungle safari", "Campfire"],
     images: [
@@ -64,9 +68,13 @@ const resorts = [
     shortDescription: "Forest retreat with nature trails, birding, adventure activities, and group packages.",
     description:
       "A nature-first Dandeli resort for guests who want a quieter stay near forest routes while still having access to rafting and adventure activities through Pinoxx coordination.",
+    resortType: "mamboo",
     startingPrice: 1499,
+    sharingPrice: 1499,
+    couplePrice: 2999,
     rating: 4.6,
     distanceFromBusStandKm: 8.5,
+    distanceToWaterActivitiesKm: 2.8,
     amenities: ["Forest view", "Meals", "Indoor games", "Campfire", "Nature trail", "Doctor on call"],
     activities: ["Bird watching", "Nature walk", "River rafting", "Cycling", "Boating"],
     images: [
@@ -100,9 +108,13 @@ const resorts = [
     shortDescription: "Activity-focused resort for groups seeking rafting, zipline, kayaking, and pool time.",
     description:
       "A practical resort for high-energy groups who want easy activity planning. Pinoxx helps confirm slots, prices, inclusions, and travel guidance before guests arrive.",
+    resortType: "budget",
     startingPrice: 1299,
+    sharingPrice: 1299,
+    couplePrice: 2499,
     rating: 4.4,
     distanceFromBusStandKm: 5.1,
+    distanceToWaterActivitiesKm: 0.9,
     amenities: ["Swimming pool", "Meals", "DJ on request", "Parking", "Activity desk", "First-aid support"],
     activities: ["River rafting", "Zipline", "Kayaking", "Zorbing", "Rain dance"],
     images: [

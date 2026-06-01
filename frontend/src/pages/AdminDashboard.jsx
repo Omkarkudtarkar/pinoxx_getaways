@@ -37,15 +37,25 @@ const graphRanges = [
   { id: "year", label: "Year", days: 365, bucket: "month" }
 ];
 
+const resortTypes = [
+  { value: "mamboo", label: "Mamboo" },
+  { value: "budget", label: "Budget" },
+  { value: "premium", label: "Premium" }
+];
+
 const initialResortForm = {
   slug: "",
   name: "",
   location: "Dandeli",
+  resortType: "budget",
   shortDescription: "",
   description: "",
   startingPrice: "",
+  sharingPrice: "",
+  couplePrice: "",
   rating: "4.5",
   distanceFromBusStandKm: "",
+  distanceToWaterActivitiesKm: "",
   amenities: "",
   activities: "",
   seoTitle: "",
@@ -77,11 +87,15 @@ function resortToForm(resort) {
     slug: resort.slug || "",
     name: resort.name || "",
     location: resort.location || "Dandeli",
+    resortType: resort.resortType || "budget",
     shortDescription: resort.shortDescription || "",
     description: resort.description || "",
     startingPrice: resort.startingPrice || "",
+    sharingPrice: resort.sharingPrice || "",
+    couplePrice: resort.couplePrice || "",
     rating: resort.rating || "4.5",
     distanceFromBusStandKm: resort.distanceFromBusStandKm || "",
+    distanceToWaterActivitiesKm: resort.distanceToWaterActivitiesKm || "",
     amenities: toCsv(resort.amenities),
     activities: toCsv(resort.activities),
     seoTitle: resort.seoTitle || "",
@@ -493,8 +507,16 @@ export function AdminDashboard() {
       <div className="grid gap-3 md:grid-cols-2">
         <input className="rounded-lg border border-slate-200 px-3 py-2" name="name" value={form.name} onChange={update} placeholder="Resort name" required />
         <input className="rounded-lg border border-slate-200 px-3 py-2" name="location" value={form.location} onChange={update} placeholder="Location" required />
-        <input className="rounded-lg border border-slate-200 px-3 py-2" name="startingPrice" value={form.startingPrice} onChange={update} type="number" min="0" placeholder="Starting price" required />
+        <select className="rounded-lg border border-slate-200 px-3 py-2" name="resortType" value={form.resortType} onChange={update}>
+          {resortTypes.map((type) => (
+            <option key={type.value} value={type.value}>{type.label}</option>
+          ))}
+        </select>
+        <input className="rounded-lg border border-slate-200 px-3 py-2" name="startingPrice" value={form.startingPrice} onChange={update} type="number" min="0" placeholder="Base starting price optional" />
+        <input className="rounded-lg border border-slate-200 px-3 py-2" name="sharingPrice" value={form.sharingPrice} onChange={update} type="number" min="0" placeholder="Sharing price" />
+        <input className="rounded-lg border border-slate-200 px-3 py-2" name="couplePrice" value={form.couplePrice} onChange={update} type="number" min="0" placeholder="Couple price" />
         <input className="rounded-lg border border-slate-200 px-3 py-2" name="distanceFromBusStandKm" value={form.distanceFromBusStandKm} onChange={update} type="number" min="0" step="0.1" placeholder="Distance from bus stand (km)" required />
+        <input className="rounded-lg border border-slate-200 px-3 py-2" name="distanceToWaterActivitiesKm" value={form.distanceToWaterActivitiesKm} onChange={update} type="number" min="0" step="0.1" placeholder="Distance to water activities (km)" />
         <input className="rounded-lg border border-slate-200 px-3 py-2" name="rating" value={form.rating} onChange={update} type="number" min="0" max="5" step="0.1" placeholder="Rating" />
         <input className="rounded-lg border border-slate-200 px-3 py-2" name="seoTitle" value={form.seoTitle} onChange={update} placeholder="SEO title optional" />
         <input className="rounded-lg border border-slate-200 px-3 py-2 md:col-span-2" name="shortDescription" value={form.shortDescription} onChange={update} placeholder="Short description" required />
@@ -730,7 +752,12 @@ export function AdminDashboard() {
                       <div className="flex flex-col justify-between gap-4 lg:flex-row lg:items-center">
                         <div>
                           <h3 className="text-lg font-black text-slate-950">{resort.name}</h3>
-                          <p className="mt-1 text-sm text-slate-600">{resort.location} - {resort.rooms?.length || 0} room category(s)</p>
+                          <p className="mt-1 text-sm text-slate-600">
+                            {resort.location} - {resort.resortType || "budget"} - {resort.rooms?.length || 0} room category(s)
+                          </p>
+                          <p className="mt-1 text-sm font-semibold text-slate-700">
+                            Sharing {resort.sharingPrice ? `Rs ${resort.sharingPrice}` : "not set"} - Couple {resort.couplePrice ? `Rs ${resort.couplePrice}` : "not set"}
+                          </p>
                           <p className="mt-1 max-w-3xl text-sm leading-6 text-slate-500">{resort.shortDescription}</p>
                         </div>
                         <div className="flex flex-wrap gap-2">

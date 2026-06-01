@@ -61,7 +61,7 @@ chatbotRouter.post("/", async (req, res, next) => {
 
     if (process.env.PYTHON_CHATBOT_URL && !shouldUseLocalResortData(message)) {
       const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 1500);
+      const timeout = setTimeout(() => controller.abort(), 500);
 
       try {
         const response = await fetch(process.env.PYTHON_CHATBOT_URL, {

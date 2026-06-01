@@ -26,9 +26,18 @@ const resortSchema = new mongoose.Schema(
     location: { type: String, required: true, trim: true },
     shortDescription: { type: String, required: true },
     description: { type: String, required: true },
+    resortType: {
+      type: String,
+      enum: ["mamboo", "budget", "premium"],
+      default: "budget",
+      index: true
+    },
     startingPrice: { type: Number, required: true, min: 0 },
+    sharingPrice: { type: Number, min: 0, default: 0 },
+    couplePrice: { type: Number, min: 0, default: 0 },
     rating: { type: Number, min: 0, max: 5, default: 4.5 },
     distanceFromBusStandKm: { type: Number, required: true, min: 0 },
+    distanceToWaterActivitiesKm: { type: Number, min: 0, default: 0 },
     amenities: [{ type: String, trim: true }],
     activities: [{ type: String, trim: true }],
     images: [imageSchema],
@@ -42,6 +51,6 @@ const resortSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-resortSchema.index({ name: "text", location: "text", amenities: "text" });
+resortSchema.index({ name: "text", location: "text", resortType: "text", amenities: "text" });
 
 export const Resort = mongoose.model("Resort", resortSchema);

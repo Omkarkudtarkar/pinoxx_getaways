@@ -9,7 +9,7 @@ export const resortsRouter = express.Router();
 
 resortsRouter.get("/", async (req, res, next) => {
   try {
-    const { minPrice, maxPrice, rating, location, q } = req.query;
+    const { minPrice, maxPrice, rating, location, resortType, q } = req.query;
     const filter = { isActive: true };
 
     if (minPrice || maxPrice) {
@@ -20,6 +20,7 @@ resortsRouter.get("/", async (req, res, next) => {
 
     if (rating) filter.rating = { $gte: Number(rating) };
     if (location) filter.location = new RegExp(location, "i");
+    if (resortType) filter.resortType = resortType;
     if (q) filter.$text = { $search: q };
 
     const resorts = await Resort.find(filter).sort({ rating: -1, startingPrice: 1 });
@@ -84,6 +85,8 @@ export function resortPayload(body, files = []) {
   const roomImageCounts = parseJsonArray(body.roomImageCounts).map((count) => Number(count || 0));
   const resortFiles = uploadedFiles.slice(0, resortImageCount);
   let roomFileOffset = resortImageCount;
+  const sharingPrice = optionalNumber(body.sharingPrice);
+  const couplePrice = optionalNumber(body.couplePrice);
 
   return {
     name,
@@ -91,9 +94,13 @@ export function resortPayload(body, files = []) {
     location: body.location,
     shortDescription: body.shortDescription,
     description: body.description,
-    startingPrice: Number(body.startingPrice),
+    resortType: normalizeResortType(body.resortType),
+    startingPrice: resolveStartingPrice(body.startingPrice, sharingPrice, couplePrice),
+    sharingPrice: sharingPrice ?? 0,
+    couplePrice: couplePrice ?? 0,
     rating: Number(body.rating || 4.5),
     distanceFromBusStandKm: Number(body.distanceFromBusStandKm),
+    distanceToWaterActivitiesKm: optionalNumber(body.distanceToWaterActivitiesKm) ?? 0,
     amenities: parseList(body.amenities),
     activities: parseList(body.activities),
     images: [
@@ -118,6 +125,23 @@ export function resortPayload(body, files = []) {
     seoDescription: body.seoDescription,
     isActive: body.isActive !== "false"
   };
+}
+
+function optionalNumber(value) {
+  if (value === undefined || value === null || value === "") return undefined;
+  const number = Number(value);
+  return Number.isFinite(number) ? number : undefined;
+}
+
+function resolveStartingPrice(value, sharingPrice, couplePrice) {
+  const explicitPrice = optionalNumber(value);
+  if (explicitPrice !== undefined) return explicitPrice;
+  const prices = [sharingPrice, couplePrice].filter((price) => price !== undefined);
+  return prices.length ? Math.min(...prices) : 0;
+}
+
+function normalizeResortType(value) {
+  return ["mamboo", "budget", "premium"].includes(value) ? value : "budget";
 }
 
 function parseList(value) {

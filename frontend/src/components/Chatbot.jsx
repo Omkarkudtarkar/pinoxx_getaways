@@ -162,6 +162,19 @@ export function Chatbot() {
     playTone(520, 0, 0.05, 0.025);
   }
 
+  function playTypingSound() {
+    playTone(560, 0, 0.035, 0.018);
+    playTone(680, 0.09, 0.035, 0.014);
+  }
+
+  useEffect(() => {
+    if (!loading || !open || !soundOn) return undefined;
+
+    playTypingSound();
+    const timer = window.setInterval(playTypingSound, 380);
+    return () => window.clearInterval(timer);
+  }, [loading, open, soundOn]);
+
   async function sendMessage(event, quickText) {
     event?.preventDefault();
     const outgoingText = String(quickText || text).trim();
@@ -235,9 +248,9 @@ export function Chatbot() {
   const shouldAskFeedback = !loading && !activeTopic && messages.length > 1 && messages[messages.length - 1]?.role === "bot";
 
   return (
-    <div className="fixed bottom-4 right-4 z-50">
+    <div className="fixed inset-x-3 bottom-[calc(0.75rem+env(safe-area-inset-bottom))] z-50 flex flex-col items-end sm:inset-x-auto sm:bottom-4 sm:right-4">
       {!open && showNudge && (
-        <div className="relative mb-3 w-[min(86vw,300px)] rounded-lg border border-slate-200 bg-white p-4 shadow-soft">
+        <div className="relative mb-3 w-full max-w-[22rem] rounded-lg border border-slate-200 bg-white p-4 shadow-soft sm:w-[300px]">
           <button className="absolute right-2 top-2 rounded-lg p-1 text-slate-400 hover:bg-slate-100" onClick={() => setShowNudge(false)} aria-label="Hide chatbot prompt">
             <X size={15} />
           </button>
@@ -251,18 +264,18 @@ export function Chatbot() {
         </div>
       )}
       {open && (
-        <div className="mb-3 w-[min(92vw,380px)] overflow-hidden rounded-lg border border-slate-200 bg-white shadow-soft">
-          <div className="flex items-center justify-between bg-slate-950 px-4 py-3 text-white">
-            <div className="flex items-center gap-2">
-              <span className="grid h-9 w-9 place-items-center rounded-lg bg-jungle-500 text-slate-950">
+        <div className="mb-3 flex h-[min(82dvh,640px)] w-full max-w-[28rem] flex-col overflow-hidden rounded-lg border border-slate-200 bg-white shadow-soft sm:h-auto sm:w-[380px] sm:max-w-none">
+          <div className="flex shrink-0 items-center justify-between bg-slate-950 px-3 py-2.5 text-white sm:px-4 sm:py-3">
+            <div className="flex min-w-0 items-center gap-2">
+              <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-jungle-500 text-slate-950 sm:h-9 sm:w-9">
                 <Bot size={19} />
               </span>
-              <div>
+              <div className="min-w-0">
                 <p className="text-sm font-black leading-tight">Pinoxx Assistant</p>
-                <p className="text-xs font-semibold text-slate-300">Guided options + custom questions</p>
+                <p className="truncate text-xs font-semibold text-slate-300">Guided options + custom questions</p>
               </div>
             </div>
-            <div className="flex items-center gap-1">
+            <div className="flex shrink-0 items-center gap-1">
               <button
                 className="rounded-lg p-2 text-slate-300 hover:bg-white/10 hover:text-white"
                 onClick={() => setSoundOn((value) => !value)}
@@ -276,23 +289,32 @@ export function Chatbot() {
               </button>
             </div>
           </div>
-          <div ref={messagesRef} className="max-h-72 space-y-3 overflow-y-auto bg-slate-50 p-4">
+          <div ref={messagesRef} className="min-h-0 flex-1 space-y-3 overflow-y-auto bg-slate-50 p-3 sm:max-h-72 sm:flex-none sm:p-4">
             {messages.map((message, index) => (
               <div
                 key={`${message.role}-${index}`}
-                className={`whitespace-pre-line rounded-lg px-3 py-2 text-sm leading-6 shadow-sm ${message.role === "user" ? "ml-8 bg-jungle-700 text-white" : "mr-8 bg-white text-slate-800"}`}
+                className={`w-fit max-w-[88%] break-words rounded-lg px-3 py-2 text-sm leading-6 shadow-sm ${message.role === "user" ? "ml-auto bg-jungle-700 text-white" : "mr-auto bg-white text-slate-800"}`}
               >
                 {message.text}
               </div>
             ))}
-            {loading && <div className="mr-8 rounded-lg bg-white px-3 py-2 text-sm font-semibold text-slate-600 shadow-sm">Checking...</div>}
+            {loading && (
+              <div className="mr-auto inline-flex w-fit max-w-[88%] items-center gap-2 rounded-lg bg-white px-3 py-2 text-sm font-semibold text-slate-600 shadow-sm" aria-live="polite">
+                <span>Typing</span>
+                <span className="flex items-center gap-1" aria-hidden="true">
+                  <span className="chatbot-typing-dot h-1.5 w-1.5 rounded-full bg-jungle-700" />
+                  <span className="chatbot-typing-dot h-1.5 w-1.5 rounded-full bg-jungle-700 [animation-delay:120ms]" />
+                  <span className="chatbot-typing-dot h-1.5 w-1.5 rounded-full bg-jungle-700 [animation-delay:240ms]" />
+                </span>
+              </div>
+            )}
           </div>
-          <div className="border-t border-slate-200 bg-white px-3 py-3">
+          <div className="shrink-0 border-t border-slate-200 bg-white px-3 py-2.5 sm:py-3">
             <div className="mb-2 flex items-center justify-between gap-2">
-              <p className="text-xs font-black uppercase tracking-wide text-slate-400">{activeTopic ? activeTopic.prompt : "Choose a topic"}</p>
+              <p className="min-w-0 truncate text-xs font-black uppercase tracking-wide text-slate-400">{activeTopic ? activeTopic.prompt : "Choose a topic"}</p>
               {activeTopic && (
                 <button
-                  className="inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-black text-slate-500 hover:bg-slate-100"
+                  className="inline-flex shrink-0 items-center gap-1 rounded-full px-2 py-1 text-xs font-black text-slate-500 hover:bg-slate-100"
                   type="button"
                   onClick={resetTopics}
                   disabled={loading}
@@ -306,7 +328,7 @@ export function Chatbot() {
               {(activeTopic ? activeTopic.options : topics).map((option) => (
                 <button
                   key={option.label}
-                  className="inline-flex shrink-0 items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-black text-slate-700 transition hover:border-jungle-500 hover:bg-jungle-50 hover:text-jungle-800"
+                  className="inline-flex max-w-[72vw] shrink-0 items-center gap-2 whitespace-nowrap rounded-full border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-black text-slate-700 transition hover:border-jungle-500 hover:bg-jungle-50 hover:text-jungle-800 sm:max-w-none"
                   type="button"
                   onClick={(event) => (activeTopic ? sendMessage(event, option.question) : chooseTopic(option))}
                   disabled={loading}
@@ -316,13 +338,13 @@ export function Chatbot() {
                 </button>
               ))}
             </div>
-            <p className="mt-2 text-xs font-semibold text-slate-500">
+            <p className="mt-2 hidden text-xs font-semibold text-slate-500 min-[380px]:block">
               {activeTopic ? "Select one option above, or type your own answer/question below." : "Pick one topic to see related questions."}
             </p>
             {shouldAskFeedback && (
-              <div className="mt-3 rounded-lg border border-jungle-100 bg-jungle-50 p-3">
+              <div className="mt-2 rounded-lg border border-jungle-100 bg-jungle-50 p-2.5 sm:mt-3 sm:p-3">
                 <p className="text-xs font-black text-jungle-900">Was this helpful?</p>
-                <div className="mt-2 flex gap-2">
+                <div className="mt-2 flex flex-wrap gap-2">
                   <button
                     className="inline-flex items-center gap-1 rounded-full bg-white px-3 py-2 text-xs font-black text-jungle-800 shadow-sm hover:bg-jungle-100"
                     type="button"
@@ -342,15 +364,15 @@ export function Chatbot() {
               </div>
             )}
           </div>
-          <form className="flex gap-2 border-t border-slate-200 p-3" onSubmit={sendMessage}>
+          <form className="flex shrink-0 gap-2 border-t border-slate-200 p-3" onSubmit={sendMessage}>
             <input
               ref={inputRef}
-              className="min-w-0 flex-1 rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-jungle-700"
+              className="h-10 min-w-0 flex-1 rounded-lg border border-slate-200 px-3 text-sm outline-none focus:border-jungle-700"
               value={text}
               onChange={(event) => setText(event.target.value)}
               placeholder="Ask about price, distance..."
             />
-            <button className="rounded-lg bg-jungle-700 p-2 text-white" aria-label="Send">
+            <button className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-jungle-700 text-white" aria-label="Send">
               <Send size={18} />
             </button>
           </form>

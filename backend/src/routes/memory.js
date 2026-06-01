@@ -78,13 +78,14 @@ export function createMemoryRouter() {
   });
 
   router.get("/api/resorts", (req, res) => {
-    const { minPrice, maxPrice, rating, location, q } = req.query;
+    const { minPrice, maxPrice, rating, location, resortType, q } = req.query;
     let resorts = store.resorts.filter((resort) => resort.isActive !== false);
 
     if (minPrice) resorts = resorts.filter((resort) => resort.startingPrice >= Number(minPrice));
     if (maxPrice) resorts = resorts.filter((resort) => resort.startingPrice <= Number(maxPrice));
     if (rating) resorts = resorts.filter((resort) => resort.rating >= Number(rating));
     if (location) resorts = resorts.filter((resort) => resort.location.toLowerCase().includes(String(location).toLowerCase()));
+    if (resortType) resorts = resorts.filter((resort) => resort.resortType === resortType);
     if (q) {
       const query = String(q).toLowerCase();
       resorts = resorts.filter((resort) => [
@@ -502,9 +503,13 @@ function createStore() {
       shortDescription: "Riverside stay with rafting access, meals, bonfire space, and family rooms.",
       description:
         "A calm river-facing resort for families, student groups, and corporate weekend plans. Pinoxx coordinates availability, activity slots, food preferences, and local guidance from inquiry to check-out.",
+      resortType: "premium",
       startingPrice: 1799,
+      sharingPrice: 1799,
+      couplePrice: 3499,
       rating: 4.8,
       distanceFromBusStandKm: 3.2,
+      distanceToWaterActivitiesKm: 1.4,
       amenities: ["River view", "Meals", "Parking", "Bonfire", "Swimming pool", "Power backup", "Guide support"],
       activities: ["River rafting", "Kayaking", "Zipline", "Jungle safari", "Campfire"],
       images: [
@@ -541,9 +546,13 @@ function createStore() {
       shortDescription: "Forest retreat with nature trails, birding, adventure activities, and group packages.",
       description:
         "A nature-first Dandeli resort for guests who want a quieter stay near forest routes while still having access to rafting and adventure activities through Pinoxx coordination.",
+      resortType: "mamboo",
       startingPrice: 1499,
+      sharingPrice: 1499,
+      couplePrice: 2999,
       rating: 4.6,
       distanceFromBusStandKm: 8.5,
+      distanceToWaterActivitiesKm: 2.8,
       amenities: ["Forest view", "Meals", "Indoor games", "Campfire", "Nature trail", "Doctor on call"],
       activities: ["Bird watching", "Nature walk", "River rafting", "Cycling", "Boating"],
       images: [
@@ -580,9 +589,13 @@ function createStore() {
       shortDescription: "Activity-focused resort for groups seeking rafting, zipline, kayaking, and pool time.",
       description:
         "A practical resort for high-energy groups who want easy activity planning. Pinoxx helps confirm slots, prices, inclusions, and travel guidance before guests arrive.",
+      resortType: "budget",
       startingPrice: 1299,
+      sharingPrice: 1299,
+      couplePrice: 2499,
       rating: 4.4,
       distanceFromBusStandKm: 5.1,
+      distanceToWaterActivitiesKm: 0.9,
       amenities: ["Swimming pool", "Meals", "DJ on request", "Parking", "Activity desk", "First-aid support"],
       activities: ["River rafting", "Zipline", "Kayaking", "Zorbing", "Rain dance"],
       images: [
@@ -769,6 +782,8 @@ function memoryResortPayload(body, files = []) {
   const roomImageCounts = parseJsonArray(body.roomImageCounts).map((count) => Number(count || 0));
   const resortFiles = uploadedFiles.slice(0, resortImageCount);
   let roomFileOffset = resortImageCount;
+  const sharingPrice = optionalNumber(body.sharingPrice);
+  const couplePrice = optionalNumber(body.couplePrice);
 
   return {
     name,
@@ -776,9 +791,13 @@ function memoryResortPayload(body, files = []) {
     location: body.location,
     shortDescription: body.shortDescription,
     description: body.description,
-    startingPrice: Number(body.startingPrice),
+    resortType: normalizeResortType(body.resortType),
+    startingPrice: resolveStartingPrice(body.startingPrice, sharingPrice, couplePrice),
+    sharingPrice: sharingPrice ?? 0,
+    couplePrice: couplePrice ?? 0,
     rating: Number(body.rating || 4.5),
     distanceFromBusStandKm: Number(body.distanceFromBusStandKm),
+    distanceToWaterActivitiesKm: optionalNumber(body.distanceToWaterActivitiesKm) ?? 0,
     amenities: parseList(body.amenities),
     activities: parseList(body.activities),
     images: [
@@ -803,6 +822,23 @@ function memoryResortPayload(body, files = []) {
     seoDescription: body.seoDescription || "",
     isActive: body.isActive !== "false"
   };
+}
+
+function optionalNumber(value) {
+  if (value === undefined || value === null || value === "") return undefined;
+  const number = Number(value);
+  return Number.isFinite(number) ? number : undefined;
+}
+
+function resolveStartingPrice(value, sharingPrice, couplePrice) {
+  const explicitPrice = optionalNumber(value);
+  if (explicitPrice !== undefined) return explicitPrice;
+  const prices = [sharingPrice, couplePrice].filter((price) => price !== undefined);
+  return prices.length ? Math.min(...prices) : 0;
+}
+
+function normalizeResortType(value) {
+  return ["mamboo", "budget", "premium"].includes(value) ? value : "budget";
 }
 
 function parseList(value) {

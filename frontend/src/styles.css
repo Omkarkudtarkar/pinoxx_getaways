@@ -40,3 +40,19 @@ button:disabled {
   overflow: hidden;
 }
 
+@keyframes chatbotTypingDot {
+  0%,
+  80%,
+  100% {
+    opacity: 0.35;
+    transform: translateY(0);
+  }
+  40% {
+    opacity: 1;
+    transform: translateY(-3px);
+  }
+}
+
+.chatbot-typing-dot {
+  animation: chatbotTypingDot 0.9s ease-in-out infinite;
+}

@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { CalendarDays, MessageSquareText, Phone, Send, UserRound, UsersRound, X } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { api } from "../lib/api";
 
 const tabs = [
@@ -25,11 +25,17 @@ const fieldClass =
 const compactFieldClass =
   "w-full rounded-lg border border-slate-200 bg-white px-3 pb-2 pt-5 text-sm font-black text-slate-950 outline-none transition focus:border-jungle-500 focus:ring-4 focus:ring-jungle-500/10";
 
-export function ContactPopup({ open, onClose }) {
-  const [mode, setMode] = useState("call_later");
+export function ContactPopup({ open, onClose, initialMode = "call_later" }) {
+  const [mode, setMode] = useState(initialMode);
   const [form, setForm] = useState(initialForm);
   const [message, setMessage] = useState("");
   const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (open) {
+      setMode(initialMode);
+    }
+  }, [initialMode, open]);
 
   const title = useMemo(() => {
     if (mode === "call_now") return "Talk with Pinoxx now";
