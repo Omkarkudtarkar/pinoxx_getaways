@@ -20,6 +20,7 @@ dotenv.config({ path: path.resolve(process.cwd(), "../.env") });
 
 export const app = express();
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const frontendDistPath = path.resolve(__dirname, "../../frontend/dist");
 
 app.set("trust proxy", 1);
 app.use(helmet({
@@ -40,6 +41,7 @@ app.use(rateLimit({
 }));
 
 app.use("/uploads", express.static(path.resolve(__dirname, "../uploads")));
+app.use(express.static(frontendDistPath));
 
 app.get("/health", (_req, res) => {
   res.json({
@@ -60,6 +62,12 @@ app.use("/api/bookings", bookingsRouter);
 app.use("/api/admin", adminRouter);
 app.use("/api/contact", contactRouter);
 app.use("/api/chatbot", chatbotRouter);
+
+app.get(/^\/(?!api(?:\/|$)|uploads(?:\/|$)|health$).*/, (_req, res, next) => {
+  res.sendFile(path.join(frontendDistPath, "index.html"), (error) => {
+    if (error) next();
+  });
+});
 
 app.use((req, res) => {
   res.status(404).json({ message: `Route not found: ${req.method} ${req.originalUrl}` });
