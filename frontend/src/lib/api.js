@@ -1,4 +1,5 @@
 import axios from "axios";
+import { businessWhatsappNumber } from "./constants";
 import { sampleResorts, sampleReviews } from "./sampleData";
 
 const defaultApiUrl = import.meta.env.PROD ? "/api" : "http://localhost:5000/api";
@@ -81,6 +82,11 @@ function formatPrice(value) {
   }).format(value || 0);
 }
 
+function formattedSupportNumber() {
+  const digits = businessWhatsappNumber;
+  return digits.startsWith("91") && digits.length === 12 ? `+91 ${digits.slice(2)}` : `+${digits}`;
+}
+
 function categoryForIndex(index, total) {
   if (total <= 1) return "budget";
   if (index < Math.ceil(total / 3)) return "budget";
@@ -122,7 +128,7 @@ function buildLocalPriceAnswer(resorts, message) {
 
   if (selectedGroup) {
     const [label, items] = selectedGroup;
-    return `${label} resorts based on current resort prices:\n${items.map(line).join("\n")}\n\nPrices can change by date, meals, room type, and activity inclusions.`;
+    return `${label} resorts based on current resort prices:\n${items.map(line).join("\n")}\n\nPrices can change by date, meals, room type, and activity inclusions. Pinoxx helps compare options for the best possible cheap price.`;
   }
 
   const sections = [
@@ -134,7 +140,7 @@ function buildLocalPriceAnswer(resorts, message) {
     .map(([label, items]) => `${label}:\n${items.map(line).join("\n")}`)
     .join("\n\n");
 
-  return `Current resort prices by category:\n${sections}\n\nShare your date and member count for the exact package quote.`;
+  return `Current resort prices by category:\n${sections}\n\nShare your date and member count so Pinoxx can help find the best-value and cheap-price option for your trip.`;
 }
 
 function buildLocalDistanceAnswer(resorts, message) {
@@ -252,7 +258,7 @@ function buildLocalExtraActivitiesAnswer(message) {
   const wantsLongRafting = text.includes("long") || text.includes("12");
 
   if (wantsSightseeing && !wantsSafari && !wantsMidRafting && !wantsLongRafting) {
-    return `Sightseeing places included:\n${sightseeingPlaces.join("\n")}\n\nPinoxx can confirm route, timing, and vehicle details before booking.`;
+    return `Sightseeing places Pinoxx can help with:\n${sightseeingPlaces.join("\n")}\n\nPinoxx can guide route, timing, vehicle planning, and coordination around your resort check-in to check-out schedule.`;
   }
 
   if (wantsSafari && !wantsSightseeing && !wantsMidRafting && !wantsLongRafting) {
@@ -267,7 +273,74 @@ function buildLocalExtraActivitiesAnswer(message) {
     return buildLocalRaftingAnswer("long rafting 12 km");
   }
 
-  return `Extra activities available:\nSightseeing:\n${sightseeingPlaces.join("\n")}\n\nJungle safari\nMid rafting - 6 km - Rs 1,450: Includes 6 km rafting plus all water activities.\nLong rafting - 12 km - Rs 1,750: Includes only the 12 km rafting experience.\n\nPinoxx can confirm timing, availability, transport, and final pricing before booking.`;
+  return `Extra activities available:\nSightseeing:\n${sightseeingPlaces.join("\n")}\n\nJungle safari\nMid rafting - 6 km - Rs 1,450: Includes 6 km rafting plus all water activities.\nLong rafting - 12 km - Rs 1,750: Includes only the 12 km rafting experience.\n\nPinoxx can confirm timing, availability, transport, final pricing, and how it fits with your stay plan.`;
+}
+
+function isTripGuidanceQuestion(text) {
+  return (
+    text.includes("trip help") ||
+    text.includes("guidance") ||
+    text.includes("guide") ||
+    text.includes("check-in") ||
+    text.includes("check in") ||
+    text.includes("check-out") ||
+    text.includes("check out") ||
+    text.includes("till resort") ||
+    text.includes("until checkout") ||
+    text.includes("until check out") ||
+    text.includes("only booking") ||
+    text.includes("not only booking") ||
+    text.includes("support only") ||
+    text.includes("what support")
+  );
+}
+
+function buildLocalTripGuidanceAnswer() {
+  return "Pinoxx support is not limited to booking. We help you compare and get the best possible cheap price, plan Dandeli sightseeing, understand activities and inclusions, and guide you from resort check-in to check-out.";
+}
+
+function isContactQuestion(text) {
+  return (
+    text.includes("contact") ||
+    text.includes("call") ||
+    text.includes("phone") ||
+    text.includes("whatsapp") ||
+    text.includes("sms") ||
+    text.includes("text") ||
+    text.includes("email") ||
+    text.includes("callback") ||
+    text.includes("call back") ||
+    text.includes("support") ||
+    text.includes("booking help") ||
+    text.includes("talk")
+  );
+}
+
+function buildLocalContactAnswer(message) {
+  const text = message.toLowerCase();
+  const phone = formattedSupportNumber();
+
+  if (text.includes("email") || text.includes("mail")) {
+    return "You can email Pinoxx at admin@pinoxx.in. For faster help with best prices, sightseeing, and stay guidance, WhatsApp or call +91 9353431179.";
+  }
+
+  if (text.includes("callback") || text.includes("call back") || text.includes("later")) {
+    return "Open the Contact page and choose Call later. Add your name, phone number, people count, preferred date, and preferred time. Pinoxx will receive it in the admin contact panel.";
+  }
+
+  if (text.includes("sms") || text.includes("text")) {
+    return `You can send Pinoxx an SMS/text message at ${phone}. The Contact page also has a Text message option for quick trip support.`;
+  }
+
+  if (text.includes("whatsapp")) {
+    return `WhatsApp Pinoxx at ${phone} for quick Dandeli trip help. Share your travel date, number of members, budget, preferred stay type, and sightseeing needs.`;
+  }
+
+  if (text.includes("call") || text.includes("phone") || text.includes("talk")) {
+    return `Call Pinoxx at ${phone} for best-price help, arrival, pickup, sightseeing, or resort guidance. You can also use the Contact page to request Call now or Call later.`;
+  }
+
+  return `You can contact Pinoxx in different ways:\nWhatsApp: ${phone}\nPhone call: ${phone}\nSMS/Text message: ${phone}\nEmail: admin@pinoxx.in\nContact page: choose Call now, Call later, or Message.\n\nFor the fastest answer, share your dates, member count, budget, preferred resort style, and sightseeing needs.`;
 }
 
 export async function askChatbot(message) {
@@ -276,10 +349,17 @@ export async function askChatbot(message) {
     return data.answer;
   } catch {
     const text = message.toLowerCase();
+    if (isTripGuidanceQuestion(text)) return buildLocalTripGuidanceAnswer();
+    if (isContactQuestion(text)) return buildLocalContactAnswer(message);
     if (
       text.includes("price") ||
       text.includes("package") ||
       text.includes("budget") ||
+      text.includes("cheap") ||
+      text.includes("best price") ||
+      text.includes("best-price") ||
+      text.includes("deal") ||
+      text.includes("discount") ||
       text.includes("comfort") ||
       text.includes("comport") ||
       text.includes("premium")
@@ -312,6 +392,6 @@ export async function askChatbot(message) {
     ) {
       return buildLocalFacilitiesAnswer(message);
     }
-    return "Share your dates, member count, and preferred resort. Pinoxx will help with booking and Dandeli adventure guidance.";
+    return "Share your dates, member count, budget, and preferred resort. Pinoxx will help with best-price options, sightseeing, activities, and guidance from check-in to check-out.";
   }
 }

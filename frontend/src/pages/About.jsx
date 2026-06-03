@@ -47,7 +47,7 @@ const offerings = [
   {
     icon: WalletCards,
     title: "Smart value",
-    text: "Budget-friendly Dandeli options with clean rooms, meals, activities, and reliable support."
+    text: "Budget-friendly Dandeli options with clean rooms, meals, activities, sightseeing help, and reliable support."
   },
   {
     icon: IndianRupee,
@@ -75,7 +75,7 @@ const process = [
   {
     icon: Headphones,
     title: "Trip coordination",
-    text: "Our team helps with booking decisions, arrival guidance, adventure slots, and stay coordination."
+    text: "Our team helps with best-price options, arrival guidance, sightseeing, adventure slots, and stay coordination."
   }
 ];
 
@@ -83,7 +83,7 @@ const trustPoints = [
   { icon: ShieldCheck, label: "No hidden charges" },
   { icon: Star, label: "Real guest reviews" },
   { icon: CalendarCheck, label: "Easy cancellations" },
-  { icon: PhoneCall, label: "Fast booking help" },
+  { icon: PhoneCall, label: "Fast trip help" },
   { icon: MapPinned, label: "Local Dandeli expertise" },
   { icon: CheckCircle2, label: "Verified inclusions" }
 ];
@@ -100,7 +100,7 @@ export function About() {
     <main className="bg-white">
       <Seo
         title="About Pinoxx Getaways | Trusted Dandeli Resort Booking Hub"
-        description="Learn about Pinoxx Getaways, a trusted Dandeli resort and adventure booking hub with verified resorts, transparent pricing, and local support."
+        description="Learn about Pinoxx Getaways, a trusted Dandeli trip support hub with verified resorts, best-price help, sightseeing, and local guidance."
       />
 
       <section className="relative isolate overflow-hidden bg-slate-950 text-white">
@@ -119,7 +119,7 @@ export function About() {
               <span className="block text-jungle-300">Dandeli stays, chosen with confidence.</span>
             </h1>
             <p className="mt-6 max-w-3xl text-lg leading-8 text-slate-100 sm:text-xl">
-              A trusted resort and adventure booking hub for travellers who want verified stays, transparent packages, and local guidance before they reach Dandeli.
+              A trusted Dandeli trip support hub for travellers who want verified stays, best-price help, sightseeing guidance, and local support from check-in to check-out.
             </p>
 
             <div className="mt-9 flex flex-col gap-3 sm:flex-row">
@@ -158,7 +158,7 @@ export function About() {
               <div className="flex items-center justify-between gap-4">
                 <div>
                   <p className="text-sm font-black uppercase tracking-wide text-jungle-700">Pinoxx promise</p>
-                  <p className="mt-2 text-2xl font-black leading-tight">Verified stay. Clear price. Local support.</p>
+                  <p className="mt-2 text-2xl font-black leading-tight">Verified stay. Best price. Full trip support.</p>
                 </div>
                 <div className="grid h-14 w-14 shrink-0 place-items-center rounded-lg bg-slate-950 text-jungle-300">
                   <ShieldCheck size={28} />
@@ -202,7 +202,7 @@ export function About() {
           <div className="grid gap-6">
             <div className="rounded-lg border border-slate-200 bg-slate-50 p-6 sm:p-8">
               <p className="text-lg leading-9 text-slate-700">
-                Founded in January 2026, Pinoxx Getaways was created to solve one real problem: finding reliable, honest Dandeli resort booking options without hidden charges, unclear packages, or unverified listings.
+                Founded in January 2026, Pinoxx Getaways was created to solve one real problem: finding reliable, honest Dandeli resort options with best-price support, sightseeing help, and no hidden confusion.
               </p>
             </div>
             <div className="grid gap-6 md:grid-cols-2">
@@ -276,7 +276,7 @@ export function About() {
               Verification, price clarity, and personal guidance.
             </h2>
             <p className="mt-5 leading-8 text-slate-600">
-              Every listing includes practical resort details, honest package information, activity inclusions, and booking support so travellers can compare and choose with peace of mind.
+              Every listing includes practical resort details, honest package information, activity inclusions, sightseeing support, and check-in to check-out guidance so travellers can compare and choose with peace of mind.
             </p>
             <div className="mt-8 grid gap-4">
               {process.map((item, index) => (

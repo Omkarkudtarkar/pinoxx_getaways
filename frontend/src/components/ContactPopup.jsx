@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { api } from "../lib/api";
 
 const tabs = [
-  { id: "call_now", label: "Call me now", icon: Phone },
+  { id: "call_now", label: "Call us now", icon: Phone },
   { id: "call_later", label: "Call me later", icon: CalendarDays },
   { id: "message", label: "Leave a message", icon: MessageSquareText }
 ];
@@ -38,7 +38,7 @@ export function ContactPopup({ open, onClose, initialMode = "call_later" }) {
   }, [initialMode, open]);
 
   const title = useMemo(() => {
-    if (mode === "call_now") return "Talk with Pinoxx now";
+    if (mode === "call_now") return "Call us now to complete your booking";
     if (mode === "message") return "Send your booking request";
     return "Choose the best time for the callback";
   }, [mode]);
@@ -57,10 +57,10 @@ export function ContactPopup({ open, onClose, initialMode = "call_later" }) {
 
     const fallbackMessage =
       mode === "call_now"
-        ? "Please call me now for a Dandeli resort booking."
+        ? "Please call me now to complete my Dandeli booking and trip plan."
         : mode === "call_later"
         ? `Please call me later on ${form.preferredDate} at ${form.preferredTime}.`
-        : "I want help with a Dandeli resort booking.";
+        : "I want help with Dandeli resort pricing, sightseeing, and check-in to check-out guidance.";
 
     try {
       const { data } = await api.post("/contact", {
@@ -178,7 +178,7 @@ export function ContactPopup({ open, onClose, initialMode = "call_later" }) {
 
             <button className="inline-flex items-center justify-center gap-2 rounded-lg bg-slate-950 px-5 py-3 text-base font-black text-white shadow-soft transition hover:-translate-y-0.5 hover:bg-jungle-900 disabled:translate-y-0" disabled={submitting}>
               <Send size={19} />
-              {submitting ? "Submitting..." : mode === "call_now" ? "Call me now" : mode === "call_later" ? "Call me later" : "Send message"}
+              {submitting ? "Submitting..." : mode === "call_now" ? "Call us now to complete your booking" : mode === "call_later" ? "Text message: Call me later" : "Send message"}
             </button>
           </form>
         </motion.div>

@@ -1,6 +1,6 @@
 import { MessageCircle, Phone } from "lucide-react";
 import { Link } from "react-router-dom";
-import { whatsappUrl } from "../lib/constants";
+import { businessWhatsappNumber, whatsappUrl } from "../lib/constants";
 
 export function Footer() {
   return (
@@ -12,7 +12,7 @@ export function Footer() {
             <span className="text-xl font-black">Pinoxx</span>
           </div>
           <p className="max-w-md text-sm leading-6 text-slate-300">
-            Resort booking and adventure coordination agency for Dandeli stays, rafting plans, guest support, and verified resort marketing.
+            Dandeli trip support for best-price resorts, sightseeing, activities, and guidance from resort check-in to check-out.
           </p>
         </div>
         <div>
@@ -26,10 +26,10 @@ export function Footer() {
         <div>
           <h3 className="mb-3 text-sm font-bold uppercase tracking-wide text-slate-400">Support</h3>
           <div className="grid gap-3 text-sm text-slate-300">
-            <a className="inline-flex items-center gap-2" href="tel:+919999999999">
-              <Phone size={16} /> 24/7 booking support
+            <a className="inline-flex items-center gap-2" href={`tel:+${businessWhatsappNumber}`}>
+              <Phone size={16} /> 24/7 trip support
             </a>
-            <a className="inline-flex items-center gap-2" href={whatsappUrl("Hi Pinoxx, I need Dandeli booking support.")} target="_blank" rel="noreferrer">
+            <a className="inline-flex items-center gap-2" href={whatsappUrl("Hi Pinoxx, I need Dandeli resort pricing, sightseeing, and trip support.")} target="_blank" rel="noreferrer">
               <MessageCircle size={16} /> WhatsApp Pinoxx
             </a>
           </div>
@@ -38,4 +38,3 @@ export function Footer() {
     </footer>
   );
 }
-

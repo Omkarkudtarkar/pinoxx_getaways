@@ -2,12 +2,13 @@ import { Menu, MessageCircle, UserRound, X } from "lucide-react";
 import { useState } from "react";
 import { Link, NavLink } from "react-router-dom";
 import { useAuth } from "../lib/AuthContext";
-import { ContactPopup } from "./ContactPopup";
 
 const links = [
   { to: "/", label: "Home" },
   { to: "/about", label: "About" },
-  { to: "/resorts", label: "Resorts" }
+  { to: "/resorts", label: "Resorts" },
+  { to: "/reviews", label: "Reviews" },
+  { to: "/contact", label: "Contact" }
 ];
 
 function displayName(user) {
@@ -26,7 +27,6 @@ function initials(name) {
 
 export function Navbar() {
   const [open, setOpen] = useState(false);
-  const [contactOpen, setContactOpen] = useState(false);
   const { user, logout } = useAuth();
   const name = displayName(user);
   const linkClass = ({ isActive }) =>
@@ -51,9 +51,6 @@ export function Navbar() {
               {link.label}
             </NavLink>
           ))}
-          <button className="rounded-full px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-jungle-50" onClick={() => setContactOpen(true)}>
-            Contact
-          </button>
           {user?.role === "admin" && (
             <NavLink to="/admin" className={linkClass}>
               Admin
@@ -100,9 +97,6 @@ export function Navbar() {
                 {link.label}
               </NavLink>
             ))}
-            <button className="rounded-full px-3 py-2 text-left text-sm font-medium text-slate-700 transition hover:bg-jungle-50" onClick={() => { setContactOpen(true); setOpen(false); }}>
-              Contact
-            </button>
             {user?.role === "admin" && (
               <NavLink to="/admin" className={linkClass} onClick={() => setOpen(false)}>
                 Admin
@@ -131,7 +125,6 @@ export function Navbar() {
           </div>
         </div>
       )}
-      <ContactPopup open={contactOpen} onClose={() => setContactOpen(false)} />
     </header>
   );
 }

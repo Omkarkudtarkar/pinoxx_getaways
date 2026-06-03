@@ -13,6 +13,7 @@ import { bookingsRouter } from "./routes/bookings.js";
 import { chatbotRouter } from "./routes/chatbot.js";
 import { contactRouter } from "./routes/contact.js";
 import { createMemoryRouter } from "./routes/memory.js";
+import { pinoxxReviewsRouter } from "./routes/pinoxxReviews.js";
 import { resortsRouter } from "./routes/resorts.js";
 
 dotenv.config();
@@ -27,11 +28,12 @@ app.use(helmet({
   contentSecurityPolicy: {
     directives: {
       "default-src": ["'self'"],
-      "script-src": ["'self'"],
+      "script-src": ["'self'", "https://accounts.google.com"],
       "style-src": ["'self'", "'unsafe-inline'"],
       "img-src": ["'self'", "data:", "blob:", "https:"],
       "font-src": ["'self'", "data:"],
       "connect-src": ["'self'", "https:"],
+      "frame-src": ["'self'", "https://accounts.google.com"],
       "object-src": ["'none'"],
       "base-uri": ["'self'"],
       "frame-ancestors": ["'self'"]
@@ -75,6 +77,7 @@ app.use("/api/bookings", bookingsRouter);
 app.use("/api/admin", adminRouter);
 app.use("/api/contact", contactRouter);
 app.use("/api/chatbot", chatbotRouter);
+app.use("/api/pinoxx-reviews", pinoxxReviewsRouter);
 
 app.get(/^\/(?!api(?:\/|$)|uploads(?:\/|$)|health$).*/, (_req, res, next) => {
   res.sendFile(path.join(frontendDistPath, "index.html"), (error) => {

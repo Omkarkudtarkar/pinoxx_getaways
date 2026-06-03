@@ -28,6 +28,7 @@ export function AuthProvider({ children }) {
       const { data } = await api.post("/auth/login", payload);
       localStorage.setItem("pinoxx_token", data.token);
       localStorage.setItem("pinoxx_user", JSON.stringify(data.user));
+      sessionStorage.setItem("pinoxx_show_whatsapp_support", "1");
       setUser(data.user);
       return data.user;
     } finally {
@@ -41,6 +42,21 @@ export function AuthProvider({ children }) {
       const { data } = await api.post("/auth/signup", payload);
       localStorage.setItem("pinoxx_token", data.token);
       localStorage.setItem("pinoxx_user", JSON.stringify(data.user));
+      sessionStorage.setItem("pinoxx_show_whatsapp_support", "1");
+      setUser(data.user);
+      return data.user;
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function googleLogin(credential) {
+    setLoading(true);
+    try {
+      const { data } = await api.post("/auth/google", { credential });
+      localStorage.setItem("pinoxx_token", data.token);
+      localStorage.setItem("pinoxx_user", JSON.stringify(data.user));
+      sessionStorage.setItem("pinoxx_show_whatsapp_support", "1");
       setUser(data.user);
       return data.user;
     } finally {
@@ -54,11 +70,10 @@ export function AuthProvider({ children }) {
     setUser(null);
   }
 
-  const value = useMemo(() => ({ user, loading, login, signup, logout }), [user, loading]);
+  const value = useMemo(() => ({ user, loading, login, signup, googleLogin, logout }), [user, loading]);
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
 export function useAuth() {
   return useContext(AuthContext);
 }
-

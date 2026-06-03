@@ -2,16 +2,13 @@ import { motion } from "framer-motion";
 import {
   ArrowRight,
   BadgeCheck,
-  CalendarDays,
   Compass,
   Headphones,
-  MapPin,
   MessageCircle,
   PhoneCall,
   Search,
   ShieldCheck,
   Sparkles,
-  Star,
   UsersRound,
   WalletCards,
   Waves
@@ -19,8 +16,8 @@ import {
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { ResortCard } from "../components/ResortCard";
-import { getResorts } from "../lib/api";
-import { formatCurrency, HERO_VIDEO_URL, whatsappUrl } from "../lib/constants";
+import { getResorts, resortImageUrl } from "../lib/api";
+import { whatsappUrl } from "../lib/constants";
 import { sampleResorts } from "../lib/sampleData";
 import { Seo } from "../lib/Seo";
 
@@ -40,36 +37,38 @@ const experiences = [
   },
   {
     icon: Compass,
-    title: "Forest escapes",
-    text: "Quiet retreats near nature trails, birding routes, and calm corners of Dandeli."
+    title: "Sightseeing guidance",
+    text: "Dandeli sightseeing routes, local places, pickup guidance, and timing planned around your stay."
   },
   {
     icon: WalletCards,
-    title: "Package clarity",
-    text: "Stay, meals, activity options, guest count, and add-ons explained before booking."
+    title: "Best price help",
+    text: "We help you compare options and find suitable stays at the best possible cheap price."
   }
 ];
 
 const trustPoints = [
   "Verified resort partners",
-  "Clear package inclusions",
-  "Local booking guidance",
-  "Fast WhatsApp support"
+  "Best and cheap price support",
+  "Dandeli sightseeing guidance",
+  "Check-in to check-out help"
 ];
 
 const bookingSteps = [
   { title: "Choose your style", text: "Tell us your dates, group size, and budget.", icon: Search },
-  { title: "Compare clearly", text: "See price, distance, rafting, rooms, and inclusions.", icon: BadgeCheck },
-  { title: "Book with support", text: "Pinoxx guides your resort booking and travel plan.", icon: MessageCircle }
+  { title: "Get the best price", text: "Compare stays, inclusions, sightseeing, and total trip value.", icon: BadgeCheck },
+  { title: "Travel with support", text: "Pinoxx guides you from resort check-in to check-out.", icon: MessageCircle }
 ];
 
 const trustStrip = [
   "Verified Dandeli resorts",
   "Budget, comfort, premium options",
+  "Best cheap price help",
+  "Dandeli sightseeing support",
   "Rafting package clarity",
   "Distance from bus stand",
-  "WhatsApp booking help",
-  "Local trip guidance"
+  "WhatsApp trip help",
+  "Check-in to check-out guidance"
 ];
 
 const fadeUp = {
@@ -96,8 +95,8 @@ export function Home() {
   const [resorts, setResorts] = useState(() => topRatedResorts(sampleResorts));
   const featuredResorts = useMemo(() => topRatedResorts(resorts), [resorts]);
   const heroResort = featuredResorts[0] || sampleResorts[0];
-  const heroImage = heroResort?.images?.[0]?.url || sampleResorts[0].images[0].url;
-  const secondaryImage = sampleResorts[1]?.images?.[0]?.url;
+  const heroImage = resortImageUrl(heroResort?.images?.[0]?.url || sampleResorts[0].images[0].url);
+  const secondaryImage = resortImageUrl(sampleResorts[1]?.images?.[0]?.url);
 
   useEffect(() => {
     getResorts().then((items) => {
@@ -109,17 +108,20 @@ export function Home() {
     <>
       <Seo
         title="Pinoxx | Trusted Resort & Adventure Booking in Dandeli"
-        description="Book Dandeli resorts and adventure packages with Pinoxx. Resort discovery, booking help, guest support, and rafting guidance."
+        description="Plan Dandeli resorts, best-price stays, sightseeing, activities, and check-in to check-out trip guidance with Pinoxx."
       />
 
       <section className="relative isolate overflow-hidden bg-slate-950">
-        <video className="absolute inset-0 -z-30 h-full w-full object-cover" autoPlay muted loop playsInline poster={heroImage}>
-          <source src={HERO_VIDEO_URL} type="video/mp4" />
-        </video>
+        <img
+          src={secondaryImage || heroImage}
+          alt=""
+          aria-hidden="true"
+          className="absolute inset-0 -z-30 h-full w-full object-cover"
+        />
         <div className="absolute inset-0 -z-20 bg-slate-950/70" />
         <div className="absolute inset-x-0 bottom-0 -z-10 h-32 bg-gradient-to-t from-white to-transparent" />
 
-        <div className="mx-auto grid min-h-[calc(100vh-4rem)] max-w-7xl gap-10 px-4 py-14 sm:px-6 lg:grid-cols-[1fr_0.86fr] lg:items-center lg:px-8">
+        <div className="mx-auto flex min-h-[calc(100vh-4rem)] max-w-7xl items-center px-4 py-14 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
@@ -133,7 +135,7 @@ export function Home() {
               className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-sm font-black uppercase tracking-wide text-jungle-100 backdrop-blur"
             >
               <Sparkles size={16} />
-              Dandeli resort booking made clear
+              Dandeli trip support made clear
             </motion.p>
             <motion.h1
               initial={{ opacity: 0, y: 18 }}
@@ -149,7 +151,7 @@ export function Home() {
               transition={{ delay: 0.26, duration: 0.62 }}
               className="mt-5 max-w-2xl text-lg leading-8 text-slate-100"
             >
-              Verified resorts, adventure packages, local guidance, and fast booking support for couples, families, friends, and corporate groups.
+              We help you find the best and cheap price, plan Dandeli sightseeing, and get proper guidance from resort check-in to check-out.
             </motion.p>
 
             <motion.div
@@ -158,18 +160,24 @@ export function Home() {
               transition={{ delay: 0.34, duration: 0.62 }}
               className="mt-8 flex flex-col gap-3 sm:flex-row"
             >
-              <Link className="inline-flex items-center justify-center gap-2 rounded-lg bg-jungle-400 px-6 py-4 font-black text-slate-950 shadow-soft transition hover:-translate-y-0.5 hover:bg-jungle-100" to="/resorts">
-                Explore Resorts <ArrowRight size={19} />
-              </Link>
-              <a
-                className="inline-flex items-center justify-center gap-2 rounded-lg border border-white/35 px-6 py-4 font-black text-white backdrop-blur transition hover:bg-white/10"
+              <motion.div whileHover={{ y: -4, scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                <Link className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-cyan-400 px-6 py-4 font-black text-slate-950 shadow-[0_0_0_4px_rgba(255,255,255,0.24),0_22px_55px_rgba(34,211,238,0.36)] ring-2 ring-white/70 transition hover:bg-cyan-300 hover:shadow-[0_0_0_5px_rgba(255,255,255,0.32),0_26px_70px_rgba(34,211,238,0.46)] sm:w-auto" to="/resorts">
+                  Explore Resorts <ArrowRight size={19} />
+                </Link>
+              </motion.div>
+              <motion.a
+                animate={{ boxShadow: ["0 18px 45px rgba(16,185,129,0.22)", "0 18px 60px rgba(16,185,129,0.38)", "0 18px 45px rgba(16,185,129,0.22)"] }}
+                transition={{ duration: 2.4, repeat: Infinity, ease: "easeInOut" }}
+                whileHover={{ y: -4, scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className="inline-flex items-center justify-center gap-2 rounded-lg border border-jungle-300/50 bg-[#25D366] px-6 py-4 font-black text-slate-950 shadow-soft transition hover:bg-jungle-300"
                 href={whatsappUrl("Hi Pinoxx, I want help choosing a Dandeli resort.")}
                 target="_blank"
                 rel="noreferrer"
               >
                 <MessageCircle size={19} />
-                WhatsApp Support
-              </a>
+                Chat on WhatsApp
+              </motion.a>
             </motion.div>
 
             <div className="mt-10 grid gap-3 sm:grid-cols-3">
@@ -187,71 +195,6 @@ export function Home() {
                   <div className="text-sm font-bold text-slate-200">{stat.label}</div>
                 </motion.div>
               ))}
-            </div>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 24, scale: 0.98 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            transition={{ delay: 0.16, duration: 0.65 }}
-            whileHover={{ y: -8 }}
-            className="rounded-lg border border-white/15 bg-white p-4 shadow-2xl sm:p-5"
-          >
-            <div className="relative overflow-hidden rounded-lg">
-              <motion.img
-                animate={{ scale: [1, 1.04, 1] }}
-                transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
-                src={heroImage}
-                alt={heroResort?.name || "Dandeli resort"}
-                className="aspect-[4/3] w-full object-cover"
-              />
-              <motion.div
-                initial={{ opacity: 0, x: -12 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.5, duration: 0.45 }}
-                className="absolute left-4 top-4 inline-flex items-center gap-2 rounded-full bg-white px-3 py-2 text-sm font-black text-slate-950 shadow-sm"
-              >
-                <Star className="text-amber-500" size={16} fill="currentColor" />
-                Top rated pick
-              </motion.div>
-            </div>
-
-            <div className="mt-5 grid gap-4">
-              <div className="flex items-start justify-between gap-4">
-                <div>
-                  <h2 className="text-2xl font-black leading-tight text-slate-950">{heroResort?.name || "Curated Dandeli Resort"}</h2>
-                  <p className="mt-2 inline-flex items-center gap-1 text-sm font-semibold text-slate-600">
-                    <MapPin size={16} />
-                    {heroResort?.location || "Dandeli, Karnataka"}
-                  </p>
-                </div>
-                <p className="rounded-lg bg-jungle-50 px-3 py-2 text-right text-sm font-black text-jungle-800">
-                  From
-                  <span className="block text-lg">{formatCurrency(heroResort?.startingPrice)}</span>
-                </p>
-              </div>
-
-              <div className="grid gap-2 sm:grid-cols-2">
-                <motion.div whileHover={{ y: -3 }} className="rounded-lg bg-slate-50 p-4">
-                  <p className="text-xs font-black uppercase tracking-wide text-slate-500">Trip date</p>
-                  <p className="mt-2 inline-flex items-center gap-2 font-black text-slate-950">
-                    <CalendarDays size={18} className="text-jungle-700" />
-                    This weekend
-                  </p>
-                </motion.div>
-                <motion.div whileHover={{ y: -3 }} className="rounded-lg bg-slate-50 p-4">
-                  <p className="text-xs font-black uppercase tracking-wide text-slate-500">Best for</p>
-                  <p className="mt-2 inline-flex items-center gap-2 font-black text-slate-950">
-                    <UsersRound size={18} className="text-river-700" />
-                    Groups & families
-                  </p>
-                </motion.div>
-              </div>
-
-              <Link className="inline-flex items-center justify-center gap-2 rounded-lg bg-slate-950 px-5 py-3 font-black text-white transition hover:bg-jungle-900" to="/resorts">
-                <Search size={18} />
-                Check availability
-              </Link>
             </div>
           </motion.div>
         </div>
@@ -339,8 +282,8 @@ export function Home() {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <motion.div variants={fadeUp} transition={{ duration: 0.55 }} className="mb-8 flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
             <div>
-              <p className="text-sm font-black uppercase tracking-wide text-jungle-300">Clear booking path</p>
-              <h2 className="mt-2 text-3xl font-black leading-tight sm:text-4xl">Three simple steps from search to stay.</h2>
+              <p className="text-sm font-black uppercase tracking-wide text-jungle-300">Clear trip path</p>
+              <h2 className="mt-2 text-3xl font-black leading-tight sm:text-4xl">Three simple steps from search to check-out.</h2>
             </div>
             <Link className="inline-flex items-center gap-2 font-black text-jungle-300" to="/resorts">
               Start now <ArrowRight size={18} />
@@ -411,10 +354,10 @@ export function Home() {
           <motion.div variants={fadeUp} transition={{ duration: 0.6 }}>
             <p className="text-sm font-black uppercase tracking-wide text-jungle-700">Why Pinoxx</p>
             <h2 className="mt-3 text-3xl font-black leading-tight text-slate-950 sm:text-5xl">
-              Less confusion before booking. Better support during the trip.
+              Less confusion before booking. Better support until check-out.
             </h2>
             <p className="mt-5 leading-8 text-slate-600">
-              Pinoxx helps you compare Dandeli stays by location, budget, room type, activities, meals, and group fit. You get a practical shortlist instead of endless scrolling.
+              Pinoxx helps you compare Dandeli stays by location, budget, room type, activities, meals, and group fit. We also help you get a best-price option, plan sightseeing, and stay guided from resort check-in to check-out.
             </p>
             <div className="mt-8 grid gap-3 sm:grid-cols-2">
               {trustPoints.map((point, index) => (
@@ -441,7 +384,7 @@ export function Home() {
                 href="tel:+919353431179"
               >
                 <PhoneCall size={18} />
-                Call booking help
+                Call trip help
               </a>
             </div>
           </motion.div>
@@ -461,7 +404,7 @@ export function Home() {
               <p className="text-sm font-black uppercase tracking-wide text-jungle-700">Top rated stays</p>
               <h2 className="mt-2 text-3xl font-black leading-tight text-slate-950 sm:text-5xl">Best resorts based on ratings</h2>
               <p className="mt-3 max-w-2xl leading-7 text-slate-600">
-                Browse verified Dandeli stays with ratings, pricing, location, and resort details ready for quick comparison.
+                Browse verified Dandeli stays with ratings, pricing, location, and resort details so Pinoxx can help you choose the best-value option.
               </p>
             </div>
             <Link className="inline-flex items-center gap-2 rounded-lg border border-slate-200 px-5 py-3 font-black text-jungle-700 transition hover:bg-jungle-50" to="/resorts">

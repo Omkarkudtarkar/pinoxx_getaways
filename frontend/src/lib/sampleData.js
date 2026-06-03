@@ -6,7 +6,7 @@ export const sampleResorts = [
     location: "Kogilban, Dandeli",
     shortDescription: "Riverside stay with rafting access, meals, bonfire space, and family rooms.",
     description:
-      "A calm river-facing resort for families, student groups, and corporate weekend plans. Pinoxx coordinates availability, activity slots, food preferences, and local guidance from inquiry to check-out.",
+      "A calm river-facing resort for families, student groups, and corporate weekend plans. Pinoxx coordinates availability, best-price guidance, activity slots, sightseeing support, food preferences, and local guidance from inquiry to check-out.",
     resortType: "premium",
     startingPrice: 1799,
     sharingPrice: 1799,
@@ -106,7 +106,7 @@ export const sampleResorts = [
     location: "Old Dandeli Road",
     shortDescription: "Activity-focused resort for groups seeking rafting, zipline, kayaking, and pool time.",
     description:
-      "A practical resort for high-energy groups who want easy activity planning. Pinoxx helps confirm slots, prices, inclusions, and travel guidance before guests arrive.",
+      "A practical resort for high-energy groups who want easy activity planning. Pinoxx helps confirm slots, prices, inclusions, sightseeing options, and travel guidance from arrival to check-out.",
     resortType: "budget",
     startingPrice: 1299,
     sharingPrice: 1299,

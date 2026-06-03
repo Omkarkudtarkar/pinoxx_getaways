@@ -1,5 +1,5 @@
-import { Building2, IndianRupee, MapPin, SlidersHorizontal, Star, X } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { IndianRupee, SlidersHorizontal, Star, Trees, X } from "lucide-react";
+import { useEffect, useState } from "react";
 import { ResortCard } from "../components/ResortCard";
 import { getResorts } from "../lib/api";
 import { Seo } from "../lib/Seo";
@@ -14,31 +14,57 @@ const priceFilters = [
 ];
 
 const resortTypeFilters = [
-  { label: "All types", value: "" },
-  { label: "Mamboo", value: "mamboo" },
-  { label: "Budget", value: "budget" },
-  { label: "Premium", value: "premium" }
+  { label: "Budget", value: "budget", icon: IndianRupee, description: "Best-value stays for simple Dandeli trips." },
+  { label: "Premium", value: "premium", icon: Star, description: "Higher comfort stays with stronger amenities." },
+  { label: "Bamboo Stay", value: "mamboo", icon: Trees, description: "Nature-style stays for forest and group trips." }
 ];
 
-const defaultLocation = "Dandeli";
-const initialFilters = { minPrice: "", maxPrice: "", rating: "", location: defaultLocation, resortType: "" };
+const initialFilters = { minPrice: "", maxPrice: "", rating: "", resortType: "" };
 
 function filterSelectClassName() {
   return "min-h-12 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 font-semibold text-slate-800 outline-none transition focus:border-jungle-700 focus:ring-2 focus:ring-jungle-100";
 }
 
-function FilterFields({ filters, locations, onFieldChange, onPriceChange }) {
+function CategorySections({ filters, onSelect }) {
+  return (
+    <div className="grid gap-3 md:grid-cols-3">
+      {resortTypeFilters.map((type) => (
+        <button
+          key={type.value}
+          className={`flex min-h-28 items-start gap-4 rounded-lg border p-4 text-left transition ${
+            filters.resortType === type.value
+              ? "border-jungle-700 bg-jungle-50 shadow-soft"
+              : "border-slate-200 bg-white hover:border-jungle-300 hover:bg-jungle-50/40"
+          }`}
+          type="button"
+          onClick={() => onSelect(type.value)}
+        >
+          <span className={`grid h-11 w-11 shrink-0 place-items-center rounded-lg ${filters.resortType === type.value ? "bg-jungle-700 text-white" : "bg-slate-100 text-slate-700"}`}>
+            <type.icon size={22} />
+          </span>
+          <span>
+            <span className="block font-black text-slate-950">{type.label}</span>
+            <span className="mt-1 block text-sm leading-6 text-slate-600">{type.description}</span>
+          </span>
+        </button>
+      ))}
+    </div>
+  );
+}
+
+function FilterFields({ filters, onFieldChange, onPriceChange }) {
   const activePriceFilter = priceFilters.find(
     (item) => item.minPrice === filters.minPrice && item.maxPrice === filters.maxPrice
   ) || priceFilters[0];
+  const controlsDisabled = !filters.resortType;
 
   return (
-    <div className="grid gap-4 md:grid-cols-4">
+    <div className="grid gap-4 md:grid-cols-2">
       <label className="grid gap-2 text-sm font-black text-slate-800">
         <span className="flex items-center gap-2">
           <IndianRupee size={16} /> Select price
         </span>
-        <select className={filterSelectClassName()} value={activePriceFilter.value} onChange={onPriceChange}>
+        <select className={filterSelectClassName()} value={activePriceFilter.value} onChange={onPriceChange} disabled={controlsDisabled}>
           {priceFilters.map((option) => (
             <option key={option.value} value={option.value}>{option.label}</option>
           ))}
@@ -47,36 +73,13 @@ function FilterFields({ filters, locations, onFieldChange, onPriceChange }) {
 
       <label className="grid gap-2 text-sm font-black text-slate-800">
         <span className="flex items-center gap-2">
-          <Building2 size={16} /> Resort type
-        </span>
-        <select className={filterSelectClassName()} name="resortType" value={filters.resortType} onChange={onFieldChange}>
-          {resortTypeFilters.map((type) => (
-            <option key={type.value || "all"} value={type.value}>{type.label}</option>
-          ))}
-        </select>
-      </label>
-
-      <label className="grid gap-2 text-sm font-black text-slate-800">
-        <span className="flex items-center gap-2">
           <Star size={16} /> Rating
         </span>
-        <select className={filterSelectClassName()} name="rating" value={filters.rating} onChange={onFieldChange}>
+        <select className={filterSelectClassName()} name="rating" value={filters.rating} onChange={onFieldChange} disabled={controlsDisabled}>
           <option value="">Any rating</option>
           <option value="4.8">4.8+</option>
           <option value="4.5">4.5+</option>
           <option value="4">4.0+</option>
-        </select>
-      </label>
-
-      <label className="grid gap-2 text-sm font-black text-slate-800">
-        <span className="flex items-center gap-2">
-          <MapPin size={16} /> Location
-        </span>
-        <select className={filterSelectClassName()} name="location" value={filters.location} onChange={onFieldChange}>
-          <option value={defaultLocation}>{defaultLocation}</option>
-          {locations.map((location) => (
-            <option key={location} value={location}>{location}</option>
-          ))}
         </select>
       </label>
     </div>
@@ -97,14 +100,10 @@ export function Resorts() {
     });
   }, [filters]);
 
-  const locations = useMemo(
-    () => Array.from(new Set(resorts.map((item) => item.location))).filter((location) => location && location !== defaultLocation),
-    [resorts]
-  );
   const activePriceFilter = priceFilters.find(
     (item) => item.minPrice === filters.minPrice && item.maxPrice === filters.maxPrice
   ) || priceFilters[0];
-  const activeResortType = resortTypeFilters.find((item) => item.value === filters.resortType) || resortTypeFilters[0];
+  const activeResortType = resortTypeFilters.find((item) => item.value === filters.resortType) || { label: "Choose stay section" };
   const hasFilters = Object.keys(initialFilters).some((key) => filters[key] !== initialFilters[key]);
 
   function update(event) {
@@ -121,18 +120,22 @@ export function Resorts() {
     }));
   }
 
+  function updateResortType(resortType) {
+    setFilters((value) => ({ ...value, resortType }));
+  }
+
   function resetFilters() {
     setFilters(initialFilters);
   }
 
   return (
     <main className="bg-slate-50 pb-24 md:pb-0">
-      <Seo title="Dandeli Resorts | Pinoxx" description="Explore Dandeli resort listings with price, rating, location filters, and shareable booking pages." />
+      <Seo title="Dandeli Resorts | Pinoxx" description="Explore Dandeli resort listings by Budget, Premium, and Bamboo Stay sections with price and rating filters." />
       <section className="bg-white py-12">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <p className="text-sm font-black uppercase tracking-wide text-jungle-700">Explore resorts</p>
           <h1 className="mt-2 text-4xl font-black text-slate-950">Dandeli resort stays</h1>
-          <p className="mt-3 max-w-2xl leading-7 text-slate-600">Compare resorts by budget, guest rating, and location. Each resort page is shareable and includes rooms, gallery, amenities, reviews, and booking.</p>
+          <p className="mt-3 max-w-2xl leading-7 text-slate-600">Choose Budget, Premium, or Bamboo Stay, then shortlist resorts by price and guest rating. Pinoxx can help you get the best-value option.</p>
         </div>
       </section>
 
@@ -146,7 +149,7 @@ export function Resorts() {
                 </span>
                 Filters
               </div>
-              <p className="mt-1 text-sm text-slate-500">Shortlist stays by package budget, rating, and area.</p>
+              <p className="mt-1 text-sm text-slate-500">First choose a stay section, then filter by price and rating.</p>
             </div>
             <div className="flex items-center gap-3">
               <span className="rounded-lg bg-slate-100 px-3 py-2 text-sm font-bold text-slate-700">
@@ -164,16 +167,22 @@ export function Resorts() {
             </div>
           </div>
 
-          <div className="p-4">
-            <FilterFields filters={filters} locations={locations} onFieldChange={update} onPriceChange={updatePrice} />
+          <div className="grid gap-5 p-4">
+            <CategorySections filters={filters} onSelect={updateResortType} />
+            <FilterFields filters={filters} onFieldChange={update} onPriceChange={updatePrice} />
+            {!filters.resortType ? (
+              <p className="rounded-lg bg-slate-50 px-3 py-2 text-sm font-bold text-slate-600">
+                Select Budget, Premium, or Bamboo Stay to enable price and rating filters.
+              </p>
+            ) : null}
           </div>
         </div>
 
         <div className="mb-4 flex items-center justify-between rounded-lg border border-slate-200 bg-white px-4 py-3 shadow-sm md:hidden">
           <div>
-            <p className="text-sm font-black text-slate-950">{filters.location || defaultLocation}</p>
+            <p className="text-sm font-black text-slate-950">{activeResortType?.label || "Choose stay section"}</p>
             <p className="text-xs font-semibold text-slate-500">
-              {loading ? "Checking resorts" : `${activePriceFilter.label} · ${activeResortType.label} · ${resorts.length} ${resorts.length === 1 ? "resort" : "resorts"}`}
+              {loading ? "Checking resorts" : `${activePriceFilter.label} - ${resorts.length} ${resorts.length === 1 ? "resort" : "resorts"}`}
             </p>
           </div>
           {hasFilters ? (
@@ -215,7 +224,7 @@ export function Resorts() {
           <SlidersHorizontal size={18} /> Filters
         </span>
         <span className="max-w-[58%] truncate text-right text-xs font-bold text-slate-200">
-          {filters.location || defaultLocation} · {activePriceFilter.label} · {activeResortType.label}
+          {activeResortType.label} - {activePriceFilter.label}
         </span>
       </button>
 
@@ -239,7 +248,13 @@ export function Resorts() {
             </div>
 
             <div className="grid gap-5 px-4 py-5">
-              <FilterFields filters={filters} locations={locations} onFieldChange={update} onPriceChange={updatePrice} />
+              <CategorySections filters={filters} onSelect={updateResortType} />
+              <FilterFields filters={filters} onFieldChange={update} onPriceChange={updatePrice} />
+              {!filters.resortType ? (
+                <p className="rounded-lg bg-slate-50 px-3 py-2 text-sm font-bold text-slate-600">
+                  Select Budget, Premium, or Bamboo Stay to enable price and rating filters.
+                </p>
+              ) : null}
             </div>
 
             <div className="sticky bottom-0 grid grid-cols-[0.8fr_1.2fr] gap-3 border-t border-slate-100 bg-white p-4">

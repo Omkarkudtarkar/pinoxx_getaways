@@ -1,10 +1,10 @@
-import { ArrowLeft, Bot, CheckCircle2, Compass, IndianRupee, MapPin, Send, Sparkles, Utensils, Volume2, VolumeX, Waves, X } from "lucide-react";
+import { ArrowLeft, Bot, CheckCircle2, Compass, IndianRupee, MapPin, PhoneCall, Send, Sparkles, Utensils, Volume2, VolumeX, Waves, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { askChatbot } from "../lib/api";
 
 const starter = {
   role: "bot",
-  text: "Hi, I am here to help you choose the right Dandeli stay. Pick a topic below, or type your question."
+  text: "Hi, I can help with best-price Dandeli stays, sightseeing, activities, and guidance from resort check-in to check-out. Pick a topic below, or type your question."
 };
 
 const topics = [
@@ -70,13 +70,26 @@ const topics = [
   },
   {
     id: "booking",
-    label: "Booking help",
+    label: "Trip help",
     prompt: "What should Pinoxx help you with?",
     icon: Sparkles,
     options: [
-      { label: "Choose resort", question: "I want help choosing and booking a resort." },
-      { label: "Couple trip", question: "Suggest a Dandeli resort for a couple trip." },
-      { label: "Family/group", question: "Suggest a Dandeli resort for a family or group trip." }
+      { label: "Best price", question: "Can Pinoxx help me get the best and cheap price?" },
+      { label: "Choose resort", question: "I want help choosing the right Dandeli resort." },
+      { label: "Sightseeing", question: "Can Pinoxx help with Dandeli sightseeing?" },
+      { label: "Full guidance", question: "Can Pinoxx guide me from resort check-in to check-out?" }
+    ]
+  },
+  {
+    id: "contact",
+    label: "Contact",
+    prompt: "How would you like to contact Pinoxx?",
+    icon: PhoneCall,
+    options: [
+      { label: "All ways", question: "How can I contact Pinoxx in different ways?" },
+      { label: "WhatsApp", question: "How can I contact Pinoxx on WhatsApp?" },
+      { label: "Call back", question: "How do I request a call back from Pinoxx?" },
+      { label: "Email", question: "What is the Pinoxx email contact?" }
     ]
   }
 ];
@@ -231,7 +244,7 @@ export function Chatbot() {
       setMessages((items) => [
         ...items,
         { role: "user", text: "Helpful" },
-        { role: "bot", text: "Great. If you share your date, guest count, and budget, Pinoxx can help shortlist the best resort for you." }
+        { role: "bot", text: "Great. Share your date, guest count, and budget. Pinoxx can help find a best-price stay, plan sightseeing, and guide you until check-out." }
       ]);
       return;
     }
@@ -241,7 +254,7 @@ export function Chatbot() {
     setMessages((items) => [
       ...items,
       { role: "user", text: "Need more help" },
-      { role: "bot", text: "No problem. Choose a booking help option below, or type your exact question." }
+      { role: "bot", text: "No problem. Choose a trip help option below, or type your exact question." }
     ]);
   }
 
@@ -256,7 +269,7 @@ export function Chatbot() {
           </button>
           <div className="pr-5">
             <p className="text-sm font-black text-slate-950">Need help choosing a resort?</p>
-            <p className="mt-1 text-xs leading-5 text-slate-600">Ask about price, distance, rafting, extra activities, facilities, or booking.</p>
+            <p className="mt-1 text-xs leading-5 text-slate-600">Ask about best price, sightseeing, distance, rafting, facilities, or full trip guidance.</p>
             <button className="mt-3 inline-flex items-center gap-2 rounded-lg bg-slate-950 px-3 py-2 text-xs font-black text-white hover:bg-jungle-900" onClick={openChat}>
               Ask Pinoxx <Sparkles size={14} />
             </button>
@@ -370,7 +383,7 @@ export function Chatbot() {
               className="h-10 min-w-0 flex-1 rounded-lg border border-slate-200 px-3 text-sm outline-none focus:border-jungle-700"
               value={text}
               onChange={(event) => setText(event.target.value)}
-              placeholder="Ask about price, distance..."
+              placeholder="Ask about price, contact..."
             />
             <button className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-jungle-700 text-white" aria-label="Send">
               <Send size={18} />

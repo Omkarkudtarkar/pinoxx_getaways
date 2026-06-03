@@ -13,6 +13,11 @@ function shouldUseLocalResortData(message) {
     query.includes("comfort") ||
     query.includes("comport") ||
     query.includes("premium") ||
+    query.includes("cheap") ||
+    query.includes("best price") ||
+    query.includes("best-price") ||
+    query.includes("deal") ||
+    query.includes("discount") ||
     query.includes("distance") ||
     query.includes("bus") ||
     query.includes("pickup") ||
@@ -47,7 +52,26 @@ function shouldUseLocalResortData(message) {
     query.includes("butterfly") ||
     query.includes("syntheri") ||
     query.includes("sethori") ||
-    query.includes("rocks")
+    query.includes("rocks") ||
+    query.includes("contact") ||
+    query.includes("call") ||
+    query.includes("phone") ||
+    query.includes("whatsapp") ||
+    query.includes("sms") ||
+    query.includes("text") ||
+    query.includes("email") ||
+    query.includes("callback") ||
+    query.includes("call back") ||
+    query.includes("support") ||
+    query.includes("booking help") ||
+    query.includes("trip help") ||
+    query.includes("guidance") ||
+    query.includes("guide") ||
+    query.includes("check-in") ||
+    query.includes("check in") ||
+    query.includes("check-out") ||
+    query.includes("check out") ||
+    query.includes("talk")
   );
 }
 
