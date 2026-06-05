@@ -9,6 +9,7 @@ import {
   ClipboardCheck,
   Compass,
   Gem,
+  Handshake,
   Headphones,
   IndianRupee,
   Leaf,
@@ -95,6 +96,24 @@ const highlights = [
   { icon: Award, label: "Quality signal", value: "Curated resort partners" }
 ];
 
+const trustProof = [
+  {
+    icon: ShieldCheck,
+    title: "Verified resort partners",
+    text: "We check resort photos, stay type, amenities, location context, and package details before presenting an option."
+  },
+  {
+    icon: IndianRupee,
+    title: "Best-price guidance",
+    text: "Guests get clear package information, practical comparisons, and support for budget-friendly plus premium stays."
+  },
+  {
+    icon: Handshake,
+    title: "Human booking support",
+    text: "Pinoxx helps from first call to check-out with arrivals, sightseeing, adventure slots, and resort coordination."
+  }
+];
+
 export function About() {
   return (
     <main className="bg-white">
@@ -116,10 +135,10 @@ export function About() {
             </p>
             <h1 className="mt-6 text-4xl font-black leading-tight sm:text-6xl lg:text-7xl">
               Pinoxx Getaways
-              <span className="block text-jungle-300">Dandeli stays, chosen with confidence.</span>
+              <span className="block text-jungle-300">Dandeli's trusted resort and adventures booking hub.</span>
             </h1>
             <p className="mt-6 max-w-3xl text-lg leading-8 text-slate-100 sm:text-xl">
-              A trusted Dandeli trip support hub for travellers who want verified stays, best-price help, sightseeing guidance, and local support from check-in to check-out.
+              Pinoxx is Dandeli's trusted resort and adventures booking support for travellers who want verified stays, best-price help, sightseeing guidance, and local support from check-in to check-out.
             </p>
 
             <div className="mt-9 flex flex-col gap-3 sm:flex-row">
@@ -169,55 +188,108 @@ export function About() {
         </div>
       </section>
 
-      <section className="-mt-14 bg-white pb-16">
+      <section className="relative isolate -mt-14 overflow-hidden bg-slate-950 py-12">
+        <img src={riverImage} alt="Dandeli resort experience" className="absolute inset-0 -z-30 h-full w-full object-cover" />
+        <div className="absolute inset-0 -z-20 bg-slate-950/78" />
+        <div className="absolute inset-x-0 bottom-0 -z-10 h-28 bg-gradient-to-t from-slate-950 to-transparent" />
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="grid gap-4 rounded-lg border border-slate-200 bg-white p-4 shadow-soft sm:grid-cols-2 lg:grid-cols-4">
-            {highlights.map((item) => (
-              <div key={item.label} className="flex items-center gap-4 rounded-lg bg-slate-50 p-4">
-                <div className="grid h-12 w-12 shrink-0 place-items-center rounded-lg bg-white text-jungle-700 shadow-sm">
-                  <item.icon size={23} />
-                </div>
-                <div>
-                  <p className="text-sm font-black uppercase tracking-wide text-slate-500">{item.label}</p>
-                  <p className="mt-1 font-black text-slate-950">{item.value}</p>
-                </div>
+          <div className="grid overflow-hidden rounded-lg border border-white/15 bg-black/45 shadow-2xl backdrop-blur-md lg:grid-cols-[0.84fr_1.16fr]">
+            <div className="relative hidden min-h-72 lg:block">
+              <img src={forestImage} alt="Dandeli resort stay" className="absolute inset-0 h-full w-full object-cover" />
+              <div className="absolute inset-0 bg-gradient-to-r from-black/20 via-black/35 to-black/75" />
+              <div className="absolute bottom-6 left-6 right-6">
+                <p className="text-sm font-black uppercase tracking-wide text-jungle-200">Resort-ready trips</p>
+                <p className="mt-2 text-3xl font-black leading-tight text-white">Stays, adventures, and guest fit in one place.</p>
               </div>
-            ))}
+            </div>
+
+            <div className="p-5 sm:p-6">
+              <div className="mb-5 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+                <div>
+                  <p className="text-sm font-black uppercase tracking-wide text-jungle-200">Pinoxx stay signals</p>
+                  <h2 className="mt-2 text-2xl font-black leading-tight text-white">Quick reasons to trust the resort selection.</h2>
+                </div>
+                <span className="w-fit rounded-lg border border-white/10 bg-white/10 px-3 py-2 text-xs font-black uppercase tracking-wide text-slate-200">
+                  Curated by Pinoxx
+                </span>
+              </div>
+
+              <div className="grid gap-3 sm:grid-cols-2">
+                {highlights.map((item, index) => (
+                  <div key={item.label} className="group flex items-start gap-4 rounded-lg border border-white/10 bg-white/[0.07] p-4 transition hover:border-jungle-300/60 hover:bg-white/10">
+                    <div className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-white text-slate-950 shadow-sm">
+                      <item.icon size={22} />
+                    </div>
+                    <div>
+                      <p className="text-xs font-black uppercase tracking-wide text-jungle-200">0{index + 1} / {item.label}</p>
+                      <p className="mt-1 text-lg font-black leading-tight text-white">{item.value}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-4 rounded-lg border border-orange-300/20 bg-orange-500/10 px-4 py-3 text-sm font-bold leading-6 text-orange-100">
+                Designed for guests comparing river activities, forest stays, family comfort, and trusted resort partners before booking.
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
-      <section className="bg-white pb-20">
-        <div className="mx-auto grid max-w-7xl gap-10 px-4 sm:px-6 lg:grid-cols-[0.88fr_1.12fr] lg:items-start lg:px-8">
-          <div className="lg:sticky lg:top-24">
-            <p className="text-sm font-black uppercase tracking-wide text-jungle-700">Who we are</p>
-            <h2 className="mt-3 text-3xl font-black leading-tight text-slate-950 sm:text-5xl">
-              A premium Dandeli booking experience built on trust.
+      <section className="relative isolate overflow-hidden bg-slate-950 py-20 text-white">
+        <img src={forestImage} alt="Dandeli forest resort background" className="absolute inset-0 -z-30 h-full w-full object-cover" />
+        <div className="absolute inset-0 -z-20 bg-slate-950/82" />
+        <div className="absolute inset-x-0 top-0 -z-10 h-24 bg-gradient-to-b from-white to-transparent" />
+
+        <div className="mx-auto grid max-w-7xl gap-10 px-4 sm:px-6 lg:grid-cols-[0.9fr_1.1fr] lg:items-center lg:px-8">
+          <div>
+            <p className="text-sm font-black uppercase tracking-wide text-jungle-300">Who we are</p>
+            <h2 className="mt-3 text-3xl font-black leading-tight sm:text-5xl">
+              Pinoxx is Dandeli's trusted resort and adventures booking partner.
             </h2>
-            <p className="mt-5 max-w-xl leading-8 text-slate-600">
-              Pinoxx Getaways helps travellers move from confusion to confident booking with verified resort choices and guided package planning.
+            <p className="mt-5 max-w-xl text-lg leading-8 text-slate-200">
+              We help customers choose the right stay with verified resort details, clear package pricing, adventure guidance, and personal support before they pay.
             </p>
+            <div className="mt-8 grid gap-3 sm:grid-cols-3">
+              {stats.map((stat) => (
+                <div key={stat.label} className="rounded-lg border border-white/15 bg-white/10 p-4 backdrop-blur">
+                  <p className="text-2xl font-black text-jungle-300">{stat.value}</p>
+                  <p className="mt-1 text-xs font-black uppercase tracking-wide text-slate-200">{stat.label}</p>
+                </div>
+              ))}
+            </div>
           </div>
 
-          <div className="grid gap-6">
-            <div className="rounded-lg border border-slate-200 bg-slate-50 p-6 sm:p-8">
-              <p className="text-lg leading-9 text-slate-700">
-                Founded in January 2026, Pinoxx Getaways was created to solve one real problem: finding reliable, honest Dandeli resort options with best-price support, sightseeing help, and no hidden confusion.
+          <div className="grid gap-4">
+            <div className="rounded-lg border border-white/15 bg-black/45 p-6 text-white shadow-2xl backdrop-blur-md sm:p-8">
+              <p className="text-lg leading-9 text-slate-100">
+                Founded in January 2026, Pinoxx Getaways was created to solve one real problem: finding reliable, honest Dandeli resort options with best-price support, sightseeing help, activity planning, and no hidden confusion.
               </p>
             </div>
-            <div className="grid gap-6 md:grid-cols-2">
-              <div className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
-                <Camera className="text-jungle-700" size={26} />
-                <h3 className="mt-4 text-xl font-black text-slate-950">Real property clarity</h3>
-                <p className="mt-3 leading-7 text-slate-600">
-                  Hand-picked resorts are presented with usable photos, activity details, room context, and honest suitability notes.
+            <div className="grid gap-4 md:grid-cols-3">
+              {trustProof.map((item) => (
+                <div key={item.title} className="rounded-lg border border-white/15 bg-white/10 p-5 backdrop-blur">
+                  <div className="grid h-11 w-11 place-items-center rounded-lg bg-jungle-400 text-slate-950">
+                    <item.icon size={22} />
+                  </div>
+                  <h3 className="mt-4 font-black text-white">{item.title}</h3>
+                  <p className="mt-3 text-sm leading-6 text-slate-300">{item.text}</p>
+                </div>
+              ))}
+            </div>
+            <div className="grid gap-4 md:grid-cols-2">
+              <div className="rounded-lg border border-white/15 bg-white/10 p-5 backdrop-blur">
+                <Camera className="text-jungle-300" size={26} />
+                <h3 className="mt-4 text-xl font-black text-white">Real property clarity</h3>
+                <p className="mt-3 leading-7 text-slate-300">
+                  Hand-picked resorts are presented with useful photos, room context, activity details, and honest suitability notes.
                 </p>
               </div>
-              <div className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
-                <Route className="text-river-700" size={26} />
-                <h3 className="mt-4 text-xl font-black text-slate-950">Local trip guidance</h3>
-                <p className="mt-3 leading-7 text-slate-600">
-                  Our team helps match your group size, budget, travel style, and adventure plans with the right Dandeli stay.
+              <div className="rounded-lg border border-white/15 bg-white/10 p-5 backdrop-blur">
+                <Route className="text-cyan-300" size={26} />
+                <h3 className="mt-4 text-xl font-black text-white">Local trip guidance</h3>
+                <p className="mt-3 leading-7 text-slate-300">
+                  Our team matches your group size, budget, travel style, and adventure plans with the right Dandeli stay.
                 </p>
               </div>
             </div>

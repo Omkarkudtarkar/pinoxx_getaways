@@ -22,12 +22,12 @@ const resortTypeFilters = [
 const initialFilters = { minPrice: "", maxPrice: "", rating: "", resortType: "" };
 
 function filterSelectClassName() {
-  return "min-h-12 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 font-semibold text-slate-800 outline-none transition focus:border-jungle-700 focus:ring-2 focus:ring-jungle-100";
+  return "min-h-12 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 font-semibold text-slate-800 outline-none transition disabled:bg-slate-100 disabled:text-slate-400 focus:border-jungle-700 focus:ring-2 focus:ring-jungle-100";
 }
 
-function CategorySections({ filters, onSelect }) {
+function CategorySections({ filters, onSelect, stacked = false }) {
   return (
-    <div className="grid gap-3 md:grid-cols-3">
+    <div className={stacked ? "grid gap-3" : "grid gap-3 md:grid-cols-3"}>
       {resortTypeFilters.map((type) => (
         <button
           key={type.value}
@@ -52,14 +52,14 @@ function CategorySections({ filters, onSelect }) {
   );
 }
 
-function FilterFields({ filters, onFieldChange, onPriceChange }) {
+function FilterFields({ filters, onFieldChange, onPriceChange, stacked = false }) {
   const activePriceFilter = priceFilters.find(
     (item) => item.minPrice === filters.minPrice && item.maxPrice === filters.maxPrice
   ) || priceFilters[0];
   const controlsDisabled = !filters.resortType;
 
   return (
-    <div className="grid gap-4 md:grid-cols-2">
+    <div className={stacked ? "grid gap-4" : "grid gap-4 md:grid-cols-2"}>
       <label className="grid gap-2 text-sm font-black text-slate-800">
         <span className="flex items-center gap-2">
           <IndianRupee size={16} /> Select price
@@ -140,44 +140,6 @@ export function Resorts() {
       </section>
 
       <section className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        <div className="mb-6 hidden rounded-lg border border-slate-200 bg-white shadow-sm md:block">
-          <div className="flex flex-col gap-3 border-b border-slate-100 p-4 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <div className="flex items-center gap-2 font-black text-slate-950">
-                <span className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-jungle-50 text-jungle-700">
-                  <SlidersHorizontal size={19} />
-                </span>
-                Filters
-              </div>
-              <p className="mt-1 text-sm text-slate-500">First choose a stay section, then filter by price and rating.</p>
-            </div>
-            <div className="flex items-center gap-3">
-              <span className="rounded-lg bg-slate-100 px-3 py-2 text-sm font-bold text-slate-700">
-                {loading ? "Checking..." : `${resorts.length} ${resorts.length === 1 ? "resort" : "resorts"}`}
-              </span>
-              {hasFilters ? (
-                <button
-                  className="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-200 px-3 py-2 text-sm font-bold text-slate-700 transition hover:border-jungle-500 hover:text-jungle-700"
-                  type="button"
-                  onClick={resetFilters}
-                >
-                  <X size={16} /> Reset
-                </button>
-              ) : null}
-            </div>
-          </div>
-
-          <div className="grid gap-5 p-4">
-            <CategorySections filters={filters} onSelect={updateResortType} />
-            <FilterFields filters={filters} onFieldChange={update} onPriceChange={updatePrice} />
-            {!filters.resortType ? (
-              <p className="rounded-lg bg-slate-50 px-3 py-2 text-sm font-bold text-slate-600">
-                Select Budget, Premium, or Bamboo Stay to enable price and rating filters.
-              </p>
-            ) : null}
-          </div>
-        </div>
-
         <div className="mb-4 flex items-center justify-between rounded-lg border border-slate-200 bg-white px-4 py-3 shadow-sm md:hidden">
           <div>
             <p className="text-sm font-black text-slate-950">{activeResortType?.label || "Choose stay section"}</p>
@@ -192,27 +154,89 @@ export function Resorts() {
           ) : null}
         </div>
 
-        {loading ? (
-          <div className="rounded-lg bg-white p-8 text-center text-slate-600">Loading resorts...</div>
-        ) : resorts.length === 0 ? (
-          <div className="rounded-lg border border-slate-200 bg-white p-8 text-center">
-            <h2 className="text-xl font-black text-slate-950">No resorts found</h2>
-            <p className="mt-2 text-slate-600">Try a wider budget range or clear the filters.</p>
-            <button
-              className="mt-4 inline-flex items-center justify-center gap-2 rounded-lg bg-slate-950 px-4 py-3 text-sm font-black text-white transition hover:bg-jungle-900"
-              type="button"
-              onClick={resetFilters}
-            >
-              <X size={16} /> Clear filters
-            </button>
+        <div className="grid gap-8 md:grid-cols-[310px_minmax(0,1fr)] lg:grid-cols-[340px_minmax(0,1fr)]">
+          <aside className="hidden md:block">
+            <div className="sticky top-24 overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+              <div className="bg-slate-950 p-5 text-white">
+                <div className="flex items-center gap-2 font-black">
+                  <span className="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-white/10 text-jungle-300">
+                    <SlidersHorizontal size={19} />
+                  </span>
+                  Resort filters
+                </div>
+                <p className="mt-2 text-sm leading-6 text-slate-300">Select a stay section first. Price and rating filters stay here on the left.</p>
+              </div>
+
+              <div className="grid gap-5 p-5">
+                <div className="flex items-center justify-between gap-3 rounded-lg bg-slate-50 px-3 py-3">
+                  <span className="text-sm font-bold text-slate-600">Matching stays</span>
+                  <span className="rounded-lg bg-white px-3 py-1 text-sm font-black text-slate-950 shadow-sm">
+                    {loading ? "Checking" : resorts.length}
+                  </span>
+                </div>
+
+                <div>
+                  <p className="mb-3 text-xs font-black uppercase tracking-wide text-slate-500">Stay section</p>
+                  <CategorySections filters={filters} onSelect={updateResortType} stacked />
+                </div>
+
+                <div className="border-t border-slate-100 pt-5">
+                  <p className="mb-3 text-xs font-black uppercase tracking-wide text-slate-500">Price and rating</p>
+                  <FilterFields filters={filters} onFieldChange={update} onPriceChange={updatePrice} stacked />
+                </div>
+
+                {!filters.resortType ? (
+                  <p className="rounded-lg bg-amber-50 px-3 py-3 text-sm font-bold leading-6 text-amber-800">
+                    Choose Budget, Premium, or Bamboo Stay to enable price and rating.
+                  </p>
+                ) : null}
+
+                <button
+                  className="inline-flex min-h-12 items-center justify-center gap-2 rounded-lg border border-slate-200 px-4 py-3 text-sm font-black text-slate-700 transition hover:border-jungle-500 hover:text-jungle-700 disabled:bg-slate-50"
+                  type="button"
+                  onClick={resetFilters}
+                  disabled={!hasFilters}
+                >
+                  <X size={16} /> Reset filters
+                </button>
+              </div>
+            </div>
+          </aside>
+
+          <div>
+            <div className="mb-5 hidden items-center justify-between gap-4 rounded-lg border border-slate-200 bg-white px-4 py-3 shadow-sm md:flex">
+              <div>
+                <p className="text-sm font-black text-slate-950">{activeResortType.label}</p>
+                <p className="text-xs font-semibold text-slate-500">{activePriceFilter.label} with {filters.rating ? `${filters.rating}+ rating` : "any rating"}</p>
+              </div>
+              <span className="rounded-lg bg-slate-100 px-3 py-2 text-sm font-bold text-slate-700">
+                {loading ? "Checking..." : `${resorts.length} ${resorts.length === 1 ? "resort" : "resorts"}`}
+              </span>
+            </div>
+
+            {loading ? (
+              <div className="rounded-lg bg-white p-8 text-center text-slate-600">Loading resorts...</div>
+            ) : resorts.length === 0 ? (
+              <div className="rounded-lg border border-slate-200 bg-white p-8 text-center">
+                <h2 className="text-xl font-black text-slate-950">No resorts found</h2>
+                <p className="mt-2 text-slate-600">Try a wider budget range or clear the filters.</p>
+                <button
+                  className="mt-4 inline-flex items-center justify-center gap-2 rounded-lg bg-slate-950 px-4 py-3 text-sm font-black text-white transition hover:bg-jungle-900"
+                  type="button"
+                  onClick={resetFilters}
+                >
+                  <X size={16} /> Clear filters
+                </button>
+              </div>
+            ) : (
+              <div className="grid gap-6 sm:grid-cols-2 md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3">
+                {resorts.map((resort) => (
+                  <ResortCard key={resort._id || resort.slug} resort={resort} />
+                ))}
+              </div>
+            )}
           </div>
-        ) : (
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {resorts.map((resort) => (
-              <ResortCard key={resort._id || resort.slug} resort={resort} />
-            ))}
-          </div>
-        )}
+        </div>
       </section>
 
       <button

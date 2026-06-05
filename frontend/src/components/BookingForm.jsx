@@ -21,7 +21,9 @@ export function BookingForm({ resort }) {
   const [form, setForm] = useState({
     customerName: "",
     phone: "",
-    members: 2,
+    adults: 2,
+    children5To11: 0,
+    childrenUnder5: 0,
     roomCategory: "",
     checkIn: "",
     checkOut: "",
@@ -37,6 +39,13 @@ export function BookingForm({ resort }) {
     () => resort.rooms?.find((room) => room.name === form.roomCategory),
     [resort.rooms, form.roomCategory]
   );
+  const adults = Math.max(0, Number(form.adults || 0));
+  const children5To11 = Math.max(0, Number(form.children5To11 || 0));
+  const childrenUnder5 = Math.max(0, Number(form.childrenUnder5 || 0));
+  const totalGuests = adults + children5To11 + childrenUnder5;
+  const chargeableGuests = adults + children5To11 * 0.5;
+  const estimatedBaseAmount = selectedRoom ? selectedRoom.price * chargeableGuests : 0;
+  const guestPricingNote = `Adults: ${adults}, Children 5-11: ${children5To11} at 50%, Children under 5: ${childrenUnder5} free. Chargeable guests: ${chargeableGuests}.`;
 
   useEffect(() => {
     const savedDraft = localStorage.getItem(draftKey(resort.slug));
@@ -46,6 +55,9 @@ export function BookingForm({ resort }) {
         setForm((value) => ({
           ...value,
           ...parsedDraft,
+          adults: parsedDraft.adults ?? parsedDraft.members ?? value.adults,
+          children5To11: parsedDraft.children5To11 ?? 0,
+          childrenUnder5: parsedDraft.childrenUnder5 ?? 0,
           roomCategory: parsedDraft.roomCategory || value.roomCategory || resort.rooms?.[0]?.name || ""
         }));
         return;
@@ -79,8 +91,8 @@ export function BookingForm({ resort }) {
   }
 
   function validateBookingFields() {
-    if (!form.customerName || !form.phone || !form.roomCategory || !form.checkIn || !form.checkOut || !form.members) {
-      setError("Fill name, phone, room, dates, and members before payment.");
+    if (!form.customerName || !form.phone || !form.roomCategory || !form.checkIn || !form.checkOut || adults < 1) {
+      setError("Fill name, phone, room, dates, and at least one adult before payment.");
       return false;
     }
     return true;
@@ -93,18 +105,11 @@ export function BookingForm({ resort }) {
     setLoading(true);
 
     const bookingUrl = window.location.href;
-    const message = [
-      "Availability request",
-      `Name: ${form.customerName}`,
-      `Number: ${form.phone}`,
-      `Date: ${form.checkIn} to ${form.checkOut}`
-    ].filter(Boolean).join("\n");
-
     try {
       const { data } = await api.post("/contact", {
         name: form.customerName,
         phone: form.phone,
-        peopleCount: form.members,
+        peopleCount: totalGuests,
         contactType: "availability_check",
         requestCall: true,
         resortName: resort.name,
@@ -114,7 +119,7 @@ export function BookingForm({ resort }) {
         checkOut: form.checkOut,
         bookingUrl,
         preferredDate: form.checkIn,
-        message
+        message: guestPricingNote
       });
       setResult(data);
     } catch (err) {
@@ -132,7 +137,9 @@ export function BookingForm({ resort }) {
     try {
       const { data } = await api.post("/bookings", {
         resortId: resort._id,
-        ...form
+        ...form,
+        members: totalGuests,
+        specialRequests: [guestPricingNote, form.specialRequests].filter(Boolean).join("\n")
       });
       setPaymentResult(data);
       window.location.assign(data.upiLink);
@@ -182,7 +189,25 @@ export function BookingForm({ resort }) {
 
         <input className="rounded-lg border border-slate-200 px-3 py-3" name="customerName" value={form.customerName} onChange={update} placeholder="Name" required />
         <input className="rounded-lg border border-slate-200 px-3 py-3" name="phone" value={form.phone} onChange={update} placeholder="WhatsApp phone number" required />
-        <input className="rounded-lg border border-slate-200 px-3 py-3" name="members" value={form.members} onChange={update} type="number" min="1" placeholder="Members" required />
+        <div className="grid gap-3">
+          <div className="grid gap-3 sm:grid-cols-3">
+            <label className="grid gap-1 text-xs font-black uppercase tracking-wide text-slate-500">
+              Adults
+              <input className="rounded-lg border border-slate-200 px-3 py-3 text-base font-semibold text-slate-950" name="adults" value={form.adults} onChange={update} type="number" min="1" placeholder="Adults" required />
+            </label>
+            <label className="grid gap-1 text-xs font-black uppercase tracking-wide text-slate-500">
+              Kids 5-11
+              <input className="rounded-lg border border-slate-200 px-3 py-3 text-base font-semibold text-slate-950" name="children5To11" value={form.children5To11} onChange={update} type="number" min="0" placeholder="50% charge" />
+            </label>
+            <label className="grid gap-1 text-xs font-black uppercase tracking-wide text-slate-500">
+              Under 5
+              <input className="rounded-lg border border-slate-200 px-3 py-3 text-base font-semibold text-slate-950" name="childrenUnder5" value={form.childrenUnder5} onChange={update} type="number" min="0" placeholder="Free" />
+            </label>
+          </div>
+          <div className="rounded-lg border border-orange-200 bg-orange-50 px-3 py-3 text-xs font-bold leading-5 text-orange-900">
+            Children 5-11 are counted at 50% charge. Children under 5 have no charge. Total guests: {totalGuests}; chargeable guests: {chargeableGuests}. {selectedRoom ? `Estimated base: ${formatCurrency(estimatedBaseAmount)}.` : ""}
+          </div>
+        </div>
         <textarea className="min-h-20 rounded-lg border border-slate-200 px-3 py-3" name="specialRequests" value={form.specialRequests} onChange={update} placeholder="Special requests" />
 
         <button className="inline-flex items-center justify-center gap-2 rounded-lg bg-jungle-700 px-4 py-3 font-black text-white hover:bg-jungle-900" disabled={loading}>
@@ -202,14 +227,14 @@ export function BookingForm({ resort }) {
             </div>
           </div>
         ) : (
-          <div className="grid gap-3 rounded-lg bg-slate-50 px-3 py-3 text-sm leading-6 text-slate-600">
+          <div className="grid gap-3 rounded-lg bg-orange-50 px-3 py-3 text-sm leading-6 text-orange-950">
             <div className="flex items-start gap-2">
-              <Clock3 className="mt-0.5 shrink-0 text-slate-500" size={18} />
+              <Clock3 className="mt-0.5 shrink-0 text-orange-600" size={18} />
               <p>After Pinoxx confirms availability, come back here and pay the UPI advance for the selected date.</p>
             </div>
             <button
               type="button"
-              className="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-3 font-black text-slate-900"
+              className="inline-flex items-center justify-center gap-2 rounded-lg bg-ember px-4 py-3 font-black text-white shadow-soft transition hover:bg-orange-600"
               onClick={payAdvance}
               disabled={paymentLoading}
             >

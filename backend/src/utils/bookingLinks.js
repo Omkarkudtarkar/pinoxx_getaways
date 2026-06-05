@@ -1,6 +1,6 @@
 export function buildUpiLink({ amount = 1000, bookingId, resortName }) {
   const params = new URLSearchParams({
-    pa: process.env.UPI_ID || "pinoxx@upi",
+    pa: process.env.UPI_ID || "kudtarkaromkar8@oksbi",
     pn: process.env.UPI_NAME || "Pinoxx",
     am: String(amount),
     cu: "INR",
@@ -28,7 +28,10 @@ export function buildContactRequestMessage(contact) {
       "Availability request",
       `Name: ${contact.name}`,
       `Number: ${contact.phone}`,
-      dateText ? `Date: ${dateText}` : ""
+      contact.peopleCount ? `Total guests: ${contact.peopleCount}` : "",
+      contact.roomCategory ? `Room: ${contact.roomCategory}` : "",
+      dateText ? `Date: ${dateText}` : "",
+      contact.message ? `Guest pricing: ${contact.message}` : ""
     ].filter(Boolean).join("\n");
   }
 

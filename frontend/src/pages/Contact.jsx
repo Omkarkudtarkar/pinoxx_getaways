@@ -5,7 +5,6 @@ import {
   Mail,
   MapPin,
   MessageCircle,
-  MessageSquareText,
   PhoneCall,
   Send,
   Smartphone,
@@ -23,14 +22,11 @@ const initialForm = {
   peopleCount: 2,
   contactType: "call_later",
   preferredDate: "Today",
-  preferredTime: "19:00",
-  message: ""
+  preferredTime: "19:00"
 };
 
 const contactModes = [
-  { id: "call_now", label: "Call us now", icon: PhoneCall, requestCall: true },
-  { id: "call_later", label: "Call me later", icon: CalendarDays, requestCall: true },
-  { id: "message", label: "Message", icon: MessageSquareText, requestCall: false }
+  { id: "call_later", label: "Call me later", icon: CalendarDays, requestCall: true }
 ];
 
 const fieldClass =
@@ -62,18 +58,13 @@ export function Contact() {
     setResult(null);
     setSubmitting(true);
 
-    const fallbackMessage =
-      form.contactType === "call_now"
-        ? "Please call me now to complete my Dandeli booking and trip plan."
-        : form.contactType === "call_later"
-        ? `Please call me on ${form.preferredDate} at ${form.preferredTime}.`
-        : "I need help with Dandeli resort pricing, sightseeing, and check-in to check-out guidance.";
+    const fallbackMessage = `Please call me on ${form.preferredDate} at ${form.preferredTime}.`;
 
     try {
       const { data } = await api.post("/contact", {
         ...form,
         requestCall: activeMode.requestCall,
-        message: form.message || fallbackMessage
+        message: fallbackMessage
       });
       setResult(data);
       setForm(initialForm);
@@ -184,7 +175,7 @@ export function Contact() {
           <div className="mb-6 flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
             <div>
               <p className="text-sm font-black uppercase tracking-wide text-jungle-700">Send request</p>
-              <h2 className="mt-1 text-2xl font-black text-slate-950">Choose how we should contact you</h2>
+              <h2 className="mt-1 text-2xl font-black text-slate-950">Request a call from Pinoxx</h2>
             </div>
             <a
               className="inline-flex items-center gap-2 text-sm font-black text-jungle-700"
@@ -195,7 +186,14 @@ export function Contact() {
             </a>
           </div>
 
-          <div className="mb-5 grid gap-2 sm:grid-cols-3">
+          <div className="mb-5 grid gap-2 sm:grid-cols-2">
+            <a
+              className="flex min-h-16 items-center justify-center gap-2 rounded-lg border border-slate-950 bg-slate-950 px-3 py-3 text-sm font-black text-white shadow-soft transition hover:bg-jungle-900"
+              href={`tel:+${businessWhatsappNumber}`}
+            >
+              <PhoneCall size={18} />
+              Call us now
+            </a>
             {contactModes.map((mode) => (
               <button
                 key={mode.id}
@@ -220,32 +218,21 @@ export function Contact() {
             <input className={fieldClass} name="peopleCount" value={form.peopleCount} onChange={update} type="number" min="1" placeholder="Number of people" required />
           </div>
 
-          {form.contactType === "call_later" && (
-            <div className="mt-3 grid gap-3 sm:grid-cols-2">
-              <select className={fieldClass} name="preferredDate" value={form.preferredDate} onChange={update}>
-                <option>Today</option>
-                <option>Tomorrow</option>
-                <option>This weekend</option>
-                <option>Next week</option>
-              </select>
-              <select className={fieldClass} name="preferredTime" value={form.preferredTime} onChange={update}>
-                <option>10:00</option>
-                <option>13:00</option>
-                <option>16:00</option>
-                <option>19:00</option>
-                <option>21:00</option>
-              </select>
-            </div>
-          )}
-
-          <textarea
-            className={`${fieldClass} mt-3 min-h-32 resize-none`}
-            name="message"
-            value={form.message}
-            onChange={update}
-            placeholder="Message, dates, resort preference, pickup point, or special request"
-            required={form.contactType === "message"}
-          />
+          <div className="mt-3 grid gap-3 sm:grid-cols-2">
+            <select className={fieldClass} name="preferredDate" value={form.preferredDate} onChange={update}>
+              <option>Today</option>
+              <option>Tomorrow</option>
+              <option>This weekend</option>
+              <option>Next week</option>
+            </select>
+            <select className={fieldClass} name="preferredTime" value={form.preferredTime} onChange={update}>
+              <option>10:00</option>
+              <option>13:00</option>
+              <option>16:00</option>
+              <option>19:00</option>
+              <option>21:00</option>
+            </select>
+          </div>
 
           {error && <p className="mt-3 rounded-lg bg-red-50 px-3 py-2 text-sm font-bold text-red-700">{error}</p>}
           {result && (
@@ -259,13 +246,7 @@ export function Contact() {
             disabled={submitting}
           >
             <Send size={18} />
-            {submitting
-              ? "Submitting..."
-              : form.contactType === "call_now"
-              ? "Call us now to complete your booking"
-              : form.contactType === "call_later"
-              ? "Text message: Call me later"
-              : "Submit contact request"}
+            {submitting ? "Submitting..." : "Request call back"}
           </button>
         </form>
       </section>
