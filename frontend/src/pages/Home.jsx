@@ -122,44 +122,19 @@ export function Home() {
         <div className="absolute inset-x-0 bottom-0 -z-10 h-32 bg-gradient-to-t from-white to-transparent" />
 
         <div className="mx-auto flex min-h-[calc(100vh-4rem)] max-w-7xl items-center px-4 py-14 sm:px-6 lg:px-8">
-          <motion.div
-            initial={{ opacity: 0, y: 24 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.65 }}
-            className="max-w-4xl text-white"
-          >
-            <motion.p
-              initial={{ opacity: 0, scale: 0.94 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.1, duration: 0.45 }}
-              className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-sm font-black uppercase tracking-wide text-jungle-100 backdrop-blur"
-            >
+          <div className="max-w-4xl text-white">
+            <p className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-sm font-black uppercase tracking-wide text-jungle-100 backdrop-blur">
               <Sparkles size={16} />
               Dandeli trip support made clear
-            </motion.p>
-            <motion.h1
-              initial={{ opacity: 0, y: 18 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.18, duration: 0.62 }}
-              className="mt-5 text-4xl font-black leading-tight sm:text-6xl lg:text-7xl"
-            >
+            </p>
+            <h1 className="mt-5 text-4xl font-black leading-tight sm:text-6xl lg:text-7xl">
               Find your perfect Dandeli stay with Pinoxx.
-            </motion.h1>
-            <motion.p
-              initial={{ opacity: 0, y: 18 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.26, duration: 0.62 }}
-              className="mt-5 max-w-2xl text-lg leading-8 text-slate-100"
-            >
+            </h1>
+            <p className="mt-5 max-w-2xl text-lg leading-8 text-slate-100">
               We help you find the best and cheap price, plan Dandeli sightseeing, and get proper guidance from resort check-in to check-out.
-            </motion.p>
+            </p>
 
-            <motion.div
-              initial={{ opacity: 0, y: 18 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.34, duration: 0.62 }}
-              className="mt-8 flex flex-col gap-3 sm:flex-row"
-            >
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
               <motion.div whileHover={{ y: -4, scale: 1.02 }} whileTap={{ scale: 0.98 }}>
                 <Link className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-cyan-400 px-6 py-4 font-black text-slate-950 shadow-[0_0_0_4px_rgba(255,255,255,0.24),0_22px_55px_rgba(34,211,238,0.36)] ring-2 ring-white/70 transition hover:bg-cyan-300 hover:shadow-[0_0_0_5px_rgba(255,255,255,0.32),0_26px_70px_rgba(34,211,238,0.46)] sm:w-auto" to="/resorts">
                   Explore Resorts <ArrowRight size={19} />
@@ -178,34 +153,22 @@ export function Home() {
                 <MessageCircle size={19} />
                 Chat on WhatsApp
               </motion.a>
-            </motion.div>
+            </div>
 
             <div className="mt-10 grid gap-3 sm:grid-cols-3">
-              {stats.map((stat, index) => (
-                <motion.div
-                  key={stat.label}
-                  initial={{ opacity: 0, y: 18 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.12 + index * 0.08, duration: 0.55 }}
-                  whileHover={{ y: -6, scale: 1.02 }}
-                  className="rounded-lg border border-white/15 bg-white/10 p-4 text-white backdrop-blur"
-                >
+              {stats.map((stat) => (
+                <motion.div key={stat.label} whileHover={{ y: -6, scale: 1.02 }} className="rounded-lg border border-white/15 bg-white/10 p-4 text-white backdrop-blur">
                   <stat.icon className="text-jungle-300" size={22} />
                   <div className="mt-3 text-3xl font-black">{stat.value}</div>
                   <div className="text-sm font-bold text-slate-200">{stat.label}</div>
                 </motion.div>
               ))}
             </div>
-          </motion.div>
+          </div>
         </div>
 
         <div className="relative mx-auto -mt-7 max-w-7xl overflow-hidden px-4 pb-10 sm:px-6 lg:px-8">
-          <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.72, duration: 0.55 }}
-            className="rounded-lg border border-white/15 bg-white/10 py-3 text-white backdrop-blur"
-          >
+          <div className="rounded-lg border border-white/15 bg-white/10 py-3 text-white backdrop-blur">
             <motion.div
               animate={{ x: ["0%", "-50%"] }}
               transition={{ duration: 24, repeat: Infinity, ease: "linear" }}
@@ -218,7 +181,7 @@ export function Home() {
                 </span>
               ))}
             </motion.div>
-          </motion.div>
+          </div>
         </div>
       </section>
 
