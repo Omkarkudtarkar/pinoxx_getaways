@@ -3,11 +3,35 @@ import { api } from "./api";
 
 const AuthContext = createContext(null);
 
-export function AuthProvider({ children }) {
-  const [user, setUser] = useState(() => {
+function savedUser() {
+  try {
     const saved = localStorage.getItem("pinoxx_user");
     return saved ? JSON.parse(saved) : null;
-  });
+  } catch {
+    localStorage.removeItem("pinoxx_user");
+    localStorage.removeItem("pinoxx_token");
+    return null;
+  }
+}
+
+function rememberUser(user) {
+  try {
+    localStorage.setItem("pinoxx_user", JSON.stringify(user));
+  } catch {
+    // Ignore storage failures; the in-memory session still works for this page load.
+  }
+}
+
+function rememberLoginPrompt() {
+  try {
+    sessionStorage.setItem("pinoxx_show_whatsapp_support", "1");
+  } catch {
+    // Non-critical prompt state.
+  }
+}
+
+export function AuthProvider({ children }) {
+  const [user, setUser] = useState(savedUser);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -17,7 +41,7 @@ export function AuthProvider({ children }) {
     api.get("/auth/me")
       .then(({ data }) => {
         setUser(data.user);
-        localStorage.setItem("pinoxx_user", JSON.stringify(data.user));
+        rememberUser(data.user);
       })
       .catch(() => logout());
   }, []);
@@ -27,8 +51,8 @@ export function AuthProvider({ children }) {
     try {
       const { data } = await api.post("/auth/login", payload);
       localStorage.setItem("pinoxx_token", data.token);
-      localStorage.setItem("pinoxx_user", JSON.stringify(data.user));
-      sessionStorage.setItem("pinoxx_show_whatsapp_support", "1");
+      rememberUser(data.user);
+      rememberLoginPrompt();
       setUser(data.user);
       return data.user;
     } finally {
@@ -41,8 +65,8 @@ export function AuthProvider({ children }) {
     try {
       const { data } = await api.post("/auth/signup", payload);
       localStorage.setItem("pinoxx_token", data.token);
-      localStorage.setItem("pinoxx_user", JSON.stringify(data.user));
-      sessionStorage.setItem("pinoxx_show_whatsapp_support", "1");
+      rememberUser(data.user);
+      rememberLoginPrompt();
       setUser(data.user);
       return data.user;
     } finally {
@@ -55,8 +79,8 @@ export function AuthProvider({ children }) {
     try {
       const { data } = await api.post("/auth/google", { credential });
       localStorage.setItem("pinoxx_token", data.token);
-      localStorage.setItem("pinoxx_user", JSON.stringify(data.user));
-      sessionStorage.setItem("pinoxx_show_whatsapp_support", "1");
+      rememberUser(data.user);
+      rememberLoginPrompt();
       setUser(data.user);
       return data.user;
     } finally {

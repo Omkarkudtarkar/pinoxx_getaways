@@ -1,6 +1,10 @@
 export function buildUpiLink({ amount = 1000, bookingId, resortName }) {
+  const configuredUpiId = process.env.UPI_ID;
+  const upiId = configuredUpiId && configuredUpiId !== "pinoxx@upi"
+    ? configuredUpiId
+    : "kudtarkaromkar8@oksbi";
   const params = new URLSearchParams({
-    pa: process.env.UPI_ID || "kudtarkaromkar8@oksbi",
+    pa: upiId,
     pn: process.env.UPI_NAME || "Pinoxx",
     am: String(amount),
     cu: "INR",

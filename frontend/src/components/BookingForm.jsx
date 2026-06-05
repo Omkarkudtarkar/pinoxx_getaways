@@ -154,7 +154,6 @@ export function BookingForm({ resort }) {
         specialRequests: [guestPricingNote, form.specialRequests].filter(Boolean).join("\n")
       });
       setPaymentResult(data);
-      window.location.assign(data.upiLink);
     } catch (err) {
       setError(err.response?.data?.message || "UPI booking could not be created.");
     } finally {
@@ -292,14 +291,13 @@ export function BookingForm({ resort }) {
                 <p className="mt-1 text-sm text-slate-300">Complete payment and notify Pinoxx with your transaction details.</p>
               </div>
             </div>
-            <button
-              className="inline-flex items-center justify-center gap-2 rounded-lg bg-ember px-4 py-3 font-black text-white"
-              type="button"
-              onClick={() => window.location.assign(paymentResult.upiLink)}
-            >
+            <a className="inline-flex items-center justify-center gap-2 rounded-lg bg-ember px-4 py-3 font-black text-white" href={paymentResult.upiLink}>
               <CreditCard size={18} />
               Open UPI Payment
-            </button>
+            </a>
+            <p className="text-xs font-semibold leading-5 text-slate-300">
+              Opens on mobile devices with a UPI app installed. If it does not open, try from Chrome on Android or your phone browser.
+            </p>
             <a className="inline-flex items-center justify-center gap-2 rounded-lg border border-white/20 px-4 py-3 font-bold" href={paymentResult.businessWhatsappUrl} target="_blank" rel="noreferrer">
               <MessageCircle size={18} />
               Notify Pinoxx

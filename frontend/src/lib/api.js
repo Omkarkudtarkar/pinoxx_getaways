@@ -11,7 +11,12 @@ export const api = axios.create({
 });
 
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem("pinoxx_token");
+  let token = "";
+  try {
+    token = localStorage.getItem("pinoxx_token");
+  } catch {
+    token = "";
+  }
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }

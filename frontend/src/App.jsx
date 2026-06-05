@@ -60,11 +60,19 @@ export function App() {
 
   useEffect(() => {
     if (!user || user.role === "admin") return undefined;
-    if (sessionStorage.getItem("pinoxx_show_whatsapp_support") !== "1") return undefined;
+    try {
+      if (sessionStorage.getItem("pinoxx_show_whatsapp_support") !== "1") return undefined;
+    } catch {
+      return undefined;
+    }
 
     const timer = setTimeout(() => {
       setWhatsappPromptOpen(true);
-      sessionStorage.removeItem("pinoxx_show_whatsapp_support");
+      try {
+        sessionStorage.removeItem("pinoxx_show_whatsapp_support");
+      } catch {
+        // Non-critical prompt state.
+      }
     }, 650);
 
     return () => clearTimeout(timer);
