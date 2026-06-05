@@ -3,7 +3,7 @@ import { connectDb } from "../backend/src/config/db.js";
 
 dotenv.config();
 
-process.env.MONGODB_TIMEOUT_MS ||= "1500";
+process.env.MONGODB_TIMEOUT_MS ||= "5000";
 
 let appPromise;
 

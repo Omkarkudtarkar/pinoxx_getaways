@@ -23,6 +23,7 @@ dotenv.config({ path: path.resolve(process.cwd(), "../.env") });
 export const app = express();
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const frontendDistPath = path.resolve(__dirname, "../../frontend/dist");
+const frontendAssetsPath = path.join(frontendDistPath, "assets");
 
 // Log paths for debugging
 console.log("[Pinoxx API] __dirname:", __dirname);
@@ -35,12 +36,12 @@ app.use(helmet({
   contentSecurityPolicy: {
     directives: {
       "default-src": ["'self'"],
-      "script-src": ["'self'", "https://accounts.google.com"],
+      "script-src": ["'self'", "https://accounts.google.com", "https://vercel.live"],
       "style-src": ["'self'", "'unsafe-inline'"],
       "img-src": ["'self'", "data:", "blob:", "https:"],
       "font-src": ["'self'", "data:"],
-      "connect-src": ["'self'", "https:"],
-      "frame-src": ["'self'", "https://accounts.google.com"],
+      "connect-src": ["'self'", "https:", "wss:"],
+      "frame-src": ["'self'", "https://accounts.google.com", "https://vercel.live"],
       "object-src": ["'none'"],
       "base-uri": ["'self'"],
       "frame-ancestors": ["'self'"]
@@ -49,17 +50,39 @@ app.use(helmet({
   crossOriginResourcePolicy: { policy: "cross-origin" }
 }));
 
-// Determine CORS origin
-let corsOrigin = "http://localhost:5173";
-if (process.env.CLIENT_URL) {
-  corsOrigin = process.env.CLIENT_URL.split(",");
-} else if (process.env.NODE_ENV === "production") {
-  // In production on Vercel, allow same-origin requests
-  corsOrigin = true;
+const clientOrigins = (process.env.CLIENT_URL || "")
+  .split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+const hasProductionClientOrigin = clientOrigins.some((origin) => !/^https?:\/\/localhost(?::\d+)?$/.test(origin));
+const vercelOrigin = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "";
+
+function resolveCorsOrigin(origin, callback) {
+  if (!origin) {
+    callback(null, true);
+    return;
+  }
+
+  if (clientOrigins.includes(origin)) {
+    callback(null, true);
+    return;
+  }
+
+  if (process.env.NODE_ENV !== "production") {
+    callback(null, /^https?:\/\/localhost(?::\d+)?$/.test(origin));
+    return;
+  }
+
+  if (!hasProductionClientOrigin || origin === vercelOrigin) {
+    callback(null, true);
+    return;
+  }
+
+  callback(null, false);
 }
 
 app.use(cors({
-  origin: corsOrigin,
+  origin: resolveCorsOrigin,
   credentials: true
 }));
 app.use(express.json({ limit: "1mb" }));
@@ -73,7 +96,22 @@ app.use(rateLimit({
 }));
 
 app.use("/uploads", express.static(path.resolve(__dirname, "../uploads")));
-app.use(express.static(frontendDistPath));
+app.use(express.static(frontendDistPath, {
+  index: false,
+  setHeaders: (res, filePath) => {
+    const assetRelativePath = path.relative(frontendAssetsPath, filePath);
+    const isFrontendAsset = assetRelativePath && !assetRelativePath.startsWith("..") && !path.isAbsolute(assetRelativePath);
+
+    if (isFrontendAsset) {
+      res.setHeader("Cache-Control", "public, max-age=31536000, immutable");
+      return;
+    }
+
+    if (filePath.endsWith(".html")) {
+      res.setHeader("Cache-Control", "no-store");
+    }
+  }
+}));
 
 app.get("/health", (_req, res) => {
   res.json({
@@ -96,7 +134,8 @@ app.use("/api/contact", contactRouter);
 app.use("/api/chatbot", chatbotRouter);
 app.use("/api/pinoxx-reviews", pinoxxReviewsRouter);
 
-app.get(/^\/(?!api(?:\/|$)|uploads(?:\/|$)|health$).*/, (_req, res, next) => {
+app.get(/^\/(?!api(?:\/|$)|uploads(?:\/|$)|assets(?:\/|$)|health$).*/, (_req, res, next) => {
+  res.setHeader("Cache-Control", "no-store");
   res.sendFile(path.join(frontendDistPath, "index.html"), (error) => {
     if (error) next();
   });
