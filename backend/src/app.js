@@ -41,8 +41,18 @@ app.use(helmet({
   },
   crossOriginResourcePolicy: { policy: "cross-origin" }
 }));
+
+// Determine CORS origin
+let corsOrigin = "http://localhost:5173";
+if (process.env.CLIENT_URL) {
+  corsOrigin = process.env.CLIENT_URL.split(",");
+} else if (process.env.NODE_ENV === "production") {
+  // In production on Vercel, allow same-origin requests
+  corsOrigin = true;
+}
+
 app.use(cors({
-  origin: process.env.CLIENT_URL?.split(",") || "http://localhost:5173",
+  origin: corsOrigin,
   credentials: true
 }));
 app.use(express.json({ limit: "1mb" }));

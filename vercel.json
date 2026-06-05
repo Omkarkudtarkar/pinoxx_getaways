@@ -7,19 +7,10 @@
       "maxDuration": 60
     }
   },
-  "public": "frontend/dist",
   "rewrites": [
     {
-      "source": "/api/:path*",
+      "source": "/(.*)",
       "destination": "/api/index.js"
-    },
-    {
-      "source": "/uploads/:path*",
-      "destination": "/api/index.js"
-    },
-    {
-      "source": "/:path*",
-      "destination": "/index.html"
     }
   ]
 }
