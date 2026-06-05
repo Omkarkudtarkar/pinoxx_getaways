@@ -24,7 +24,7 @@
       ]
     },
     {
-      "source": "/assets/(.*)",
+      "source": "/assets/:path*",
       "headers": [
         {
           "key": "Cache-Control",
@@ -35,15 +35,15 @@
   ],
   "rewrites": [
     {
-      "source": "/api/(.*)",
+      "source": "/api/:path*",
       "destination": "/api/index.js"
     },
     {
-      "source": "/uploads/(.*)",
+      "source": "/uploads/:path*",
       "destination": "/api/index.js"
     },
     {
-      "source": "/((?!assets/|favicon\\.ico|robots\\.txt|manifest\\.json).*)",
+      "source": "/:path((?!assets/|favicon\\.ico|robots\\.txt|manifest\\.json).*)",
       "destination": "/index.html"
     }
   ]
