@@ -25,7 +25,8 @@ export function buildContactRequestMessage(contact) {
   if (contact.contactType === "availability_check") {
     const dateText = [contact.checkIn || contact.preferredDate, contact.checkOut].filter(Boolean).join(" to ");
     return [
-      "Availability request",
+      "Pinoxx availability request",
+      "Source: Pinoxx booking form",
       `Name: ${contact.name}`,
       `Number: ${contact.phone}`,
       contact.peopleCount ? `Total guests: ${contact.peopleCount}` : "",

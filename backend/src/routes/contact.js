@@ -5,10 +5,18 @@ import {
   buildSmsUrl,
   buildWhatsappUrl
 } from "../utils/bookingLinks.js";
-import { sendWhatsAppText } from "../utils/whatsappCloud.js";
+import { sendWhatsAppTextToMany } from "../utils/whatsappCloud.js";
 
 export const contactRouter = express.Router();
 const defaultCallNowTextNumber = "918147843271";
+
+function adminNotificationNumbers() {
+  const configured = process.env.WHATSAPP_ADMIN_NOTIFICATION_NUMBERS || process.env.BUSINESS_WHATSAPP_NUMBER || "919353431179";
+  return configured
+    .split(",")
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
 
 contactRouter.post("/", async (req, res, next) => {
   try {
@@ -34,8 +42,8 @@ contactRouter.post("/", async (req, res, next) => {
     const textMessageUrl = contact.contactType === "call_now"
       ? buildSmsUrl(process.env.CALL_NOW_TEXT_NUMBER || defaultCallNowTextNumber, message)
       : "";
-    const directWhatsapp = await sendWhatsAppText({
-      to: process.env.BUSINESS_WHATSAPP_NUMBER || "919353431179",
+    const directWhatsapp = await sendWhatsAppTextToMany({
+      recipients: adminNotificationNumbers(),
       message
     });
 

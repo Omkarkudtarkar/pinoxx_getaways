@@ -38,3 +38,23 @@ export async function sendWhatsAppText({ to, message }) {
   return { skipped: false, sent: true, response: data };
 }
 
+export async function sendWhatsAppTextToMany({ recipients = [], message }) {
+  const uniqueRecipients = [...new Set(recipients.map(normalizePhone).filter(Boolean))];
+
+  if (!uniqueRecipients.length) {
+    return { skipped: true, results: [] };
+  }
+
+  const results = await Promise.all(
+    uniqueRecipients.map(async (recipient) => ({
+      recipient,
+      result: await sendWhatsAppText({ to: recipient, message })
+    }))
+  );
+
+  return {
+    skipped: results.every((item) => item.result.skipped),
+    sent: results.some((item) => item.result.sent),
+    results
+  };
+}

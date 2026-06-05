@@ -45,6 +45,9 @@ export function BookingForm({ resort }) {
   const totalGuests = adults + children5To11 + childrenUnder5;
   const chargeableGuests = adults + children5To11 * 0.5;
   const estimatedBaseAmount = selectedRoom ? selectedRoom.price * chargeableGuests : 0;
+  const adultTotal = selectedRoom ? selectedRoom.price * adults : 0;
+  const childHalfPrice = selectedRoom ? selectedRoom.price * 0.5 : 0;
+  const child5To11Total = childHalfPrice * children5To11;
   const guestPricingNote = `Adults: ${adults}, Children 5-11: ${children5To11} at 50%, Children under 5: ${childrenUnder5} free. Chargeable guests: ${chargeableGuests}.`;
 
   useEffect(() => {
@@ -105,6 +108,11 @@ export function BookingForm({ resort }) {
     setLoading(true);
 
     const bookingUrl = window.location.href;
+    const availabilityMessage = [
+      guestPricingNote,
+      form.specialRequests.trim() ? `Special request: ${form.specialRequests.trim()}` : ""
+    ].filter(Boolean).join("\n");
+
     try {
       const { data } = await api.post("/contact", {
         name: form.customerName,
@@ -119,9 +127,13 @@ export function BookingForm({ resort }) {
         checkOut: form.checkOut,
         bookingUrl,
         preferredDate: form.checkIn,
-        message: guestPricingNote
+        message: availabilityMessage
       });
       setResult(data);
+
+      if (data.whatsappUrl) {
+        window.open(data.whatsappUrl, "_blank", "noopener,noreferrer");
+      }
     } catch (err) {
       setError(err.response?.data?.message || "Availability request could not be sent.");
     } finally {
@@ -162,7 +174,7 @@ export function BookingForm({ resort }) {
           <h2 className="text-xl font-black">Check Availability</h2>
         </div>
         <p className="mt-2 text-sm leading-6 text-slate-300">
-          Send your dates to Pinoxx on WhatsApp. The team will confirm availability before booking.
+          Send your dates to Pinoxx. The team will confirm availability before booking.
         </p>
       </div>
 
@@ -176,9 +188,9 @@ export function BookingForm({ resort }) {
         </select>
 
         {selectedRoom && (
-          <div className="rounded-lg bg-jungle-50 px-3 py-3 text-sm text-jungle-950">
-            <p className="font-black">{selectedRoom.name}</p>
-            <p className="mt-1">Up to {selectedRoom.capacity} guests. Base price {formatCurrency(selectedRoom.price)}.</p>
+          <div className="rounded-lg border border-orange-200 bg-orange-50 p-4 text-sm text-orange-950">
+            <p className="font-black text-slate-950">{selectedRoom.name}</p>
+            <p className="mt-1 text-orange-900">Up to {selectedRoom.capacity} guests.</p>
           </div>
         )}
 
@@ -196,23 +208,50 @@ export function BookingForm({ resort }) {
               <input className="rounded-lg border border-slate-200 px-3 py-3 text-base font-semibold text-slate-950" name="adults" value={form.adults} onChange={update} type="number" min="1" placeholder="Adults" required />
             </label>
             <label className="grid gap-1 text-xs font-black uppercase tracking-wide text-slate-500">
-              Kids 5-11
+              Kids 5-11 years
               <input className="rounded-lg border border-slate-200 px-3 py-3 text-base font-semibold text-slate-950" name="children5To11" value={form.children5To11} onChange={update} type="number" min="0" placeholder="50% charge" />
             </label>
             <label className="grid gap-1 text-xs font-black uppercase tracking-wide text-slate-500">
-              Under 5
+              Under 5 years
               <input className="rounded-lg border border-slate-200 px-3 py-3 text-base font-semibold text-slate-950" name="childrenUnder5" value={form.childrenUnder5} onChange={update} type="number" min="0" placeholder="Free" />
             </label>
           </div>
-          <div className="rounded-lg border border-orange-200 bg-orange-50 px-3 py-3 text-xs font-bold leading-5 text-orange-900">
-            Children 5-11 are counted at 50% charge. Children under 5 have no charge. Total guests: {totalGuests}; chargeable guests: {chargeableGuests}. {selectedRoom ? `Estimated base: ${formatCurrency(estimatedBaseAmount)}.` : ""}
+          <div className="rounded-lg border border-orange-200 bg-orange-50 p-4 text-xs font-bold leading-5 text-orange-950">
+            <ul className="grid gap-1.5">
+              <li className="flex gap-2">
+                <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-orange-500" />
+                <span>
+                  Adults: {adults} x {selectedRoom ? formatCurrency(selectedRoom.price) : "full price"} = {formatCurrency(adultTotal)}
+                </span>
+              </li>
+              <li className="flex gap-2">
+                <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-orange-500" />
+                <span>
+                  Kids 5-11 years: {children5To11} x {selectedRoom ? formatCurrency(childHalfPrice) : "50% price"} = {formatCurrency(child5To11Total)}
+                </span>
+              </li>
+              <li className="flex gap-2">
+                <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-orange-500" />
+                <span>Kids under 5 years: {childrenUnder5} x free = {formatCurrency(0)}</span>
+              </li>
+              <li className="flex gap-2">
+                <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-orange-500" />
+                <span>Total guests: {totalGuests}; chargeable guests: {chargeableGuests}.</span>
+              </li>
+            </ul>
+            {selectedRoom ? (
+              <div className="mt-4 rounded-lg bg-white px-4 py-3 shadow-sm">
+                <p className="text-xs font-black uppercase tracking-wide text-slate-500">Final price for selected guests</p>
+                <p className="mt-1 text-3xl font-black leading-tight text-orange-600">{formatCurrency(estimatedBaseAmount)}</p>
+              </div>
+            ) : null}
           </div>
         </div>
-        <textarea className="min-h-20 rounded-lg border border-slate-200 px-3 py-3" name="specialRequests" value={form.specialRequests} onChange={update} placeholder="Special requests" />
+        <textarea className="min-h-20 rounded-lg border border-slate-200 px-3 py-3" name="specialRequests" value={form.specialRequests} onChange={update} placeholder="Special requests (optional)" />
 
         <button className="inline-flex items-center justify-center gap-2 rounded-lg bg-jungle-700 px-4 py-3 font-black text-white hover:bg-jungle-900" disabled={loading}>
           {loading ? <Loader2 className="animate-spin" size={18} /> : <Send size={18} />}
-          {loading ? "Sending..." : "Send WhatsApp Availability Request"}
+          {loading ? "Sending..." : "Send Availability on WhatsApp"}
         </button>
       </form>
 
@@ -222,7 +261,7 @@ export function BookingForm({ resort }) {
             <div className="flex items-start gap-2">
               <CheckCircle2 className="mt-0.5 shrink-0 text-jungle-700" size={21} />
               <p className="text-sm font-bold leading-6">
-                You have sent a text to check the availability. Please wait for Pinoxx to confirm before booking.
+                Availability request saved in admin portal and opened on WhatsApp. Please wait for Pinoxx to confirm before booking.
               </p>
             </div>
           </div>
@@ -253,10 +292,14 @@ export function BookingForm({ resort }) {
                 <p className="mt-1 text-sm text-slate-300">Complete payment and notify Pinoxx with your transaction details.</p>
               </div>
             </div>
-            <a className="inline-flex items-center justify-center gap-2 rounded-lg bg-jungle-500 px-4 py-3 font-black text-slate-950" href={paymentResult.upiLink}>
+            <button
+              className="inline-flex items-center justify-center gap-2 rounded-lg bg-ember px-4 py-3 font-black text-white"
+              type="button"
+              onClick={() => window.location.assign(paymentResult.upiLink)}
+            >
               <CreditCard size={18} />
               Open UPI Payment
-            </a>
+            </button>
             <a className="inline-flex items-center justify-center gap-2 rounded-lg border border-white/20 px-4 py-3 font-bold" href={paymentResult.businessWhatsappUrl} target="_blank" rel="noreferrer">
               <MessageCircle size={18} />
               Notify Pinoxx
