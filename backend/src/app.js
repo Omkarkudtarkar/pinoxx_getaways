@@ -6,6 +6,7 @@ import rateLimit from "express-rate-limit";
 import morgan from "morgan";
 import path from "path";
 import { fileURLToPath } from "url";
+import fs from "fs";
 import { adminRouter } from "./routes/admin.js";
 import { authRouter } from "./routes/auth.js";
 import { availabilityRouter } from "./routes/availability.js";
@@ -22,6 +23,12 @@ dotenv.config({ path: path.resolve(process.cwd(), "../.env") });
 export const app = express();
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const frontendDistPath = path.resolve(__dirname, "../../frontend/dist");
+
+// Log paths for debugging
+console.log("[Pinoxx API] __dirname:", __dirname);
+console.log("[Pinoxx API] frontendDistPath:", frontendDistPath);
+console.log("[Pinoxx API] NODE_ENV:", process.env.NODE_ENV);
+console.log("[Pinoxx API] Frontend dist exists:", fs.existsSync(frontendDistPath));
 
 app.set("trust proxy", 1);
 app.use(helmet({
