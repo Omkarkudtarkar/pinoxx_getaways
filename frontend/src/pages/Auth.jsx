@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import { GoogleAuthButton } from "../components/GoogleAuthButton";
 import { useAuth } from "../lib/AuthContext";
 import { Seo } from "../lib/Seo";
 
 export function AuthPage({ mode }) {
   const isSignup = mode === "signup";
-  const { login, signup, loading } = useAuth();
+  const { login, signup, googleLogin, loading } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [form, setForm] = useState({ name: "", email: "", phone: "", password: "" });
@@ -29,6 +30,20 @@ export function AuthPage({ mode }) {
     }
   }
 
+  async function handleGoogleCredential(credential) {
+    setError("");
+    try {
+      const user = await googleLogin(credential);
+      navigate(user.role === "admin" ? "/admin" : location.state?.from || "/resorts");
+    } catch (err) {
+      setError(err.response?.data?.message || "Google login failed. Please try again.");
+    }
+  }
+
+  function handleGoogleError(message) {
+    setError(message);
+  }
+
   return (
     <main className="bg-slate-50 py-16">
       <Seo title={`${isSignup ? "Signup" : "Login"} | Pinoxx`} description="Pinoxx account access for reviews, uploads, and admin management." />
@@ -50,6 +65,21 @@ export function AuthPage({ mode }) {
               {loading ? "Please wait..." : isSignup ? "Signup" : "Login"}
             </button>
           </div>
+
+          <div className="mt-4 flex items-center gap-3">
+            <div className="flex-1 border-t border-slate-200" />
+            <span className="text-xs font-semibold text-slate-500">OR</span>
+            <div className="flex-1 border-t border-slate-200" />
+          </div>
+          <div className="mt-4">
+            <GoogleAuthButton
+              disabled={loading}
+              onCredential={handleGoogleCredential}
+              onError={handleGoogleError}
+              text={isSignup ? "signup_with" : "signin_with"}
+            />
+          </div>
+
           <p className="mt-5 text-sm text-slate-600">
             {isSignup ? "Already have an account?" : "Need an account?"}{" "}
             <Link className="font-bold text-jungle-700" to={isSignup ? "/login" : "/signup"}>

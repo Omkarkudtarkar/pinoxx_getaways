@@ -76,8 +76,8 @@ async function requireGoogleReviewAuth(req, res, next) {
       req.user = user;
     }
 
-    if (req.user?.authProvider !== "google" || !req.user?.email) {
-      return res.status(403).json({ message: "Please continue with Google before adding a Pinoxx review" });
+    if (req.user?.authProvider !== "google" || !req.user?.email || !req.user?.avatarUrl) {
+      return res.status(403).json({ message: "Please continue with Google and allow your profile photo before adding a Pinoxx review" });
     }
 
     next();

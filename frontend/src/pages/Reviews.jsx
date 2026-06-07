@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { CheckCircle2, MessageCircle, Send, Star, ThumbsDown, ThumbsUp } from "lucide-react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { GoogleAuthButton } from "../components/GoogleAuthButton";
 import { api } from "../lib/api";
 import { useAuth } from "../lib/AuthContext";
 import { Seo } from "../lib/Seo";
@@ -49,69 +50,6 @@ function Avatar({ src, name, size = "h-12 w-12" }) {
   );
 }
 
-function GoogleReviewLogin({ onCredential, disabled }) {
-  const buttonRef = useRef(null);
-  const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
-  const [error, setError] = useState("");
-
-  useEffect(() => {
-    if (!clientId || !buttonRef.current) return undefined;
-
-    let cancelled = false;
-
-    function renderButton() {
-      if (cancelled || !window.google?.accounts?.id || !buttonRef.current) return;
-      window.google.accounts.id.initialize({
-        client_id: clientId,
-        callback: ({ credential }) => onCredential(credential)
-      });
-      buttonRef.current.innerHTML = "";
-      window.google.accounts.id.renderButton(buttonRef.current, {
-        theme: "filled_blue",
-        size: "large",
-        shape: "rectangular",
-        text: "continue_with",
-        width: Math.min(buttonRef.current.offsetWidth || 320, 360)
-      });
-    }
-
-    if (window.google?.accounts?.id) {
-      renderButton();
-      return () => {
-        cancelled = true;
-      };
-    }
-
-    const existing = document.querySelector('script[src="https://accounts.google.com/gsi/client"]');
-    const script = existing || document.createElement("script");
-    script.src = "https://accounts.google.com/gsi/client";
-    script.async = true;
-    script.defer = true;
-    script.onload = renderButton;
-    script.onerror = () => setError("Google login could not load. Please try again.");
-    if (!existing) document.head.appendChild(script);
-
-    return () => {
-      cancelled = true;
-    };
-  }, [clientId, onCredential]);
-
-  if (!clientId) {
-    return (
-      <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm font-bold text-amber-900">
-        Google review login is not configured yet. Add `VITE_GOOGLE_CLIENT_ID` in Vercel and `.env`.
-      </div>
-    );
-  }
-
-  return (
-    <div className={disabled ? "pointer-events-none opacity-70" : ""}>
-      <div ref={buttonRef} className="min-h-11 w-full" />
-      {error && <p className="mt-2 rounded-lg bg-red-50 px-3 py-2 text-sm font-bold text-red-700">{error}</p>}
-    </div>
-  );
-}
-
 export function Reviews() {
   const { user, googleLogin, loading: authLoading } = useAuth();
   const [reviews, setReviews] = useState([]);
@@ -120,7 +58,7 @@ export function Reviews() {
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState("");
 
-  const googleVerified = user?.authProvider === "google";
+  const googleVerified = user?.authProvider === "google" && user?.avatarUrl;
 
   useEffect(() => {
     api.get("/pinoxx-reviews")
@@ -267,7 +205,12 @@ export function Reviews() {
                 <p className="mb-3 text-sm font-bold text-slate-700">
                   Continue with Google to verify your Gmail account and profile photo before reviewing Pinoxx.
                 </p>
-                <GoogleReviewLogin onCredential={handleGoogleCredential} disabled={authLoading} />
+                <GoogleAuthButton
+                  disabled={authLoading}
+                  onCredential={handleGoogleCredential}
+                  onError={setMessage}
+                  text="continue_with"
+                />
               </div>
             )}
 

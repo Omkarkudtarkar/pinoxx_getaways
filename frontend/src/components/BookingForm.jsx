@@ -5,6 +5,7 @@ import { api } from "../lib/api";
 import { formatCurrency } from "../lib/constants";
 
 const today = new Date().toISOString().slice(0, 10);
+const dayInMs = 24 * 60 * 60 * 1000;
 
 function draftKey(resortSlug) {
   return `pinoxx_availability_request_${resortSlug}`;
@@ -15,6 +16,24 @@ function nextDay(date) {
   const value = new Date(`${date}T00:00:00.000Z`);
   value.setUTCDate(value.getUTCDate() + 1);
   return value.toISOString().slice(0, 10);
+}
+
+function dateValue(date) {
+  if (!date) return null;
+  const [year, month, day] = date.split("-").map(Number);
+  if (!year || !month || !day) return null;
+  return Date.UTC(year, month - 1, day);
+}
+
+function stayNights(checkIn, checkOut) {
+  const start = dateValue(checkIn);
+  const end = dateValue(checkOut);
+  if (start === null || end === null || end <= start) return 1;
+  return Math.max(1, Math.round((end - start) / dayInMs));
+}
+
+function nightLabel(nights) {
+  return `${nights} ${nights === 1 ? "night" : "nights"}`;
 }
 
 export function BookingForm({ resort }) {
@@ -34,6 +53,7 @@ export function BookingForm({ resort }) {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [paymentLoading, setPaymentLoading] = useState(false);
+  const [upiOpened, setUpiOpened] = useState(false);
 
   const selectedRoom = useMemo(
     () => resort.rooms?.find((room) => room.name === form.roomCategory),
@@ -44,11 +64,13 @@ export function BookingForm({ resort }) {
   const childrenUnder5 = Math.max(0, Number(form.childrenUnder5 || 0));
   const totalGuests = adults + children5To11 + childrenUnder5;
   const chargeableGuests = adults + children5To11 * 0.5;
-  const estimatedBaseAmount = selectedRoom ? selectedRoom.price * chargeableGuests : 0;
-  const adultTotal = selectedRoom ? selectedRoom.price * adults : 0;
+  const selectedNights = stayNights(form.checkIn, form.checkOut);
+  const selectedNightLabel = nightLabel(selectedNights);
+  const estimatedBaseAmount = selectedRoom ? selectedRoom.price * chargeableGuests * selectedNights : 0;
+  const adultTotal = selectedRoom ? selectedRoom.price * adults * selectedNights : 0;
   const childHalfPrice = selectedRoom ? selectedRoom.price * 0.5 : 0;
-  const child5To11Total = childHalfPrice * children5To11;
-  const guestPricingNote = `Adults: ${adults}, Children 5-11: ${children5To11} at 50%, Children under 5: ${childrenUnder5} free. Chargeable guests: ${chargeableGuests}.`;
+  const child5To11Total = childHalfPrice * children5To11 * selectedNights;
+  const guestPricingNote = `Stay: ${selectedNightLabel}. Adults: ${adults}, Children 5-11: ${children5To11} at 50%, Children under 5: ${childrenUnder5} free. Chargeable guests: ${chargeableGuests}. Estimated total: ${formatCurrency(estimatedBaseAmount)}.`;
 
   useEffect(() => {
     const savedDraft = localStorage.getItem(draftKey(resort.slug));
@@ -145,6 +167,7 @@ export function BookingForm({ resort }) {
     setError("");
     if (!validateBookingFields()) return;
     setPaymentLoading(true);
+    setUpiOpened(false);
 
     try {
       const { data } = await api.post("/bookings", {
@@ -220,13 +243,13 @@ export function BookingForm({ resort }) {
               <li className="flex gap-2">
                 <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-orange-500" />
                 <span>
-                  Adults: {adults} x {selectedRoom ? formatCurrency(selectedRoom.price) : "full price"} = {formatCurrency(adultTotal)}
+                  Adults: {adults} x {selectedRoom ? formatCurrency(selectedRoom.price) : "full price"} x {selectedNightLabel} = {formatCurrency(adultTotal)}
                 </span>
               </li>
               <li className="flex gap-2">
                 <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-orange-500" />
                 <span>
-                  Kids 5-11 years: {children5To11} x {selectedRoom ? formatCurrency(childHalfPrice) : "50% price"} = {formatCurrency(child5To11Total)}
+                  Kids 5-11 years: {children5To11} x {selectedRoom ? formatCurrency(childHalfPrice) : "50% price"} x {selectedNightLabel} = {formatCurrency(child5To11Total)}
                 </span>
               </li>
               <li className="flex gap-2">
@@ -235,12 +258,12 @@ export function BookingForm({ resort }) {
               </li>
               <li className="flex gap-2">
                 <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-orange-500" />
-                <span>Total guests: {totalGuests}; chargeable guests: {chargeableGuests}.</span>
+                <span>Total guests: {totalGuests}; chargeable guests: {chargeableGuests}; stay: {selectedNightLabel}.</span>
               </li>
             </ul>
             {selectedRoom ? (
               <div className="mt-4 rounded-lg bg-white px-4 py-3 shadow-sm">
-                <p className="text-xs font-black uppercase tracking-wide text-slate-500">Final price for selected guests</p>
+                <p className="text-xs font-black uppercase tracking-wide text-slate-500">Final price for selected guests and dates</p>
                 <p className="mt-1 text-3xl font-black leading-tight text-orange-600">{formatCurrency(estimatedBaseAmount)}</p>
               </div>
             ) : null}
@@ -291,17 +314,19 @@ export function BookingForm({ resort }) {
                 <p className="mt-1 text-sm text-slate-300">Complete payment and notify Pinoxx with your transaction details.</p>
               </div>
             </div>
-            <a className="inline-flex items-center justify-center gap-2 rounded-lg bg-ember px-4 py-3 font-black text-white" href={paymentResult.upiLink}>
+            <a className="inline-flex items-center justify-center gap-2 rounded-lg bg-ember px-4 py-3 font-black text-white" href={paymentResult.upiLink} onClick={() => setUpiOpened(true)}>
               <CreditCard size={18} />
               Open UPI Payment
             </a>
             <p className="text-xs font-semibold leading-5 text-slate-300">
               Opens on mobile devices with a UPI app installed. If it does not open, try from Chrome on Android or your phone browser.
             </p>
-            <a className="inline-flex items-center justify-center gap-2 rounded-lg border border-white/20 px-4 py-3 font-bold" href={paymentResult.businessWhatsappUrl} target="_blank" rel="noreferrer">
-              <MessageCircle size={18} />
-              Notify Pinoxx
-            </a>
+            {upiOpened ? (
+              <a className="inline-flex items-center justify-center gap-2 rounded-lg border border-white/20 px-4 py-3 font-bold" href={paymentResult.businessWhatsappUrl} target="_blank" rel="noreferrer">
+                <MessageCircle size={18} />
+                Notify Pinoxx
+              </a>
+            ) : null}
           </div>
         )}
 

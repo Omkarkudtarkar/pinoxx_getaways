@@ -4,7 +4,9 @@
   "buildCommand": "npm run build",
   "outputDirectory": "frontend/dist",
   "env": {
-    "NODE_ENV": "production"
+    "NODE_ENV": "production",
+    "GOOGLE_CLIENT_ID": "611343899369-2itb08p2u9rhumhh9a308c82r82mektg.apps.googleusercontent.com",
+    "VITE_GOOGLE_CLIENT_ID": "611343899369-2itb08p2u9rhumhh9a308c82r82mektg.apps.googleusercontent.com"
   },
   "functions": {
     "api/index.js": {
