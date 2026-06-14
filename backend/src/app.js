@@ -124,12 +124,44 @@ app.use(express.static(frontendDistPath, {
 }));
 
 app.get("/health", (_req, res) => {
+  const database = databaseHealth();
+
+  res.status(database.ok ? 200 : 503);
   res.json({
-    ok: true,
+    ok: database.ok,
     service: "pinoxx-api",
-    dataMode: process.env.USE_MEMORY_DB === "true" ? "memory" : "mongo"
+    dataMode: database.dataMode,
+    mongoConfigured: Boolean(process.env.MONGODB_URI),
+    cloudUploadsConfigured: Boolean(
+      process.env.CLOUDINARY_CLOUD_NAME &&
+      process.env.CLOUDINARY_API_KEY &&
+      process.env.CLOUDINARY_API_SECRET
+    ),
+    googleLoginConfigured: Boolean(process.env.GOOGLE_CLIENT_ID || process.env.VITE_GOOGLE_CLIENT_ID),
+    databaseError: database.ok ? undefined : process.env.MONGODB_ERROR
   });
 });
+
+function databaseHealth() {
+  if (process.env.USE_MEMORY_DB === "true") {
+    return {
+      ok: process.env.NODE_ENV !== "production",
+      dataMode: "memory"
+    };
+  }
+
+  if (process.env.DATABASE_READY === "false") {
+    return {
+      ok: false,
+      dataMode: "unavailable"
+    };
+  }
+
+  return {
+    ok: true,
+    dataMode: "mongo"
+  };
+}
 
 if (process.env.USE_MEMORY_DB === "true") {
   app.use(createMemoryRouter());

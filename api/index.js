@@ -10,11 +10,14 @@ let appPromise;
 async function prepareApp() {
   if (!appPromise) {
     appPromise = (async () => {
+      const allowMemoryFallback = process.env.NODE_ENV !== "production" || process.env.ALLOW_MEMORY_FALLBACK === "true";
+
       try {
-        await connectDb({ allowMemoryFallback: true });
+        await connectDb({ allowMemoryFallback });
       } catch (error) {
-        console.error("Database connection failed; using memory fallback.", error);
-        process.env.USE_MEMORY_DB = "true";
+        console.error("Database connection failed.", error);
+        process.env.USE_MEMORY_DB = "false";
+        process.env.DATABASE_READY = "false";
         process.env.MONGODB_ERROR = error.message;
       }
 
