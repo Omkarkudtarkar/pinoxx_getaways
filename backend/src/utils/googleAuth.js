@@ -1,9 +1,10 @@
 import { OAuth2Client } from "google-auth-library";
 
+const defaultGoogleClientId = "611343899369-2itb08p2u9rhumhh9a308c82r82mektg.apps.googleusercontent.com";
 let googleClient;
 
 export async function verifyGoogleCredential(credential) {
-  const clientId = process.env.GOOGLE_CLIENT_ID || process.env.VITE_GOOGLE_CLIENT_ID;
+  const clientId = process.env.GOOGLE_CLIENT_ID || process.env.VITE_GOOGLE_CLIENT_ID || defaultGoogleClientId;
 
   if (!clientId) {
     const error = new Error("Google login is not configured");
