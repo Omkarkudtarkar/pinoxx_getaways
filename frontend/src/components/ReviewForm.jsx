@@ -25,7 +25,7 @@ export function ReviewForm({ resortId }) {
   if (!user) {
     return (
       <div className="rounded-lg border border-slate-200 bg-white p-5">
-        <h3 className="font-black text-slate-950">Share Your Stay</h3>
+        <h3 className="font-black text-slate-950">Share Your Experience</h3>
         <p className="mt-2 text-sm text-slate-600">Login is required for reviews and image uploads.</p>
         <div className="mt-4 flex flex-wrap items-center gap-3">
           <Link className="inline-flex rounded-lg bg-jungle-700 px-4 py-2 text-sm font-bold text-white" to="/login">
@@ -53,7 +53,7 @@ export function ReviewForm({ resortId }) {
   if (!hasGoogleAuth) {
     return (
       <div className="rounded-lg border border-slate-200 bg-white p-5">
-        <h3 className="font-black text-slate-950">Share Your Stay</h3>
+        <h3 className="font-black text-slate-950">Share Your Experience</h3>
         <p className="mt-2 text-sm text-slate-600">
           Google account verification is required for reviews. Connect your Gmail to verify your profile and share authentic reviews.
         </p>
@@ -86,7 +86,7 @@ export function ReviewForm({ resortId }) {
   return (
     <form className="rounded-lg border border-slate-200 bg-white p-5" onSubmit={submit}>
       <div className="mb-4 flex items-center gap-3">
-        <h3 className="font-black text-slate-950">Share Your Stay</h3>
+        <h3 className="font-black text-slate-950">Share Your Experience</h3>
         {user.avatarUrl && (
           <img
             src={user.avatarUrl}

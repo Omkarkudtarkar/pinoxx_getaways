@@ -63,7 +63,8 @@ def chat(payload: ChatRequest):
                 "You can also email admin@pinoxx.in or open the Contact page to choose Call now, Call later, or Message. "
                 "Share your dates, budget, member count, and sightseeing needs for faster help."
             )
-        )
+        ) 
+        print("YEd zava ") 
 
     if "distance" in text or "bus" in text:
         return ChatResponse(

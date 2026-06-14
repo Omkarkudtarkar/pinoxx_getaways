@@ -6,6 +6,7 @@ import { formatCurrency } from "../lib/constants";
 
 const today = new Date().toISOString().slice(0, 10);
 const dayInMs = 24 * 60 * 60 * 1000;
+const stayTimingNote = "Check-in: 12:00 PM. Check-out: 11:00 AM.";
 
 function draftKey(resortSlug) {
   return `pinoxx_availability_request_${resortSlug}`;
@@ -67,10 +68,12 @@ export function BookingForm({ resort }) {
   const selectedNights = stayNights(form.checkIn, form.checkOut);
   const selectedNightLabel = nightLabel(selectedNights);
   const estimatedBaseAmount = selectedRoom ? selectedRoom.price * chargeableGuests * selectedNights : 0;
+  const estimatedAdvanceAmount = Math.ceil(estimatedBaseAmount * 0.2);
   const adultTotal = selectedRoom ? selectedRoom.price * adults * selectedNights : 0;
   const childHalfPrice = selectedRoom ? selectedRoom.price * 0.5 : 0;
   const child5To11Total = childHalfPrice * children5To11 * selectedNights;
-  const guestPricingNote = `Stay: ${selectedNightLabel}. Adults: ${adults}, Children 5-11: ${children5To11} at 50%, Children under 5: ${childrenUnder5} free. Chargeable guests: ${chargeableGuests}. Estimated total: ${formatCurrency(estimatedBaseAmount)}.`;
+  const guestPricingNote = `Stay: ${selectedNightLabel}. ${stayTimingNote} Adults: ${adults}, Children 5-11: ${children5To11} at 50%, Children under 5: ${childrenUnder5} free. Chargeable guests: ${chargeableGuests}. Estimated total: ${formatCurrency(estimatedBaseAmount)}.`;
+  const advancePricingNote = `UPI advance 20%: ${formatCurrency(estimatedAdvanceAmount)}.`;
 
   useEffect(() => {
     const savedDraft = localStorage.getItem(draftKey(resort.slug));
@@ -174,7 +177,7 @@ export function BookingForm({ resort }) {
         resortId: resort._id,
         ...form,
         members: totalGuests,
-        specialRequests: [guestPricingNote, form.specialRequests].filter(Boolean).join("\n")
+        specialRequests: [guestPricingNote, advancePricingNote, form.specialRequests].filter(Boolean).join("\n")
       });
       setPaymentResult(data);
     } catch (err) {
@@ -219,6 +222,12 @@ export function BookingForm({ resort }) {
         <div className="grid gap-3 sm:grid-cols-2">
           <input className="rounded-lg border border-slate-200 px-3 py-3" name="checkIn" value={form.checkIn} onChange={update} type="date" min={today} required />
           <input className="rounded-lg border border-slate-200 px-3 py-3" name="checkOut" value={form.checkOut} onChange={update} type="date" min={nextDay(form.checkIn) || today} required />
+        </div>
+        <div className="overflow-x-auto rounded-lg border border-slate-200 bg-slate-50 p-3 text-sm font-bold text-slate-700">
+          <span className="inline-flex min-w-max items-center gap-2 whitespace-nowrap">
+            <Clock3 size={16} className="text-jungle-700" />
+            Check-in: 12:00 PM | Check-out: 11:00 AM
+          </span>
         </div>
 
         <input className="rounded-lg border border-slate-200 px-3 py-3" name="customerName" value={form.customerName} onChange={update} placeholder="Name" required />
@@ -265,6 +274,7 @@ export function BookingForm({ resort }) {
               <div className="mt-4 rounded-lg bg-white px-4 py-3 shadow-sm">
                 <p className="text-xs font-black uppercase tracking-wide text-slate-500">Final price for selected guests and dates</p>
                 <p className="mt-1 text-3xl font-black leading-tight text-orange-600">{formatCurrency(estimatedBaseAmount)}</p>
+                <p className="mt-2 text-sm font-black text-slate-700">UPI advance 20%: {formatCurrency(estimatedAdvanceAmount)}</p>
               </div>
             ) : null}
           </div>
@@ -291,7 +301,10 @@ export function BookingForm({ resort }) {
           <div className="grid gap-3 rounded-lg bg-orange-50 px-3 py-3 text-sm leading-6 text-orange-950">
             <div className="flex items-start gap-2">
               <Clock3 className="mt-0.5 shrink-0 text-orange-600" size={18} />
-              <p>After Pinoxx confirms availability, come back here and pay the UPI advance for the selected date.</p>
+              <p>
+                After Pinoxx confirms availability, come back here and pay the 20% UPI advance
+                {selectedRoom ? ` (${formatCurrency(estimatedAdvanceAmount)})` : ""} for the selected date.
+              </p>
             </div>
             <button
               type="button"
@@ -300,7 +313,7 @@ export function BookingForm({ resort }) {
               disabled={paymentLoading}
             >
               {paymentLoading ? <Loader2 className="animate-spin" size={18} /> : <CreditCard size={18} />}
-              {paymentLoading ? "Opening UPI..." : "Pay UPI Advance"}
+              {paymentLoading ? "Opening UPI..." : "Pay 20% UPI Advance"}
             </button>
           </div>
         )}
@@ -311,6 +324,9 @@ export function BookingForm({ resort }) {
               <ShieldCheck className="mt-0.5 text-jungle-400" size={21} />
               <div>
                 <p className="font-black">UPI advance booking created</p>
+                <p className="mt-1 text-sm font-bold text-slate-200">
+                  Advance amount: {formatCurrency(paymentResult.booking?.advanceAmount || estimatedAdvanceAmount)}
+                </p>
                 <p className="mt-1 text-sm text-slate-300">Complete payment and notify Pinoxx with your transaction details.</p>
               </div>
             </div>

@@ -12,6 +12,7 @@ import {
   buildUpiLink,
   buildWhatsappUrl
 } from "../utils/bookingLinks.js";
+import { calculateBookingAmounts } from "../utils/bookingAmounts.js";
 import { fileToImage, uploadImages } from "../middleware/upload.js";
 import { sendWhatsAppText } from "../utils/whatsappCloud.js";
 import { verifyGoogleCredential } from "../utils/googleAuth.js";
@@ -231,6 +232,15 @@ export function createMemoryRouter() {
       return res.status(400).json({ message: "Room category, check-in and check-out are required" });
     }
 
+    const amounts = calculateBookingAmounts({
+      resort,
+      roomCategory: req.body.roomCategory,
+      checkIn: req.body.checkIn,
+      checkOut: req.body.checkOut,
+      adults: req.body.adults,
+      children5To11: req.body.children5To11
+    });
+
     const booking = {
       _id: makeId("booking"),
       resort: resort._id,
@@ -241,7 +251,8 @@ export function createMemoryRouter() {
       checkIn: req.body.checkIn,
       checkOut: req.body.checkOut,
       specialRequests: req.body.specialRequests || "",
-      advanceAmount: Number(process.env.ADVANCE_AMOUNT || 1000),
+      totalAmount: amounts.totalAmount,
+      advanceAmount: amounts.advanceAmount,
       holdExpiresAt: new Date(Date.now() + memoryHoldMinutes * 60 * 1000).toISOString(),
       commissionPerGuest: 100,
       estimatedCommission: Number(req.body.members) * 100,

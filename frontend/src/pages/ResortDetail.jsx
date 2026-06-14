@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { BedDouble, Building2, ChevronLeft, ChevronRight, Images, IndianRupee, MapPin, Share2, Star, UsersRound, Waves, Wifi, X } from "lucide-react";
+import { BedDouble, Building2, ChevronLeft, ChevronRight, Clock3, Images, IndianRupee, MapPin, Share2, Star, UsersRound, Waves, Wifi, X } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 import { AdminResortPanel } from "../components/AdminResortPanel";
@@ -13,6 +13,20 @@ const resortTypeLabels = {
   mamboo: "Mamboo",
   budget: "Budget",
   premium: "Premium"
+};
+
+const resortInfoReveal = {
+  hidden: { opacity: 0, y: 26 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.5, ease: "easeOut", staggerChildren: 0.07 }
+  }
+};
+
+const resortInfoItemReveal = {
+  hidden: { opacity: 0, y: 16, scale: 0.98 },
+  visible: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.35, ease: "easeOut" } }
 };
 
 function formatDistance(value) {
@@ -72,6 +86,20 @@ export function ResortDetail() {
   const heroGallery = fullGallery.length ? fullGallery : gallery;
   const resortTypeLabel = resortTypeLabels[resort?.resortType] || "Budget";
   const averageReviewRating = ratingAverage(reviews, resort?.rating);
+  const resortInfoItems = [
+    { label: "Location", value: resort.location, Icon: MapPin, style: "border-jungle-100 bg-jungle-50 text-jungle-800" },
+    { label: "Distance from bus stand", value: `${resort.distanceFromBusStandKm} km`, Icon: MapPin, style: "border-slate-200 bg-slate-50 text-slate-800" },
+    { label: "Distance to water activities", value: formatDistance(resort.distanceToWaterActivitiesKm), Icon: Waves, style: "border-sky-100 bg-sky-50 text-river-700" },
+    { label: "Stay timing", value: "Check-in: 12:00 PM | Check-out: 11:00 AM", Icon: Clock3, style: "border-amber-100 bg-amber-50 text-amber-800" },
+    { label: "Resort type", value: resortTypeLabel, Icon: Building2, style: "border-slate-200 bg-white text-slate-800" },
+    {
+      label: "Prices",
+      value: `Sharing price: ${formatCurrency(resort.sharingPrice || resort.startingPrice)} | Couple price: ${formatCurrency(resort.couplePrice || resort.startingPrice)}`,
+      Icon: IndianRupee,
+      style: "border-jungle-100 bg-white text-jungle-800"
+    },
+    { label: "Guest rating", value: `${resort.rating} / 5`, Icon: Star, style: "border-amber-100 bg-white text-amber-700" }
+  ];
 
   useEffect(() => {
     if (!viewer) return undefined;
@@ -199,68 +227,97 @@ export function ResortDetail() {
 
       <section className="mx-auto grid max-w-7xl gap-8 px-4 py-12 sm:px-6 lg:grid-cols-[1fr_380px] lg:px-8">
         <div className="grid gap-8">
-          <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+          <motion.section
+            variants={resortInfoReveal}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.25 }}
+            className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm"
+          >
+            <div className="h-1.5 bg-[linear-gradient(90deg,#15803d,#0369a1,#f59e0b)]" />
+            <div className="p-5">
             <div className="mb-4 flex items-center gap-2">
-              <Images className="text-jungle-700" size={22} />
+              <motion.span
+                animate={{ rotate: [0, -8, 8, 0] }}
+                transition={{ duration: 2.8, repeat: Infinity, repeatDelay: 2 }}
+                className="grid h-10 w-10 place-items-center rounded-lg bg-jungle-50 text-jungle-700"
+              >
+                <Images size={22} />
+              </motion.span>
               <h2 className="text-2xl font-black text-slate-950">Resort Information</h2>
             </div>
-            <div className="grid gap-4 text-sm sm:grid-cols-2">
-              <div className="rounded-lg bg-slate-50 p-4">
-                <p className="font-bold text-slate-500">Location</p>
-                <p className="mt-1 font-black text-slate-950">{resort.location}</p>
-              </div>
-              <div className="rounded-lg bg-slate-50 p-4">
-                <p className="font-bold text-slate-500">Distance from bus stand</p>
-                <p className="mt-1 font-black text-slate-950">{resort.distanceFromBusStandKm} km</p>
-              </div>
-              <div className="rounded-lg bg-slate-50 p-4">
-                <p className="font-bold text-slate-500">Distance to water activities</p>
-                <p className="mt-1 font-black text-slate-950">{formatDistance(resort.distanceToWaterActivitiesKm)}</p>
-              </div>
-              <div className="rounded-lg bg-slate-50 p-4">
-                <p className="font-bold text-slate-500">Resort type</p>
-                <p className="mt-1 font-black text-slate-950">{resortTypeLabel}</p>
-              </div>
-              <div className="rounded-lg bg-slate-50 p-4">
-                <p className="font-bold text-slate-500">Sharing price</p>
-                <p className="mt-1 font-black text-slate-950">{formatCurrency(resort.sharingPrice || resort.startingPrice)}</p>
-              </div>
-              <div className="rounded-lg bg-slate-50 p-4">
-                <p className="font-bold text-slate-500">Couple price</p>
-                <p className="mt-1 font-black text-slate-950">{formatCurrency(resort.couplePrice || resort.startingPrice)}</p>
-              </div>
-              <div className="rounded-lg bg-slate-50 p-4">
-                <p className="font-bold text-slate-500">Guest rating</p>
-                <p className="mt-1 font-black text-slate-950">{resort.rating} / 5</p>
-              </div>
+            <motion.div variants={resortInfoReveal} className="grid gap-4 text-sm sm:grid-cols-2">
+              {resortInfoItems.map(({ label, value, Icon, style }) => (
+                <motion.div
+                  key={label}
+                  variants={resortInfoItemReveal}
+                  whileHover={{ y: -4, scale: 1.015 }}
+                  className={`group rounded-lg border p-4 shadow-sm transition-shadow hover:shadow-md ${style}`}
+                >
+                  <div className="flex items-start gap-3">
+                    <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-white/80 shadow-sm transition-transform group-hover:scale-110">
+                      <Icon size={18} fill={label === "Guest rating" ? "currentColor" : "none"} />
+                    </span>
+                    <div className="min-w-0">
+                      <p className="font-bold text-slate-500">{label}</p>
+                      <p className="mt-1 break-words text-base font-black text-slate-950">{value}</p>
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
+            </motion.div>
+            <motion.p variants={resortInfoItemReveal} className="mt-5 leading-8 text-slate-700">
+              {resort.shortDescription}
+            </motion.p>
             </div>
-            <p className="mt-5 leading-8 text-slate-700">{resort.shortDescription}</p>
-          </section>
+          </motion.section>
 
-          <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+          <motion.section
+            variants={resortInfoReveal}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.25 }}
+            className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm"
+          >
             <div className="mb-4 flex items-center gap-2">
               <Wifi className="text-jungle-700" size={22} />
               <h2 className="text-2xl font-black text-slate-950">Amenities & Activities</h2>
             </div>
             <div className="grid gap-5 md:grid-cols-2">
-              <div>
+              <motion.div variants={resortInfoItemReveal}>
                 <h3 className="mb-3 font-black">Amenities</h3>
                 <div className="flex flex-wrap gap-2">
-                  {resort.amenities?.map((item) => (
-                    <span key={item} className="rounded-full bg-jungle-50 px-3 py-2 text-sm font-semibold text-jungle-900">{item}</span>
+                  {resort.amenities?.map((item, index) => (
+                    <motion.span
+                      key={item}
+                      variants={resortInfoItemReveal}
+                      whileHover={{ y: -2, scale: 1.04 }}
+                      className="rounded-full bg-jungle-50 px-3 py-2 text-sm font-semibold text-jungle-900 shadow-sm"
+                      transition={{ delay: index * 0.02 }}
+                    >
+                      {item}
+                    </motion.span>
                   ))}
                 </div>
-              </div>
-              <div>
+              </motion.div>
+              <motion.div variants={resortInfoItemReveal}>
                 <h3 className="mb-3 font-black">Activities</h3>
                 <div className="flex flex-wrap gap-2">
-                  {resort.activities?.map((item) => (
-                    <span key={item} className="rounded-full bg-sky-50 px-3 py-2 text-sm font-semibold text-river-700">{item}</span>
+                  {resort.activities?.map((item, index) => (
+                    <motion.span
+                      key={item}
+                      variants={resortInfoItemReveal}
+                      whileHover={{ y: -2, scale: 1.04 }}
+                      className="rounded-full bg-sky-50 px-3 py-2 text-sm font-semibold text-river-700 shadow-sm"
+                      transition={{ delay: index * 0.02 }}
+                    >
+                      {item}
+                    </motion.span>
                   ))}
                 </div>
-              </div>
+              </motion.div>
             </div>
-          </section>
+          </motion.section>
 
           <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
             <div className="mb-4 flex items-center gap-2">

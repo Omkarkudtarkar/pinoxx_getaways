@@ -2,6 +2,7 @@ import express from "express";
 import { Booking } from "../models/Booking.js";
 import { Resort } from "../models/Resort.js";
 import { requireAdmin, requireAuth } from "../middleware/auth.js";
+import { calculateBookingAmounts } from "../utils/bookingAmounts.js";
 import { HOLD_MINUTES } from "../utils/availabilityQuote.js";
 import {
   buildBookingMessage,
@@ -34,6 +35,15 @@ bookingsRouter.post("/", async (req, res, next) => {
       return res.status(400).json({ message: "Room category, check-in and check-out are required" });
     }
 
+    const amounts = calculateBookingAmounts({
+      resort,
+      roomCategory,
+      checkIn,
+      checkOut,
+      adults: req.body.adults,
+      children5To11: req.body.children5To11
+    });
+
     const booking = new Booking({
       resort: resort._id,
       customerName,
@@ -43,7 +53,8 @@ bookingsRouter.post("/", async (req, res, next) => {
       checkIn,
       checkOut,
       specialRequests,
-      advanceAmount: Number(process.env.ADVANCE_AMOUNT || 1000),
+      totalAmount: amounts.totalAmount,
+      advanceAmount: amounts.advanceAmount,
       holdExpiresAt: new Date(Date.now() + HOLD_MINUTES * 60 * 1000),
       status: "payment_initiated"
     });

@@ -1,0 +1,18 @@
+
+> pinoxx-platform@1.0.0 start
+> npm run start --workspace backend
+
+
+> pinoxx-backend@1.0.0 start
+> node src/server.js
+
+◇ injected env (1) from .env // tip: ⌁ auth for agents [www.vestauth.com]
+◇ injected env (17) from ..\.env // tip: ◈ encrypted .env [www.dotenvx.com]
+◇ injected env (0) from .env // tip: ⌘ override existing { override: true }
+◇ injected env (0) from ..\.env // tip: ⌁ auth for agents [www.vestauth.com]
+[Pinoxx API] __dirname: D:\pinoxx main website\backend\src
+[Pinoxx API] frontendDistPath: D:\pinoxx main website\frontend\dist
+[Pinoxx API] NODE_ENV: undefined
+[Pinoxx API] Frontend dist exists: true
+Pinoxx API running on port 5001
+[0mGET /health [32m200[0m 7.499 ms - 54[0m

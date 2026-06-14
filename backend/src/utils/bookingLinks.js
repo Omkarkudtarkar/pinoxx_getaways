@@ -1,4 +1,4 @@
-export function buildUpiLink({ amount = 1000, bookingId, resortName }) {
+export function buildUpiLink({ amount = 0, bookingId, resortName }) {
   const configuredUpiId = process.env.UPI_ID;
   const upiId = configuredUpiId && configuredUpiId !== "pinoxx@upi"
     ? configuredUpiId
@@ -72,6 +72,7 @@ export function buildBookingMessage({ booking, resort }) {
     `Phone: ${booking.phone}`,
     `Members: ${booking.members}`,
     `Dates: ${checkIn} to ${checkOut}`,
+    booking.totalAmount ? `Total amount: Rs ${booking.totalAmount}` : "",
     `Advance: Rs ${booking.advanceAmount}`,
     `Payment status: ${booking.status.replaceAll("_", " ")}`,
     booking.payment?.transactionRef ? `Transaction ref: ${booking.payment.transactionRef}` : "",
@@ -94,6 +95,7 @@ export function buildCustomerSlip({ booking, resort }) {
     `Phone: ${booking.phone}`,
     `Members: ${booking.members}`,
     `Dates: ${checkIn} to ${checkOut}`,
+    booking.totalAmount ? `Total amount: Rs ${booking.totalAmount}` : "",
     `Advance amount: Rs ${booking.advanceAmount}`,
     `Payment status: ${booking.status.replaceAll("_", " ")}`,
     "Your request is saved with Pinoxx. Final room confirmation is subject to availability verification by our booking team.",
