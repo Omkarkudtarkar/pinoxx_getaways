@@ -54,8 +54,12 @@ const clientOrigins = (process.env.CLIENT_URL || "")
   .split(",")
   .map((origin) => origin.trim())
   .filter(Boolean);
-const hasProductionClientOrigin = clientOrigins.some((origin) => !/^https?:\/\/localhost(?::\d+)?$/.test(origin));
-const vercelOrigin = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "";
+const vercelOrigins = [
+  process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "",
+  process.env.VERCEL_PROJECT_PRODUCTION_URL ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}` : ""
+].filter(Boolean);
+const allowedProductionOrigins = new Set([...clientOrigins, ...vercelOrigins]);
+const isLocalOrigin = (origin) => /^https?:\/\/localhost(?::\d+)?$/.test(origin);
 
 function resolveCorsOrigin(origin, callback) {
   if (!origin) {
@@ -69,11 +73,11 @@ function resolveCorsOrigin(origin, callback) {
   }
 
   if (process.env.NODE_ENV !== "production") {
-    callback(null, /^https?:\/\/localhost(?::\d+)?$/.test(origin));
+    callback(null, isLocalOrigin(origin));
     return;
   }
 
-  if (!hasProductionClientOrigin || origin === vercelOrigin) {
+  if (allowedProductionOrigins.has(origin)) {
     callback(null, true);
     return;
   }
@@ -91,6 +95,12 @@ app.use(morgan("dev"));
 app.use(rateLimit({
   windowMs: 15 * 60 * 1000,
   limit: 300,
+  standardHeaders: "draft-8",
+  legacyHeaders: false
+}));
+app.use(["/api/auth", "/api/admin"], rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 50,
   standardHeaders: "draft-8",
   legacyHeaders: false
 }));
