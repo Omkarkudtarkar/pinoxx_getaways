@@ -6,17 +6,29 @@
 > pinoxx-backend@1.0.0 start
 > node src/server.js
 
-◇ injected env (17) from .env // tip: ⌘ suppress logs { quiet: true }
-◇ injected env (1) from ..\.env // tip: ⌘ multiple files { path: ['.env.local', '.env'] }
-◇ injected env (0) from .env // tip: ⌁ auth for agents [www.vestauth.com]
-◇ injected env (0) from ..\.env // tip: ⌘ override existing { override: true }
+◇ injected env (17) from .env // tip: ◈ secrets for agents [www.dotenvx.com]
+◇ injected env (1) from ..\.env // tip: ⌘ suppress logs { quiet: true }
+MongoDB connected
+◇ injected env (0) from .env // tip: ⌘ custom filepath { path: '/custom/path/.env' }
+◇ injected env (0) from ..\.env // tip: ⌘ enable debugging { debug: true }
 [Pinoxx API] __dirname: D:\pinoxx main website\backend\src
 [Pinoxx API] frontendDistPath: D:\pinoxx main website\frontend\dist
 [Pinoxx API] NODE_ENV: undefined
 [Pinoxx API] Frontend dist exists: true
 Pinoxx API running on port 5001
-[0mGET /api/resorts/kali-river-edge-resort [32m200[0m 15.960 ms - 2590[0m
-[0mGET /resorts [32m200[0m 30.414 ms - 955[0m
-[0mGET /resort [32m200[0m 49.757 ms - 955[0m
-[0mGET /resorts/kali-river-edge-resort [32m200[0m 32.006 ms - 955[0m
-[0mGET /resort/kali-river-edge-resort [32m200[0m 32.480 ms - 955[0m
+[0mGET /health [32m200[0m 7.428 ms - 136[0m
+[0mGET /health [32m200[0m 1.688 ms - 136[0m
+[0mPOST /api/auth/login [32m200[0m 719.924 ms - 371[0m
+[0mPOST /api/admin/resorts [32m201[0m 509.896 ms - 836[0m
+[0mPOST /api/resorts/6a30462ddfe8b96ed160b930/reviews [32m201[0m 454.714 ms - 352[0m
+[0mGET /health [32m200[0m 0.954 ms - 136[0m
+[0mGET /admin [32m200[0m 4.464 ms - 955[0m
+[0mGET /resorts [32m200[0m 2.278 ms - 955[0m
+[0mGET /api/resorts [32m200[0m 101.174 ms - 14[0m
+[0mPOST /api/auth/login [32m200[0m 502.830 ms - 371[0m
+[0mPOST /api/admin/resorts [32m201[0m 205.147 ms - 849[0m
+[0mGET /api/resorts/working-check-resort [32m200[0m 167.301 ms - 811[0m
+[0mDELETE /api/admin/resorts/6a3047f2dfe8b96ed160b934 [32m200[0m 166.334 ms - 799[0m
+[0mGET /health [32m200[0m 2.181 ms - 136[0m
+[0mGET /health [32m200[0m 1.375 ms - 136[0m
+[0mGET /health [32m200[0m 1.452 ms - 136[0m
