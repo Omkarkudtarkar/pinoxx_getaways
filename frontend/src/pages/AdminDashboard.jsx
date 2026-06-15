@@ -73,6 +73,14 @@ const emptyRoom = {
   imageFiles: []
 };
 
+const maxAdminUploadBytes = 3.8 * 1024 * 1024;
+const imageMaxDimension = 1600;
+const imageQualitySteps = [0.72, 0.62, 0.52];
+
+function formatFileSize(bytes) {
+  return `${(Number(bytes || 0) / (1024 * 1024)).toFixed(1)} MB`;
+}
+
 function dateRange(booking) {
   const options = { day: "2-digit", month: "short", year: "numeric" };
   return `${new Date(booking.checkIn).toLocaleDateString("en-IN", options)} - ${new Date(booking.checkOut).toLocaleDateString("en-IN", options)}`;
@@ -117,9 +125,93 @@ function normalizeRooms(rooms) {
     }));
 }
 
-function appendResortPayload(body, form, rooms, files) {
+function fileBaseName(name = "image") {
+  return name.replace(/\.[^.]+$/, "") || "image";
+}
+
+function loadImageFile(file) {
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(file);
+    const image = new Image();
+    image.onload = () => {
+      URL.revokeObjectURL(url);
+      resolve(image);
+    };
+    image.onerror = () => {
+      URL.revokeObjectURL(url);
+      reject(new Error(`Could not read ${file.name}`));
+    };
+    image.src = url;
+  });
+}
+
+function canvasToBlob(canvas, type, quality) {
+  return new Promise((resolve) => {
+    canvas.toBlob(resolve, type, quality);
+  });
+}
+
+async function compressImageFile(file) {
+  if (!file?.type?.startsWith("image/")) return file;
+
+  const image = await loadImageFile(file);
+  const scale = Math.min(1, imageMaxDimension / Math.max(image.width, image.height));
+  const width = Math.max(1, Math.round(image.width * scale));
+  const height = Math.max(1, Math.round(image.height * scale));
+  const canvas = document.createElement("canvas");
+  canvas.width = width;
+  canvas.height = height;
+
+  const context = canvas.getContext("2d");
+  context.fillStyle = "#ffffff";
+  context.fillRect(0, 0, width, height);
+  context.drawImage(image, 0, 0, width, height);
+
+  let bestBlob = null;
+  for (const quality of imageQualitySteps) {
+    const blob = await canvasToBlob(canvas, "image/jpeg", quality);
+    if (!blob) continue;
+    if (!bestBlob || blob.size < bestBlob.size) bestBlob = blob;
+    if (blob.size <= 800 * 1024) break;
+  }
+
+  if (!bestBlob || bestBlob.size >= file.size) return file;
+  return new File([bestBlob], `${fileBaseName(file.name)}.jpg`, {
+    type: "image/jpeg",
+    lastModified: Date.now()
+  });
+}
+
+async function compressImageFiles(files) {
+  const items = Array.from(files || []);
+  return Promise.all(items.map((file) => compressImageFile(file)));
+}
+
+async function prepareResortImages(rooms, files) {
+  const resortFiles = await compressImageFiles(files);
+  const roomFileLists = await Promise.all(
+    rooms.map((room) => compressImageFiles(room.imageFiles || []))
+  );
+  const allFiles = [...resortFiles, ...roomFileLists.flat()];
+  const totalBytes = allFiles.reduce((sum, file) => sum + Number(file.size || 0), 0);
+
+  if (totalBytes > maxAdminUploadBytes) {
+    throw new Error(`Selected images are still ${formatFileSize(totalBytes)} after compression. Vercel allows about 4.5 MB per request, so upload fewer images or smaller images.`);
+  }
+
+  return { resortFiles, roomFileLists, totalBytes };
+}
+
+function uploadErrorMessage(error, fallback) {
+  if (error.response?.status === 413) {
+    return "Images are too large for Vercel. Select fewer or smaller images, then try again.";
+  }
+  return error.response?.data?.message || error.message || fallback;
+}
+
+function appendResortPayload(body, form, rooms, files, preparedRoomFileLists) {
   const resortFiles = Array.from(files || []);
-  const roomFileLists = rooms.map((room) => Array.from(room.imageFiles || []));
+  const roomFileLists = preparedRoomFileLists || rooms.map((room) => Array.from(room.imageFiles || []));
 
   Object.entries(form).forEach(([key, value]) => {
     if (key === "images") {
@@ -348,12 +440,24 @@ export function AdminDashboard() {
   async function uploadImages(event) {
     event.preventDefault();
     if (!selectedResort) return;
-    const body = new FormData();
-    Array.from(files).forEach((file) => body.append("images", file));
-    const { data } = await api.post(`/admin/resorts/${selectedResort}/images`, body);
-    setResorts((items) => items.map((item) => (item._id === selectedResort ? data.resort : item)));
-    setMessage("Images uploaded successfully.");
-    setFiles([]);
+    setMessage("Preparing images...");
+
+    try {
+      const preparedFiles = await compressImageFiles(files);
+      const totalBytes = preparedFiles.reduce((sum, file) => sum + Number(file.size || 0), 0);
+      if (totalBytes > maxAdminUploadBytes) {
+        throw new Error(`Selected images are still ${formatFileSize(totalBytes)} after compression. Upload fewer images at once.`);
+      }
+
+      const body = new FormData();
+      preparedFiles.forEach((file) => body.append("images", file));
+      const { data } = await api.post(`/admin/resorts/${selectedResort}/images`, body);
+      setResorts((items) => items.map((item) => (item._id === selectedResort ? data.resort : item)));
+      setMessage("Images uploaded successfully.");
+      setFiles([]);
+    } catch (err) {
+      setMessage(uploadErrorMessage(err, "Images could not be uploaded."));
+    }
   }
 
   function updateResortForm(event) {
@@ -400,7 +504,9 @@ export function AdminDashboard() {
 
     try {
       const body = new FormData();
-      appendResortPayload(body, resortForm, rooms, resortFiles);
+      setMessage("Preparing images...");
+      const preparedImages = await prepareResortImages(rooms, resortFiles);
+      appendResortPayload(body, resortForm, rooms, preparedImages.resortFiles, preparedImages.roomFileLists);
       const { data } = await api.post("/admin/resorts", body);
       const createdResort = data.resort;
       setResorts((items) => [createdResort, ...items]);
@@ -411,7 +517,7 @@ export function AdminDashboard() {
       setResortFiles([]);
       setMessage(`Created ${createdResort.name}.`);
     } catch (err) {
-      setMessage(err.response?.data?.message || "Resort could not be created.");
+      setMessage(uploadErrorMessage(err, "Resort could not be created."));
     } finally {
       setSavingResort(false);
     }
@@ -435,7 +541,9 @@ export function AdminDashboard() {
 
     try {
       const body = new FormData();
-      appendResortPayload(body, editForm, editRooms, editFiles);
+      setMessage("Preparing images...");
+      const preparedImages = await prepareResortImages(editRooms, editFiles);
+      appendResortPayload(body, editForm, editRooms, preparedImages.resortFiles, preparedImages.roomFileLists);
       const { data } = await api.patch(`/admin/resorts/${editingResortId}`, body);
       setResorts((items) => items.map((item) => (item._id === editingResortId ? data.resort : item)));
       setSelectedResort(data.resort._id);
@@ -443,7 +551,7 @@ export function AdminDashboard() {
       setEditFiles([]);
       setMessage(`Updated ${data.resort.name}.`);
     } catch (err) {
-      setMessage(err.response?.data?.message || "Resort could not be updated.");
+      setMessage(uploadErrorMessage(err, "Resort could not be updated."));
     }
   }
 
