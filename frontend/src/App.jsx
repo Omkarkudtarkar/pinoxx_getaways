@@ -1,4 +1,4 @@
-import { Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Chatbot } from "./components/Chatbot";
@@ -84,6 +84,8 @@ export function App() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/about" element={<About />} />
+        <Route path="/resort" element={<Navigate to="/resorts" replace />} />
+        <Route path="/resort/:slug" element={<ResortDetail />} />
         <Route path="/resorts" element={<Resorts />} />
         <Route path="/resorts/:slug" element={<ResortDetail />} />
         <Route path="/reviews" element={<Reviews />} />

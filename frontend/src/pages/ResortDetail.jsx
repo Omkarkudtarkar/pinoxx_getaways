@@ -86,20 +86,6 @@ export function ResortDetail() {
   const heroGallery = fullGallery.length ? fullGallery : gallery;
   const resortTypeLabel = resortTypeLabels[resort?.resortType] || "Budget";
   const averageReviewRating = ratingAverage(reviews, resort?.rating);
-  const resortInfoItems = [
-    { label: "Location", value: resort.location, Icon: MapPin, style: "border-jungle-100 bg-jungle-50 text-jungle-800" },
-    { label: "Distance from bus stand", value: `${resort.distanceFromBusStandKm} km`, Icon: MapPin, style: "border-slate-200 bg-slate-50 text-slate-800" },
-    { label: "Distance to water activities", value: formatDistance(resort.distanceToWaterActivitiesKm), Icon: Waves, style: "border-sky-100 bg-sky-50 text-river-700" },
-    { label: "Stay timing", value: "Check-in: 12:00 PM | Check-out: 11:00 AM", Icon: Clock3, style: "border-amber-100 bg-amber-50 text-amber-800" },
-    { label: "Resort type", value: resortTypeLabel, Icon: Building2, style: "border-slate-200 bg-white text-slate-800" },
-    {
-      label: "Prices",
-      value: `Sharing price: ${formatCurrency(resort.sharingPrice || resort.startingPrice)} | Couple price: ${formatCurrency(resort.couplePrice || resort.startingPrice)}`,
-      Icon: IndianRupee,
-      style: "border-jungle-100 bg-white text-jungle-800"
-    },
-    { label: "Guest rating", value: `${resort.rating} / 5`, Icon: Star, style: "border-amber-100 bg-white text-amber-700" }
-  ];
 
   useEffect(() => {
     if (!viewer) return undefined;
@@ -123,6 +109,21 @@ export function ResortDetail() {
   if (!resort) {
     return <div className="mx-auto max-w-7xl px-4 py-16 text-slate-600">Loading resort...</div>;
   }
+
+  const resortInfoItems = [
+    { label: "Location", value: resort.location, Icon: MapPin, style: "border-jungle-100 bg-jungle-50 text-jungle-800" },
+    { label: "Distance from bus stand", value: `${resort.distanceFromBusStandKm} km`, Icon: MapPin, style: "border-slate-200 bg-slate-50 text-slate-800" },
+    { label: "Distance to water activities", value: formatDistance(resort.distanceToWaterActivitiesKm), Icon: Waves, style: "border-sky-100 bg-sky-50 text-river-700" },
+    { label: "Stay timing", value: "Check-in: 12:00 PM | Check-out: 11:00 AM", Icon: Clock3, style: "border-amber-100 bg-amber-50 text-amber-800" },
+    { label: "Resort type", value: resortTypeLabel, Icon: Building2, style: "border-slate-200 bg-white text-slate-800" },
+    {
+      label: "Prices",
+      value: `Sharing price: ${formatCurrency(resort.sharingPrice || resort.startingPrice)} | Couple price: ${formatCurrency(resort.couplePrice || resort.startingPrice)}`,
+      Icon: IndianRupee,
+      style: "border-jungle-100 bg-white text-jungle-800"
+    },
+    { label: "Guest rating", value: `${resort.rating} / 5`, Icon: Star, style: "border-amber-100 bg-white text-amber-700" }
+  ];
 
   async function share() {
     const url = window.location.href;

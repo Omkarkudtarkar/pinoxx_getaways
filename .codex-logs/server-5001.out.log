@@ -6,13 +6,17 @@
 > pinoxx-backend@1.0.0 start
 > node src/server.js
 
-◇ injected env (1) from .env // tip: ⌁ auth for agents [www.vestauth.com]
-◇ injected env (17) from ..\.env // tip: ◈ encrypted .env [www.dotenvx.com]
-◇ injected env (0) from .env // tip: ⌘ override existing { override: true }
-◇ injected env (0) from ..\.env // tip: ⌁ auth for agents [www.vestauth.com]
+◇ injected env (17) from .env // tip: ⌘ suppress logs { quiet: true }
+◇ injected env (1) from ..\.env // tip: ⌘ multiple files { path: ['.env.local', '.env'] }
+◇ injected env (0) from .env // tip: ⌁ auth for agents [www.vestauth.com]
+◇ injected env (0) from ..\.env // tip: ⌘ override existing { override: true }
 [Pinoxx API] __dirname: D:\pinoxx main website\backend\src
 [Pinoxx API] frontendDistPath: D:\pinoxx main website\frontend\dist
 [Pinoxx API] NODE_ENV: undefined
 [Pinoxx API] Frontend dist exists: true
 Pinoxx API running on port 5001
-[0mGET /health [32m200[0m 7.499 ms - 54[0m
+[0mGET /api/resorts/kali-river-edge-resort [32m200[0m 15.960 ms - 2590[0m
+[0mGET /resorts [32m200[0m 30.414 ms - 955[0m
+[0mGET /resort [32m200[0m 49.757 ms - 955[0m
+[0mGET /resorts/kali-river-edge-resort [32m200[0m 32.006 ms - 955[0m
+[0mGET /resort/kali-river-edge-resort [32m200[0m 32.480 ms - 955[0m
