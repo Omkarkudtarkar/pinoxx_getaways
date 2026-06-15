@@ -6,12 +6,16 @@ import multer from "multer";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const uploadDir = path.resolve(__dirname, "../../uploads");
-fs.mkdirSync(uploadDir, { recursive: true });
 const cloudinaryConfigured = Boolean(
   process.env.CLOUDINARY_CLOUD_NAME &&
   process.env.CLOUDINARY_API_KEY &&
   process.env.CLOUDINARY_API_SECRET
 );
+const requiresCloudUploads = process.env.NODE_ENV === "production" || Boolean(process.env.VERCEL);
+
+if (!cloudinaryConfigured && !requiresCloudUploads) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+}
 
 if (cloudinaryConfigured) {
   cloudinary.config({
@@ -64,9 +68,19 @@ const localStorage = multer.diskStorage({
     cb(null, name);
   }
 });
-const storage = cloudinaryConfigured ? new CloudinaryStorage() : localStorage;
+const storage = cloudinaryConfigured
+  ? new CloudinaryStorage()
+  : requiresCloudUploads
+    ? multer.memoryStorage()
+    : localStorage;
 
 function fileFilter(_req, file, cb) {
+  if (requiresCloudUploads && !cloudinaryConfigured) {
+    const error = new Error("Cloudinary is required for image uploads in production. Create the resort without images, or add Cloudinary environment variables and redeploy.");
+    error.status = 503;
+    return cb(error);
+  }
+
   if (!file.mimetype.startsWith("image/")) {
     return cb(new Error("Only image uploads are allowed"));
   }
