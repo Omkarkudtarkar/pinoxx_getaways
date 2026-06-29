@@ -90,6 +90,19 @@ function toCsv(items = []) {
   return items.join(", ");
 }
 
+function emptyImage(alt = "") {
+  return { url: "", alt };
+}
+
+function normalizeImages(images = []) {
+  return images
+    .map((image) => ({
+      url: image.url?.trim() || "",
+      alt: image.alt?.trim() || ""
+    }))
+    .filter((image) => image.url);
+}
+
 function resortToForm(resort) {
   return {
     slug: resort.slug || "",
@@ -121,7 +134,7 @@ function normalizeRooms(rooms) {
       price: Number(room.price || 0),
       capacity: Number(room.capacity || 1),
       description: room.description?.trim() || "",
-      images: room.images || []
+      images: normalizeImages(room.images || [])
     }));
 }
 
@@ -215,7 +228,7 @@ function appendResortPayload(body, form, rooms, files, preparedRoomFileLists) {
 
   Object.entries(form).forEach(([key, value]) => {
     if (key === "images") {
-      body.append("images", JSON.stringify(value || []));
+      body.append("images", JSON.stringify(normalizeImages(value || [])));
     } else {
       body.append(key, value);
     }
@@ -490,6 +503,90 @@ export function AdminDashboard() {
     )));
   }
 
+  function addResortImageUrl(formSetter, alt = "") {
+    formSetter((value) => ({
+      ...value,
+      images: [...(value.images || []), emptyImage(alt || value.name)]
+    }));
+  }
+
+  function updateResortImageUrl(formSetter, index, field, fieldValue) {
+    formSetter((value) => ({
+      ...value,
+      images: (value.images || []).map((image, imageIndex) => (
+        imageIndex === index ? { ...image, [field]: fieldValue } : image
+      ))
+    }));
+  }
+
+  function removeResortImageUrl(formSetter, index) {
+    formSetter((value) => ({
+      ...value,
+      images: (value.images || []).filter((_, imageIndex) => imageIndex !== index)
+    }));
+  }
+
+  function addRoomImageUrl(setter, roomIndex) {
+    setter((items) => items.map((room, index) => (
+      index === roomIndex
+        ? { ...room, images: [...(room.images || []), emptyImage(room.name)] }
+        : room
+    )));
+  }
+
+  function updateRoomImageUrl(setter, roomIndex, imageIndex, field, value) {
+    setter((items) => items.map((room, index) => (
+      index === roomIndex
+        ? {
+            ...room,
+            images: (room.images || []).map((image, currentIndex) => (
+              currentIndex === imageIndex ? { ...image, [field]: value } : image
+            ))
+          }
+        : room
+    )));
+  }
+
+  function renderImageUrlEditor(images, { onAdd, onUpdate, onRemove, label }) {
+    return (
+      <div className="grid gap-3">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <p className="text-sm font-black text-slate-800">{label}</p>
+          <button type="button" className="inline-flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-2 text-sm font-bold" onClick={onAdd}>
+            <Plus size={16} />
+            Add URL
+          </button>
+        </div>
+        {(images || []).length > 0 && (
+          <div className="grid gap-3">
+            {images.map((image, imageIndex) => (
+              <div key={`${label}-${imageIndex}`} className="grid gap-2 rounded-lg border border-slate-200 bg-slate-50 p-3 md:grid-cols-[1fr_0.65fr_auto]">
+                <input
+                  className="rounded-lg border border-slate-200 px-3 py-2"
+                  value={image.url || ""}
+                  onChange={(event) => onUpdate(imageIndex, "url", event.target.value)}
+                  placeholder="Cloudinary image URL"
+                />
+                <input
+                  className="rounded-lg border border-slate-200 px-3 py-2"
+                  value={image.alt || ""}
+                  onChange={(event) => onUpdate(imageIndex, "alt", event.target.value)}
+                  placeholder="Alt text"
+                />
+                <button type="button" className="inline-flex items-center justify-center rounded-lg border border-slate-200 bg-white px-3 py-2 text-slate-700" onClick={() => onRemove(imageIndex)} aria-label="Remove image URL">
+                  <X size={18} />
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+        <p className="text-xs font-semibold leading-5 text-slate-500">
+          Paste secure Cloudinary URLs here, or use the file upload below after Cloudinary env vars are configured.
+        </p>
+      </div>
+    );
+  }
+
   async function createResort(event) {
     event.preventDefault();
     setSavingResort(true);
@@ -591,19 +688,17 @@ export function AdminDashboard() {
             </button>
             <textarea className="min-h-16 rounded-lg border border-slate-200 px-3 py-2 md:col-span-4" value={room.description} onChange={(event) => updateRoom(setter, index, "description", event.target.value)} placeholder="Room description" />
             <div className="grid gap-3 md:col-span-4">
+              {renderImageUrlEditor(room.images || [], {
+                label: "Room image URLs",
+                onAdd: () => addRoomImageUrl(setter, index),
+                onUpdate: (imageIndex, field, value) => updateRoomImageUrl(setter, index, imageIndex, field, value),
+                onRemove: (imageIndex) => removeRoomImage(setter, index, imageIndex)
+              })}
               {room.images?.length > 0 && (
                 <div className="grid grid-cols-3 gap-2 sm:grid-cols-5">
-                  {room.images.map((image, imageIndex) => (
+                  {normalizeImages(room.images).map((image, imageIndex) => (
                     <div key={`${image.url}-${imageIndex}`} className="relative overflow-hidden rounded-lg border border-slate-200 bg-slate-100">
                       <img src={assetUrl(image.url)} alt={image.alt || room.name || "Room"} className="aspect-square w-full object-cover" />
-                      <button
-                        type="button"
-                        className="absolute right-1 top-1 grid h-7 w-7 place-items-center rounded-full bg-white/90 text-slate-800 shadow-sm"
-                        onClick={() => removeRoomImage(setter, index, imageIndex)}
-                        aria-label="Remove room image"
-                      >
-                        <X size={15} />
-                      </button>
                     </div>
                   ))}
                 </div>
@@ -627,7 +722,7 @@ export function AdminDashboard() {
     );
   }
 
-  function renderResortFields(form, update) {
+  function renderResortFields(form, update, formSetter) {
     return (
       <div className="grid gap-3 md:grid-cols-2">
         <input className="rounded-lg border border-slate-200 px-3 py-2" name="name" value={form.name} onChange={update} placeholder="Resort name" required />
@@ -650,6 +745,23 @@ export function AdminDashboard() {
         <input className="rounded-lg border border-slate-200 px-3 py-2" name="activities" value={form.activities} onChange={update} placeholder="Activities, comma separated" />
         <input className="rounded-lg border border-slate-200 px-3 py-2 md:col-span-2" name="availabilitySheetUrl" value={form.availabilitySheetUrl} onChange={update} placeholder="Google Sheet availability URL" />
         <textarea className="min-h-20 rounded-lg border border-slate-200 px-3 py-2 md:col-span-2" name="seoDescription" value={form.seoDescription} onChange={update} placeholder="SEO description optional" />
+        <div className="md:col-span-2">
+          {renderImageUrlEditor(form.images || [], {
+            label: "Resort image URLs",
+            onAdd: () => addResortImageUrl(formSetter),
+            onUpdate: (index, field, value) => updateResortImageUrl(formSetter, index, field, value),
+            onRemove: (index) => removeResortImageUrl(formSetter, index)
+          })}
+        </div>
+        {normalizeImages(form.images || []).length > 0 && (
+          <div className="grid grid-cols-3 gap-2 sm:grid-cols-5 md:col-span-2">
+            {normalizeImages(form.images).map((image, imageIndex) => (
+              <div key={`${image.url}-${imageIndex}`} className="overflow-hidden rounded-lg border border-slate-200 bg-slate-100">
+                <img src={assetUrl(image.url)} alt={image.alt || form.name || "Resort"} className="aspect-square w-full object-cover" />
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     );
   }
@@ -868,7 +980,7 @@ export function AdminDashboard() {
                 <Building2 className="text-jungle-700" size={22} />
                 <h2 className="text-xl font-black text-slate-950">Create Resort Profile</h2>
               </div>
-              {renderResortFields(resortForm, updateResortForm)}
+              {renderResortFields(resortForm, updateResortForm, setResortForm)}
               <div className="mt-5">{renderRoomEditor(rooms, setRooms)}</div>
               <div className="mt-5 grid gap-3 md:grid-cols-[1fr_auto] md:items-center">
                 <label className="flex cursor-pointer items-center justify-center gap-2 rounded-lg border border-dashed border-slate-300 px-4 py-5 text-sm font-semibold text-slate-700">
@@ -890,7 +1002,7 @@ export function AdminDashboard() {
                   <div key={resort._id} className="rounded-lg border border-slate-200 p-4">
                     {editingResortId === resort._id ? (
                       <form className="grid gap-4" onSubmit={saveResort}>
-                        {renderResortFields(editForm, updateEditForm)}
+                        {renderResortFields(editForm, updateEditForm, setEditForm)}
                         {renderRoomEditor(editRooms, setEditRooms)}
                         <label className="flex cursor-pointer items-center justify-center gap-2 rounded-lg border border-dashed border-slate-300 px-4 py-5 text-sm font-semibold text-slate-700">
                           <ImagePlus size={18} />
