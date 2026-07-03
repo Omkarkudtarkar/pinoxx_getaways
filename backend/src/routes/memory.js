@@ -590,7 +590,7 @@ function createStore() {
       shortDescription: "Forest retreat with nature trails, birding, adventure activities, and group packages.",
       description:
         "A nature-first Dandeli resort for guests who want a quieter stay near forest routes while still having access to rafting and adventure activities through Pinoxx coordination.",
-      resortType: "mamboo",
+      resortType: "bamboo",
       startingPrice: 1499,
       sharingPrice: 1499,
       couplePrice: 2999,
@@ -891,7 +891,7 @@ function resolveStartingPrice(value, sharingPrice, couplePrice) {
 }
 
 function normalizeResortType(value) {
-  return ["mamboo", "budget", "premium"].includes(value) ? value : "budget";
+  return ["bamboo", "mamboo", "budget", "premium"].includes(value) ? (value === "mamboo" ? "bamboo" : value) : "budget";
 }
 
 function parseList(value) {

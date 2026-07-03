@@ -1,5 +1,4 @@
 import {
-  CalendarDays,
   Clock3,
   Headphones,
   Mail,
@@ -25,9 +24,7 @@ const initialForm = {
   preferredTime: "19:00"
 };
 
-const contactModes = [
-  { id: "call_later", label: "Call me later", icon: CalendarDays, requestCall: true }
-];
+const contactModes = [];
 
 const fieldClass =
   "w-full rounded-lg border border-slate-200 bg-white px-3 py-3 text-sm font-semibold text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-jungle-600 focus:ring-4 focus:ring-jungle-600/10";
@@ -186,7 +183,7 @@ export function Contact() {
             </a>
           </div>
 
-          <div className="mb-5 grid gap-2 sm:grid-cols-2">
+          <div className="mb-5 grid gap-2 sm:grid-cols-1">
             <a
               className="flex min-h-16 items-center justify-center gap-2 rounded-lg border border-slate-950 bg-slate-950 px-3 py-3 text-sm font-black text-white shadow-soft transition hover:bg-jungle-900"
               href={`tel:+${businessWhatsappNumber}`}
@@ -194,21 +191,6 @@ export function Contact() {
               <PhoneCall size={18} />
               Call us now
             </a>
-            {contactModes.map((mode) => (
-              <button
-                key={mode.id}
-                className={`flex min-h-16 items-center justify-center gap-2 rounded-lg border px-3 py-3 text-sm font-black transition ${
-                  form.contactType === mode.id
-                    ? "border-slate-950 bg-slate-950 text-white shadow-soft"
-                    : "border-slate-200 bg-slate-50 text-slate-700 hover:border-jungle-600 hover:bg-white"
-                }`}
-                type="button"
-                onClick={() => setContactType(mode.id)}
-              >
-                <mode.icon size={18} />
-                {mode.label}
-              </button>
-            ))}
           </div>
 
           <div className="grid gap-3 sm:grid-cols-2">

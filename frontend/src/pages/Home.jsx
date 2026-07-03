@@ -55,7 +55,7 @@ const trustPoints = [
 ];
 
 const bookingSteps = [
-  { title: "Choose your style", text: "Tell us your dates, group size, and budget.", icon: Search },
+  { title: "Choose your resort", text: "Tell us your dates, group size, and budget.", icon: Search },
   { title: "Get the best price", text: "Compare stays, inclusions, sightseeing, and total trip value.", icon: BadgeCheck },
   { title: "Travel with support", text: "Pinoxx guides you from resort check-in to check-out.", icon: MessageCircle }
 ];

@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 100" role="img" aria-label="Pinoxx logo">
+  <defs>
+    <linearGradient id="pinoxxGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0d3c2b" />
+      <stop offset="100%" stop-color="#1b7a45" />
+    </linearGradient>
+  </defs>
+  <rect width="320" height="100" rx="18" fill="#ffffff" />
+  <path d="M28 72 L48 36 L72 56 L92 28 L118 72" fill="none" stroke="#0d3c2b" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" />
+  <path d="M92 32 L124 72" fill="none" stroke="#1b7a45" stroke-width="10" stroke-linecap="round" />
+  <circle cx="100" cy="30" r="10" fill="#ffc42d" />
+  <text x="150" y="40" font-family="Inter, Arial, sans-serif" font-size="32" font-weight="800" fill="#0d3c2b">PINOXX</text>
+  <text x="150" y="62" font-family="Inter, Arial, sans-serif" font-size="16" font-weight="700" fill="#1b7a45">GETAWAYS</text>
+  <text x="150" y="80" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="700" fill="#6b7f6a" letter-spacing="0.22em">DANDELI</text>
+</svg>

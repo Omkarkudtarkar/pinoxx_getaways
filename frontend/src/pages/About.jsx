@@ -142,10 +142,10 @@ export function About() {
             </p>
 
             <div className="mt-9 flex flex-col gap-3 sm:flex-row">
-              <Link className="inline-flex items-center justify-center gap-2 rounded-lg bg-jungle-400 px-6 py-4 font-black text-slate-950 shadow-soft transition hover:bg-jungle-100" to="/resorts">
+              <Link className="inline-flex items-center justify-center gap-2 rounded-lg border border-jungle-300 bg-jungle-500 px-6 py-4 font-black text-white shadow-lg shadow-jungle-500/25 transition hover:bg-jungle-400" to="/resorts">
                 Explore Verified Resorts <ArrowRight size={19} />
               </Link>
-              <Link className="inline-flex items-center justify-center rounded-lg border border-white/35 px-6 py-4 font-black text-white backdrop-blur transition hover:bg-white/10" to="/contact">
+              <Link className="inline-flex items-center justify-center rounded-lg border border-white/35 bg-white/10 px-6 py-4 font-black text-white backdrop-blur transition hover:bg-white/15" to="/contact">
                 Talk to Pinoxx
               </Link>
             </div>

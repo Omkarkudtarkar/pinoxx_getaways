@@ -10,7 +10,8 @@ import { formatCurrency } from "../lib/constants";
 import { Seo } from "../lib/Seo";
 
 const resortTypeLabels = {
-  mamboo: "Mamboo",
+  bamboo: "Bamboo",
+  mamboo: "Bamboo",
   budget: "Budget",
   premium: "Premium"
 };

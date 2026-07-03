@@ -4,6 +4,7 @@ import { resortImageUrl, useFallbackResortImage } from "../lib/api";
 import { formatCurrency } from "../lib/constants";
 
 const resortTypeLabels = {
+  bamboo: "Bamboo Stay",
   mamboo: "Bamboo Stay",
   budget: "Budget",
   premium: "Premium"

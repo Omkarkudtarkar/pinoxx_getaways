@@ -16,7 +16,7 @@ const priceFilters = [
 const resortTypeFilters = [
   { label: "Budget", value: "budget", icon: IndianRupee, description: "Best-value stays for simple Dandeli trips." },
   { label: "Premium", value: "premium", icon: Star, description: "Higher comfort stays with stronger amenities." },
-  { label: "Bamboo Stay", value: "mamboo", icon: Trees, description: "Nature-style stays for forest and group trips." }
+  { label: "Bamboo Stay", value: "bamboo", icon: Trees, description: "Nature-style stays for forest and group trips." }
 ];
 
 const initialFilters = { minPrice: "", maxPrice: "", rating: "", resortType: "" };

@@ -1,4 +1,4 @@
-import { MessageCircle, Phone } from "lucide-react";
+import { Instagram, MessageCircle, Phone, Facebook } from "lucide-react";
 import { Link } from "react-router-dom";
 import { businessWhatsappNumber, whatsappUrl } from "../lib/constants";
 
@@ -8,7 +8,7 @@ export function Footer() {
       <div className="mx-auto grid max-w-7xl gap-8 px-4 py-10 sm:px-6 md:grid-cols-[1.2fr_0.8fr_0.8fr] lg:px-8">
         <div>
           <div className="mb-3 flex items-center gap-3">
-            <span className="grid h-10 w-10 place-items-center rounded-lg bg-jungle-500 text-lg font-black">P</span>
+            <img src="/pinoxx-logo.svg" alt="Pinoxx logo" className="h-11 w-11 rounded-lg object-cover" />
             <span className="text-xl font-black">Pinoxx</span>
           </div>
           <p className="max-w-md text-sm leading-6 text-slate-300">
@@ -31,6 +31,12 @@ export function Footer() {
             </a>
             <a className="inline-flex items-center gap-2" href={whatsappUrl("Hi Pinoxx, I need Dandeli resort pricing, sightseeing, and trip support.")} target="_blank" rel="noreferrer">
               <MessageCircle size={16} /> WhatsApp Pinoxx
+            </a>
+            <a className="inline-flex items-center gap-2" href="https://www.instagram.com/pinoxxgetaways/" target="_blank" rel="noreferrer">
+              <Instagram size={16} /> Instagram
+            </a>
+            <a className="inline-flex items-center gap-2" href="https://www.facebook.com/profile.php?id=61585874739421" target="_blank" rel="noreferrer">
+              <Facebook size={16} /> Facebook
             </a>
           </div>
         </div>

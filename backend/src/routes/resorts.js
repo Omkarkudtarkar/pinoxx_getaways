@@ -103,6 +103,8 @@ export function resortPayload(body, files = []) {
     distanceToWaterActivitiesKm: optionalNumber(body.distanceToWaterActivitiesKm) ?? 0,
     amenities: parseList(body.amenities),
     activities: parseList(body.activities),
+    checkInTime: body.checkInTime?.trim() || "",
+    checkOutTime: body.checkOutTime?.trim() || "",
     images: [
       ...parseJsonArray(body.images),
       ...resortFiles.map(fileToImage)
@@ -141,7 +143,7 @@ function resolveStartingPrice(value, sharingPrice, couplePrice) {
 }
 
 function normalizeResortType(value) {
-  return ["mamboo", "budget", "premium"].includes(value) ? value : "budget";
+  return ["bamboo", "mamboo", "budget", "premium"].includes(value) ? (value === "mamboo" ? "bamboo" : value) : "budget";
 }
 
 function parseList(value) {

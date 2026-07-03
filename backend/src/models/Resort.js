@@ -28,7 +28,7 @@ const resortSchema = new mongoose.Schema(
     description: { type: String, required: true },
     resortType: {
       type: String,
-      enum: ["mamboo", "budget", "premium"],
+      enum: ["bamboo", "budget", "premium"],
       default: "budget",
       index: true
     },
@@ -40,6 +40,8 @@ const resortSchema = new mongoose.Schema(
     distanceToWaterActivitiesKm: { type: Number, min: 0, default: 0 },
     amenities: [{ type: String, trim: true }],
     activities: [{ type: String, trim: true }],
+    checkInTime: { type: String, default: "", trim: true },
+    checkOutTime: { type: String, default: "", trim: true },
     images: [imageSchema],
     rooms: [roomSchema],
     availabilitySheetUrl: { type: String, default: "", trim: true },

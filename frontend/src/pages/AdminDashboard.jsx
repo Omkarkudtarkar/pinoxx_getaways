@@ -38,7 +38,7 @@ const graphRanges = [
 ];
 
 const resortTypes = [
-  { value: "mamboo", label: "Mamboo" },
+  { value: "bamboo", label: "Bamboo" },
   { value: "budget", label: "Budget" },
   { value: "premium", label: "Premium" }
 ];
@@ -58,6 +58,8 @@ const initialResortForm = {
   distanceToWaterActivitiesKm: "",
   amenities: "",
   activities: "",
+  checkInTime: "",
+  checkOutTime: "",
   seoTitle: "",
   seoDescription: "",
   availabilitySheetUrl: "",
@@ -119,6 +121,8 @@ function resortToForm(resort) {
     distanceToWaterActivitiesKm: resort.distanceToWaterActivitiesKm || "",
     amenities: toCsv(resort.amenities),
     activities: toCsv(resort.activities),
+    checkInTime: resort.checkInTime || "",
+    checkOutTime: resort.checkOutTime || "",
     seoTitle: resort.seoTitle || "",
     seoDescription: resort.seoDescription || "",
     availabilitySheetUrl: resort.availabilitySheetUrl || "",
@@ -737,6 +741,8 @@ export function AdminDashboard() {
         <input className="rounded-lg border border-slate-200 px-3 py-2" name="couplePrice" value={form.couplePrice} onChange={update} type="number" min="0" placeholder="Couple price" />
         <input className="rounded-lg border border-slate-200 px-3 py-2" name="distanceFromBusStandKm" value={form.distanceFromBusStandKm} onChange={update} type="number" min="0" step="0.1" placeholder="Distance from bus stand (km)" required />
         <input className="rounded-lg border border-slate-200 px-3 py-2" name="distanceToWaterActivitiesKm" value={form.distanceToWaterActivitiesKm} onChange={update} type="number" min="0" step="0.1" placeholder="Distance to water activities (km)" />
+        <input className="rounded-lg border border-slate-200 px-3 py-2" name="checkInTime" value={form.checkInTime} onChange={update} type="time" />
+        <input className="rounded-lg border border-slate-200 px-3 py-2" name="checkOutTime" value={form.checkOutTime} onChange={update} type="time" />
         <input className="rounded-lg border border-slate-200 px-3 py-2" name="rating" value={form.rating} onChange={update} type="number" min="0" max="5" step="0.1" placeholder="Rating" />
         <input className="rounded-lg border border-slate-200 px-3 py-2" name="seoTitle" value={form.seoTitle} onChange={update} placeholder="SEO title optional" />
         <input className="rounded-lg border border-slate-200 px-3 py-2 md:col-span-2" name="shortDescription" value={form.shortDescription} onChange={update} placeholder="Short description" required />
