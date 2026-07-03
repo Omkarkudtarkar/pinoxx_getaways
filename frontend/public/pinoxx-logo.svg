@@ -1,15 +1,22 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 100" role="img" aria-label="Pinoxx logo">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 440 140" role="img" aria-label="Pinoxx logo">
   <defs>
-    <linearGradient id="pinoxxGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#0d3c2b" />
-      <stop offset="100%" stop-color="#1b7a45" />
+    <linearGradient id="sunGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f9c420" />
+      <stop offset="100%" stop-color="#f49d1a" />
+    </linearGradient>
+    <linearGradient id="waterGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#0e83c1" />
+      <stop offset="100%" stop-color="#23b2e2" />
     </linearGradient>
   </defs>
-  <rect width="320" height="100" rx="18" fill="#ffffff" />
-  <path d="M28 72 L48 36 L72 56 L92 28 L118 72" fill="none" stroke="#0d3c2b" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" />
-  <path d="M92 32 L124 72" fill="none" stroke="#1b7a45" stroke-width="10" stroke-linecap="round" />
-  <circle cx="100" cy="30" r="10" fill="#ffc42d" />
-  <text x="150" y="40" font-family="Inter, Arial, sans-serif" font-size="32" font-weight="800" fill="#0d3c2b">PINOXX</text>
-  <text x="150" y="62" font-family="Inter, Arial, sans-serif" font-size="16" font-weight="700" fill="#1b7a45">GETAWAYS</text>
-  <text x="150" y="80" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="700" fill="#6b7f6a" letter-spacing="0.22em">DANDELI</text>
+  <rect width="440" height="140" rx="16" fill="transparent" />
+  <circle cx="156" cy="36" r="26" fill="url(#sunGrad)" />
+  <path d="M24 74 C48 46 76 26 120 46 C156 64 178 36 210 50 C236 62 266 44 294 56 C322 68 338 78 368 52" fill="none" stroke="#435d1f" stroke-width="10" stroke-linecap="round" />
+  <path d="M88 78 C132 52 180 44 218 68 C254 90 292 68 330 72" fill="none" stroke="url(#waterGrad)" stroke-width="14" stroke-linecap="round" />
+  <path d="M92 92 C134 72 168 86 218 96 C262 104 300 88 334 100" fill="none" stroke="url(#waterGrad)" stroke-width="12" stroke-linecap="round" opacity="0.9" />
+  <path d="M286 34 C296 22 318 24 324 34 C330 44 348 52 360 46" fill="none" stroke="#163e45" stroke-width="4" stroke-linecap="round" />
+  <path d="M340 50 L352 58 L348 68" fill="none" stroke="#163e45" stroke-width="4" stroke-linecap="round" />
+  <text x="32" y="118" font-family="Inter, Arial, sans-serif" font-size="40" font-weight="900" letter-spacing="-1" fill="#0b3f47">PINOXX</text>
+  <text x="32" y="144" font-family="Inter, Arial, sans-serif" font-size="18" font-weight="800" fill="#375c2b">GETAWAYS</text>
+  <text x="180" y="144" font-family="Inter, Arial, sans-serif" font-size="14" font-weight="700" fill="#60715c" letter-spacing="0.16em">DANDELI</text>
 </svg>
