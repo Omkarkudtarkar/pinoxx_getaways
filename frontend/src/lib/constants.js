@@ -19,7 +19,7 @@ export const formatCurrency = (value) =>
     maximumFractionDigits: 0
   }).format(value || 0);
 
-export const formatCouplePrice = (value) => `PP ${formatCurrency(value)}`;
+export const formatPerPersonPrice = (value) => `${formatCurrency(value)} PP`;
 
 export const whatsappUrl = (message) =>
   `https://wa.me/${businessWhatsappNumber}?text=${encodeURIComponent(message)}`;

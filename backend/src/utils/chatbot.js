@@ -8,8 +8,8 @@ function formatPrice(value) {
   return `Rs ${Number(value || 0).toLocaleString("en-IN")}`;
 }
 
-function formatCouplePrice(value) {
-  return `PP ${formatPrice(value)}`;
+function formatPerPersonPrice(value) {
+  return `${formatPrice(value)} PP`;
 }
 
 function bulletList(items = []) {
@@ -154,7 +154,7 @@ function groupedPriceLines(resorts) {
 }
 
 function resortPriceLine(resort) {
-  return `${resort.name}: from ${formatPrice(resort.startingPrice)}`;
+  return `${resort.name}: from ${formatPerPersonPrice(resort.startingPrice)}`;
 }
 
 function activeResortsByDistance(resorts) {
@@ -215,8 +215,8 @@ function buildResortOverviewAnswer(resort) {
     `Type: ${resortTypeLabel(resort.resortType)}`,
     `Location: ${resort.location}`,
     `Details: ${description}`,
-    `Sharing price: ${formatPrice(resort.sharingPrice || resort.startingPrice)}`,
-    `Couple price: ${formatCouplePrice(resort.couplePrice || resort.startingPrice)}`,
+    `Sharing price: ${formatPerPersonPrice(resort.sharingPrice || resort.startingPrice)}`,
+    `Couple price: ${formatPerPersonPrice(resort.couplePrice || resort.startingPrice)}`,
     `Distance: ${distance}${activityDistance}`,
     `Amenities: ${listItems(resort.amenities)}`,
     `Activities: ${listItems(resort.activities)}`
@@ -225,8 +225,8 @@ function buildResortOverviewAnswer(resort) {
 
 function buildResortPriceAnswer(resort) {
   const pricePoints = [
-    `Sharing: ${formatPrice(resort.sharingPrice || resort.startingPrice)}`,
-    `Couple: ${formatCouplePrice(resort.couplePrice || resort.startingPrice)}`
+    `Sharing: ${formatPerPersonPrice(resort.sharingPrice || resort.startingPrice)}`,
+    `Couple: ${formatPerPersonPrice(resort.couplePrice || resort.startingPrice)}`
   ];
   const roomPoints = resort.rooms?.length ? resort.rooms.map(roomLine) : [];
 

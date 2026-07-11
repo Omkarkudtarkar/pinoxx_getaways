@@ -1050,8 +1050,8 @@ function formatMemoryPrice(value) {
   return `Rs ${Number(value || 0).toLocaleString("en-IN")}`;
 }
 
-function formatMemoryCouplePrice(value) {
-  return `PP ${formatMemoryPrice(value)}`;
+function formatMemoryPerPersonPrice(value) {
+  return `${formatMemoryPrice(value)} PP`;
 }
 
 const memoryGenericSearchWords = new Set([
@@ -1152,7 +1152,7 @@ function groupedMemoryPriceLines() {
 }
 
 function memoryResortPriceLine(resort) {
-  return `${resort.name} - from ${formatMemoryPrice(resort.startingPrice)}`;
+  return `${resort.name} - from ${formatMemoryPerPersonPrice(resort.startingPrice)}`;
 }
 
 function activeMemoryResortsByDistance() {
@@ -1189,7 +1189,7 @@ function buildMemoryResortOverviewAnswer(resort) {
   return [
     `${resort.name} is in ${resort.location}.`,
     resort.shortDescription || resort.description || "Details are available with Pinoxx.",
-    `Prices: sharing ${formatMemoryPrice(resort.sharingPrice || resort.startingPrice)}, couple ${formatMemoryCouplePrice(resort.couplePrice || resort.startingPrice)}.`,
+    `Prices: sharing ${formatMemoryPerPersonPrice(resort.sharingPrice || resort.startingPrice)}, couple ${formatMemoryPerPersonPrice(resort.couplePrice || resort.startingPrice)}.`,
     `Distance: ${Number(resort.distanceFromBusStandKm || 0).toFixed(1)} km from Dandeli bus stand.`,
     `Amenities: ${memoryListItems(resort.amenities)}.`,
     `Activities: ${memoryListItems(resort.activities)}.`
@@ -1199,8 +1199,8 @@ function buildMemoryResortOverviewAnswer(resort) {
 function buildMemoryResortPriceAnswer(resort) {
   const lines = [
     `${resort.name} pricing:`,
-    `Sharing: ${formatMemoryPrice(resort.sharingPrice || resort.startingPrice)}`,
-    `Couple: ${formatMemoryCouplePrice(resort.couplePrice || resort.startingPrice)}`
+    `Sharing: ${formatMemoryPerPersonPrice(resort.sharingPrice || resort.startingPrice)}`,
+    `Couple: ${formatMemoryPerPersonPrice(resort.couplePrice || resort.startingPrice)}`
   ];
   if (resort.rooms?.length) lines.push("", "Room prices:", ...resort.rooms.map(memoryRoomLine));
   lines.push("", "Pinoxx can confirm the final best price for your date and guest count.");

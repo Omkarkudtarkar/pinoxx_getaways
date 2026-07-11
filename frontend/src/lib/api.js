@@ -87,6 +87,10 @@ function formatPrice(value) {
   }).format(value || 0);
 }
 
+function formatPerPersonPrice(value) {
+  return `${formatPrice(value)} PP`;
+}
+
 function bulletList(items = []) {
   return items
     .map((item) => String(item || "").trim())
@@ -125,7 +129,7 @@ function buildLocalPriceAnswer(resorts, message) {
     groups[categoryForIndex(index, sorted.length)].push(resort);
   });
 
-  const line = (resort) => `${resort.name}: from ${formatPrice(resort.startingPrice)}`;
+  const line = (resort) => `${resort.name}: from ${formatPerPersonPrice(resort.startingPrice)}`;
   const selected = text.includes("budget")
     ? "budget"
     : text.includes("comfort") || text.includes("comport")
