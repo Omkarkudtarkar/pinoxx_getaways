@@ -306,7 +306,7 @@ export function Chatbot() {
             {messages.map((message, index) => (
               <div
                 key={`${message.role}-${index}`}
-                className={`w-fit max-w-[88%] break-words rounded-lg px-3 py-2 text-sm leading-6 shadow-sm ${message.role === "user" ? "ml-auto bg-jungle-700 text-white" : "mr-auto bg-white text-slate-800"}`}
+                className={`w-fit max-w-[88%] whitespace-pre-line break-words rounded-lg px-3 py-2 text-left text-sm leading-6 shadow-sm ${message.role === "user" ? "ml-auto bg-jungle-700 text-white" : "mr-auto bg-white text-slate-800"}`}
               >
                 {message.text}
               </div>

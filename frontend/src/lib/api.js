@@ -87,6 +87,22 @@ function formatPrice(value) {
   }).format(value || 0);
 }
 
+function bulletList(items = []) {
+  return items
+    .map((item) => String(item || "").trim())
+    .filter(Boolean)
+    .map((item) => `- ${item}`)
+    .join("\n");
+}
+
+function formatAnswer(title, points = [], note = "") {
+  return [
+    title,
+    bulletList(points),
+    note
+  ].filter(Boolean).join("\n\n");
+}
+
 function formattedSupportNumber() {
   return formatPhoneNumber(businessWhatsappNumber);
 }
@@ -109,7 +125,7 @@ function buildLocalPriceAnswer(resorts, message) {
     groups[categoryForIndex(index, sorted.length)].push(resort);
   });
 
-  const line = (resort) => `${resort.name} - from ${formatPrice(resort.startingPrice)}`;
+  const line = (resort) => `${resort.name}: from ${formatPrice(resort.startingPrice)}`;
   const selected = text.includes("budget")
     ? "budget"
     : text.includes("comfort") || text.includes("comport")
@@ -132,7 +148,11 @@ function buildLocalPriceAnswer(resorts, message) {
 
   if (selectedGroup) {
     const [label, items] = selectedGroup;
-    return `${label} resorts based on current resort prices:\n${items.map(line).join("\n")}\n\nPrices can change by date, meals, room type, and activity inclusions. Pinoxx helps compare options for the best possible cheap price.`;
+    return formatAnswer(
+      `${label} resorts based on current prices`,
+      items.map(line),
+      "Prices can change by date, meals, room type, and activity inclusions. Pinoxx helps compare options for the best possible cheap price."
+    );
   }
 
   const sections = [
@@ -141,10 +161,10 @@ function buildLocalPriceAnswer(resorts, message) {
     ["Premium", groups.premium]
   ]
     .filter(([, items]) => items.length)
-    .map(([label, items]) => `${label}:\n${items.map(line).join("\n")}`)
+    .map(([label, items]) => formatAnswer(label, items.map(line)))
     .join("\n\n");
 
-  return `Current resort prices by category:\n${sections}\n\nShare your date and member count so Pinoxx can help find the best-value and cheap-price option for your trip.`;
+  return `Current resort prices by category\n\n${sections}\n\nShare your date and member count so Pinoxx can help find the best-value and cheap-price option for your trip.`;
 }
 
 function buildLocalDistanceAnswer(resorts, message) {
@@ -152,21 +172,21 @@ function buildLocalDistanceAnswer(resorts, message) {
   const sorted = [...(resorts || [])]
     .filter((resort) => resort?.isActive !== false && Number.isFinite(Number(resort.distanceFromBusStandKm)))
     .sort((first, second) => Number(first.distanceFromBusStandKm) - Number(second.distanceFromBusStandKm));
-  const line = (resort) => `${resort.name} - ${Number(resort.distanceFromBusStandKm).toFixed(1)} km from Dandeli bus stand`;
+  const line = (resort) => `${resort.name}: ${Number(resort.distanceFromBusStandKm).toFixed(1)} km from Dandeli bus stand`;
 
   if (!sorted.length) {
     return "Distance details are not available right now. Pinoxx can confirm the exact route before booking.";
   }
 
   if (text.includes("pickup") || text.includes("route") || text.includes("travel")) {
-    return `Pinoxx can guide pickup and route planning from Dandeli bus stand. Current resort distances:\n${sorted.map(line).join("\n")}\n\nActual travel time can vary by road condition and pickup point.`;
+    return formatAnswer("Pickup and route help", ["Pinoxx can guide pickup and route planning from Dandeli bus stand.", ...sorted.map(line)], "Actual travel time can vary by road condition and pickup point.");
   }
 
   if (text.includes("near") || text.includes("nearest") || text.includes("closest")) {
-    return `Nearest active resorts from Dandeli bus stand:\n${sorted.slice(0, 5).map(line).join("\n")}\n\nThese distances come from the resort distance data saved in Pinoxx.`;
+    return formatAnswer("Nearest active resorts", sorted.slice(0, 5).map(line), "These distances come from the resort distance data saved in Pinoxx.");
   }
 
-  return `Current resort distances from Dandeli bus stand:\n${sorted.map(line).join("\n")}\n\nPinoxx can confirm pickup guidance after you choose a resort.`;
+  return formatAnswer("Current resort distances", sorted.map(line), "Pinoxx can confirm pickup guidance after you choose a resort.");
 }
 
 const raftingPackages = [
@@ -200,10 +220,10 @@ function buildLocalRaftingAnswer(message) {
   );
 
   if (selected) {
-    return `${line(selected)}\n\nAvailability depends on season, river condition, and slot timing. Pinoxx can confirm before booking.`;
+    return formatAnswer("Dandeli rafting option", [line(selected)], "Availability depends on season, river condition, and slot timing. Pinoxx can confirm before booking.");
   }
 
-  return `Dandeli rafting options:\n${raftingPackages.map(line).join("\n")}\n\nShort rafting is package-included, mid rafting includes all water activities, and long rafting includes only rafting.`;
+  return formatAnswer("Dandeli rafting options", raftingPackages.map(line), "Short rafting is package-included, mid rafting includes all water activities, and long rafting includes only rafting.");
 }
 
 function buildLocalFacilitiesAnswer(message) {
@@ -214,18 +234,22 @@ function buildLocalFacilitiesAnswer(message) {
   const wantsOverview = text.includes("all") || text.includes("inclusion") || [wantsFood, wantsPool, wantsIndoor].filter(Boolean).length > 1;
 
   if (!wantsOverview && wantsFood) {
-    return "Food included:\nBreakfast\nLunch\nDinner\n\nPinoxx can confirm veg/non-veg and meal timing before booking.";
+    return formatAnswer("Food included", ["Breakfast", "Lunch", "Dinner"], "Pinoxx can confirm veg/non-veg and meal timing before booking.");
   }
 
   if (!wantsOverview && wantsPool) {
-    return "Activity and entertainment inclusions:\nSwimming pool\nCampfire with music\nRain dance\n\nTiming can depend on resort rules and group schedule.";
+    return formatAnswer("Activity and entertainment inclusions", ["Swimming pool", "Campfire with music", "Rain dance"], "Timing can depend on resort rules and group schedule.");
   }
 
   if (!wantsOverview && wantsIndoor) {
-    return "Indoor and outdoor games included:\nCarrom\nChess\nBadminton\nArchery\n\nPinoxx can confirm availability before your visit.";
+    return formatAnswer("Indoor and outdoor games included", ["Carrom", "Chess", "Badminton", "Archery"], "Pinoxx can confirm availability before your visit.");
   }
 
-  return "Dandeli resort package inclusions:\nMeals:\nBreakfast\nLunch\nDinner\n\nAmenities and activities:\nSwimming pool\nCampfire with music\nRain dance\nCarrom\nChess\nBadminton\nArchery\n\nExact timing and availability can vary by resort and date, so Pinoxx will confirm before booking.";
+  return [
+    formatAnswer("Meals", ["Breakfast", "Lunch", "Dinner"]),
+    formatAnswer("Amenities and activities", ["Swimming pool", "Campfire with music", "Rain dance", "Carrom", "Chess", "Badminton", "Archery"]),
+    "Exact timing and availability can vary by resort and date, so Pinoxx will confirm before booking."
+  ].join("\n\n");
 }
 
 const sightseeingPlaces = [
@@ -262,7 +286,7 @@ function buildLocalExtraActivitiesAnswer(message) {
   const wantsLongRafting = text.includes("long") || text.includes("12");
 
   if (wantsSightseeing && !wantsSafari && !wantsMidRafting && !wantsLongRafting) {
-    return `Sightseeing places Pinoxx can help with:\n${sightseeingPlaces.join("\n")}\n\nPinoxx can guide route, timing, vehicle planning, and coordination around your resort check-in to check-out schedule.`;
+    return formatAnswer("Sightseeing places Pinoxx can help with", sightseeingPlaces, "Pinoxx can guide route, timing, vehicle planning, and coordination around your resort check-in to check-out schedule.");
   }
 
   if (wantsSafari && !wantsSightseeing && !wantsMidRafting && !wantsLongRafting) {
@@ -277,7 +301,16 @@ function buildLocalExtraActivitiesAnswer(message) {
     return buildLocalRaftingAnswer("long rafting 12 km");
   }
 
-  return `Extra activities available:\nSightseeing:\n${sightseeingPlaces.join("\n")}\n\nJungle safari\nMid rafting - 6 km - Rs 1,450: Includes 6 km rafting plus all water activities.\nLong rafting - 12 km - Rs 1,750: Includes only the 12 km rafting experience.\n\nPinoxx can confirm timing, availability, transport, final pricing, and how it fits with your stay plan.`;
+  return formatAnswer(
+    "Extra activities available",
+    [
+      ...sightseeingPlaces.map((place) => `Sightseeing: ${place}`),
+      "Jungle safari",
+      "Mid rafting - 6 km: Rs 1,450 - Includes 6 km rafting plus all water activities",
+      "Long rafting - 12 km: Rs 1,750 - Includes only the 12 km rafting experience"
+    ],
+    "Pinoxx can confirm timing, availability, transport, final pricing, and how it fits with your stay plan."
+  );
 }
 
 function isTripGuidanceQuestion(text) {
@@ -300,7 +333,13 @@ function isTripGuidanceQuestion(text) {
 }
 
 function buildLocalTripGuidanceAnswer() {
-  return "Pinoxx support is not limited to booking. We help you compare and get the best possible cheap price, plan Dandeli sightseeing, understand activities and inclusions, and guide you from resort check-in to check-out.";
+  return formatAnswer("Pinoxx trip support", [
+    "Compare resort options and prices",
+    "Find the best possible cheap price for your dates",
+    "Plan Dandeli sightseeing",
+    "Understand activities and inclusions",
+    "Get guidance from resort check-in to check-out"
+  ]);
 }
 
 function isContactQuestion(text) {
@@ -325,26 +364,41 @@ function buildLocalContactAnswer(message) {
   const phone = formattedSupportNumber();
 
   if (text.includes("email") || text.includes("mail")) {
-    return `You can email Pinoxx at admin@pinoxx.in. For faster help with best prices, sightseeing, and stay guidance, WhatsApp or call ${phone}.`;
+    return formatAnswer("Pinoxx email contact", [`Email: admin@pinoxx.in`, `For faster help, WhatsApp or call ${phone}`]);
   }
 
   if (text.includes("callback") || text.includes("call back") || text.includes("later")) {
-    return "Open the Contact page and choose Call later. Add your name, phone number, people count, preferred date, and preferred time. Pinoxx will receive it in the admin contact panel.";
+    return formatAnswer("Request a call back", [
+      "Open the Contact page",
+      "Choose Call later",
+      "Add your name, phone number, people count, preferred date, and preferred time",
+      "Pinoxx will receive it in the admin contact panel"
+    ]);
   }
 
   if (text.includes("sms") || text.includes("text")) {
-    return `You can send Pinoxx an SMS/text message at ${phone}. The Contact page also has a Text message option for quick trip support.`;
+    return formatAnswer("SMS contact", [`Send an SMS/text message to ${phone}`, "The Contact page also has a Text message option for quick trip support"]);
   }
 
   if (text.includes("whatsapp")) {
-    return `WhatsApp Pinoxx at ${phone} for quick Dandeli trip help. Share your travel date, number of members, budget, preferred stay type, and sightseeing needs.`;
+    return formatAnswer("WhatsApp Pinoxx", [`Number: ${phone}`, "Share travel date, member count, budget, preferred stay type, and sightseeing needs"]);
   }
 
   if (text.includes("call") || text.includes("phone") || text.includes("talk")) {
-    return `Call Pinoxx at ${phone} for best-price help, arrival, pickup, sightseeing, or resort guidance. You can also use the Contact page to request Call now or Call later.`;
+    return formatAnswer("Call Pinoxx", [`Phone: ${phone}`, "Use it for best-price help, arrival, pickup, sightseeing, or resort guidance", "You can also use the Contact page to request Call now or Call later"]);
   }
 
-  return `You can contact Pinoxx in different ways:\nWhatsApp: ${phone}\nPhone call: ${phone}\nSMS/Text message: ${phone}\nEmail: admin@pinoxx.in\nContact page: choose Call now, Call later, or Message.\n\nFor the fastest answer, share your dates, member count, budget, preferred resort style, and sightseeing needs.`;
+  return formatAnswer(
+    "You can contact Pinoxx in different ways",
+    [
+      `WhatsApp: ${phone}`,
+      `Phone call: ${phone}`,
+      `SMS/Text message: ${phone}`,
+      "Email: admin@pinoxx.in",
+      "Contact page: choose Call now, Call later, or Message"
+    ],
+    "For the fastest answer, share your dates, member count, budget, preferred resort style, and sightseeing needs."
+  );
 }
 
 export async function askChatbot(message) {
