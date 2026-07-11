@@ -1,6 +1,6 @@
 import { Instagram, MessageCircle, Phone, Facebook } from "lucide-react";
 import { Link } from "react-router-dom";
-import { businessWhatsappNumber, whatsappUrl } from "../lib/constants";
+import { formatPhoneNumber, supportPhoneNumbers, whatsappUrl } from "../lib/constants";
 
 export function Footer() {
   return (
@@ -26,9 +26,11 @@ export function Footer() {
         <div>
           <h3 className="mb-3 text-sm font-bold uppercase tracking-wide text-slate-400">Support</h3>
           <div className="grid gap-3 text-sm text-slate-300">
-            <a className="inline-flex items-center gap-2" href={`tel:+${businessWhatsappNumber}`}>
-              <Phone size={16} /> 24/7 trip support
-            </a>
+            {supportPhoneNumbers.map((phone) => (
+              <a key={phone} className="inline-flex items-center gap-2" href={`tel:+${phone}`}>
+                <Phone size={16} /> {formatPhoneNumber(phone)}
+              </a>
+            ))}
             <a className="inline-flex items-center gap-2" href={whatsappUrl("Hi Pinoxx, I need Dandeli resort pricing, sightseeing, and trip support.")} target="_blank" rel="noreferrer">
               <MessageCircle size={16} /> WhatsApp Pinoxx
             </a>

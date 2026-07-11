@@ -99,6 +99,6 @@ export function buildCustomerSlip({ booking, resort }) {
     `Advance amount: Rs ${booking.advanceAmount}`,
     `Payment status: ${booking.status.replaceAll("_", " ")}`,
     "Your request is saved with Pinoxx. Final room confirmation is subject to availability verification by our booking team.",
-    "Support: +91 9353431179"
+    "Support: +91 9353431173"
   ].filter(Boolean).join("\n");
 }

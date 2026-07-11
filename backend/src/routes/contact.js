@@ -11,7 +11,7 @@ export const contactRouter = express.Router();
 const defaultCallNowTextNumber = "918147843271";
 
 function adminNotificationNumbers() {
-  const configured = process.env.WHATSAPP_ADMIN_NOTIFICATION_NUMBERS || process.env.BUSINESS_WHATSAPP_NUMBER || "919353431179";
+  const configured = process.env.WHATSAPP_ADMIN_NOTIFICATION_NUMBERS || process.env.BUSINESS_WHATSAPP_NUMBER || "919353431173";
   return configured
     .split(",")
     .map((item) => item.trim())
@@ -38,7 +38,7 @@ contactRouter.post("/", async (req, res, next) => {
       message: req.body.message
     });
     const message = buildContactRequestMessage(contact);
-    const whatsappUrl = buildWhatsappUrl(process.env.BUSINESS_WHATSAPP_NUMBER || "919353431179", message);
+    const whatsappUrl = buildWhatsappUrl(process.env.BUSINESS_WHATSAPP_NUMBER || "919353431173", message);
     const textMessageUrl = contact.contactType === "call_now"
       ? buildSmsUrl(process.env.CALL_NOW_TEXT_NUMBER || defaultCallNowTextNumber, message)
       : "";

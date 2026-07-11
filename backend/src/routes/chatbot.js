@@ -18,6 +18,31 @@ function shouldUseLocalResortData(message) {
     query.includes("best-price") ||
     query.includes("deal") ||
     query.includes("discount") ||
+    query.includes("resort") ||
+    query.includes("stay") ||
+    query.includes("stays") ||
+    query.includes("room") ||
+    query.includes("rooms") ||
+    query.includes("cottage") ||
+    query.includes("category") ||
+    query.includes("capacity") ||
+    query.includes("guest") ||
+    query.includes("check-in") ||
+    query.includes("check in") ||
+    query.includes("check-out") ||
+    query.includes("check out") ||
+    query.includes("timing") ||
+    query.includes("time") ||
+    query.includes("location") ||
+    query.includes("where") ||
+    query.includes("address") ||
+    query.includes("about") ||
+    query.includes("details") ||
+    query.includes("information") ||
+    query.includes("info") ||
+    query.includes("tell me") ||
+    query.includes("rating") ||
+    query.includes("review") ||
     query.includes("distance") ||
     query.includes("bus") ||
     query.includes("pickup") ||

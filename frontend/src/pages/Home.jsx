@@ -17,7 +17,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { ResortCard } from "../components/ResortCard";
 import { getResorts, resortImageUrl } from "../lib/api";
-import { whatsappUrl } from "../lib/constants";
+import { businessWhatsappNumber, whatsappUrl } from "../lib/constants";
 import { sampleResorts } from "../lib/sampleData";
 import { Seo } from "../lib/Seo";
 
@@ -344,7 +344,7 @@ export function Home() {
               </Link>
               <a
                 className="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-300 px-5 py-3 font-black text-slate-900 transition hover:border-jungle-700 hover:bg-jungle-50"
-                href="tel:+919353431179"
+                href={`tel:+${businessWhatsappNumber}`}
               >
                 <PhoneCall size={18} />
                 Call trip help

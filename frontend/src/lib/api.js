@@ -1,5 +1,5 @@
 import axios from "axios";
-import { businessWhatsappNumber } from "./constants";
+import { businessWhatsappNumber, formatPhoneNumber } from "./constants";
 import { sampleResorts, sampleReviews } from "./sampleData";
 
 const defaultApiUrl = import.meta.env.PROD ? "/api" : "http://localhost:5000/api";
@@ -88,8 +88,7 @@ function formatPrice(value) {
 }
 
 function formattedSupportNumber() {
-  const digits = businessWhatsappNumber;
-  return digits.startsWith("91") && digits.length === 12 ? `+91 ${digits.slice(2)}` : `+${digits}`;
+  return formatPhoneNumber(businessWhatsappNumber);
 }
 
 function categoryForIndex(index, total) {
@@ -326,7 +325,7 @@ function buildLocalContactAnswer(message) {
   const phone = formattedSupportNumber();
 
   if (text.includes("email") || text.includes("mail")) {
-    return "You can email Pinoxx at admin@pinoxx.in. For faster help with best prices, sightseeing, and stay guidance, WhatsApp or call +91 9353431179.";
+    return `You can email Pinoxx at admin@pinoxx.in. For faster help with best prices, sightseeing, and stay guidance, WhatsApp or call ${phone}.`;
   }
 
   if (text.includes("callback") || text.includes("call back") || text.includes("later")) {

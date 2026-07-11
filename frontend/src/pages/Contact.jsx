@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { api } from "../lib/api";
-import { businessWhatsappNumber, whatsappUrl } from "../lib/constants";
+import { businessWhatsappNumber, formatPhoneNumber, whatsappUrl } from "../lib/constants";
 import { Seo } from "../lib/Seo";
 
 const initialForm = {
@@ -34,6 +34,7 @@ export function Contact() {
   const [result, setResult] = useState(null);
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const formattedBusinessNumber = formatPhoneNumber(businessWhatsappNumber);
 
   const activeMode = useMemo(
     () => contactModes.find((mode) => mode.id === form.contactType) || contactModes[1],
@@ -136,7 +137,7 @@ export function Contact() {
             </span>
             <div>
               <h2 className="font-black text-slate-950">Call us now to complete your booking</h2>
-              <p className="text-sm leading-6 text-slate-600">Call +91 9353431179 for price help, arrival guidance, sightseeing, and stay support.</p>
+              <p className="text-sm leading-6 text-slate-600">Call {formattedBusinessNumber} for price help, arrival guidance, sightseeing, and stay support.</p>
             </div>
           </a>
 

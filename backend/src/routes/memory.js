@@ -269,7 +269,7 @@ export function createMemoryRouter() {
     booking.whatsapp.message = buildBookingMessage({ booking, resort });
     booking.whatsapp.customerSlip = buildCustomerSlip({ booking, resort });
     booking.whatsapp.businessUrl = buildWhatsappUrl(
-      process.env.BUSINESS_WHATSAPP_NUMBER || "919353431179",
+      process.env.BUSINESS_WHATSAPP_NUMBER || "919353431173",
       booking.whatsapp.message
     );
     booking.whatsapp.customerUrl = buildWhatsappUrl(booking.phone, booking.whatsapp.customerSlip);
@@ -308,13 +308,13 @@ export function createMemoryRouter() {
     store.contacts.push(contact);
 
     const message = buildContactRequestMessage(contact);
-    const whatsappUrl = buildWhatsappUrl(process.env.BUSINESS_WHATSAPP_NUMBER || "919353431179", message);
+    const whatsappUrl = buildWhatsappUrl(process.env.BUSINESS_WHATSAPP_NUMBER || "919353431173", message);
     const textMessageUrl = contact.contactType === "call_now"
       ? buildSmsUrl(process.env.CALL_NOW_TEXT_NUMBER || defaultCallNowTextNumber, message)
       : "";
 
     const directWhatsapp = await sendWhatsAppText({
-      to: process.env.BUSINESS_WHATSAPP_NUMBER || "919353431179",
+      to: process.env.BUSINESS_WHATSAPP_NUMBER || "919353431173",
       message
     });
 
@@ -1050,6 +1050,79 @@ function formatMemoryPrice(value) {
   return `Rs ${Number(value || 0).toLocaleString("en-IN")}`;
 }
 
+function formatMemoryCouplePrice(value) {
+  return `PP ${formatMemoryPrice(value)}`;
+}
+
+const memoryGenericSearchWords = new Set([
+  "about",
+  "and",
+  "booking",
+  "can",
+  "check",
+  "cost",
+  "dandeli",
+  "detail",
+  "details",
+  "does",
+  "for",
+  "from",
+  "have",
+  "help",
+  "how",
+  "info",
+  "information",
+  "package",
+  "price",
+  "resort",
+  "resorts",
+  "room",
+  "rooms",
+  "stay",
+  "stays",
+  "tell",
+  "the",
+  "what",
+  "which",
+  "with"
+]);
+
+function memorySearchWords(value) {
+  return String(value || "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .split(/\s+/)
+    .filter((word) => word.length > 2 && !memoryGenericSearchWords.has(word));
+}
+
+function findMentionedMemoryResort(resorts, query) {
+  const normalizedQuery = String(query || "").toLowerCase().replace(/[^a-z0-9]+/g, " ");
+  const exact = resorts.find((resort) => {
+    const name = String(resort.name || "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+    const slug = String(resort.slug || "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+    return (name && normalizedQuery.includes(name)) || (slug && normalizedQuery.includes(slug));
+  });
+  if (exact) return exact;
+
+  return resorts
+    .map((resort) => {
+      const keywords = [...new Set(memorySearchWords(`${resort.name || ""} ${resort.slug || ""}`))];
+      const hits = keywords.filter((word) => normalizedQuery.includes(word));
+      return { resort, keywords, score: hits.length, longestHit: hits.reduce((longest, word) => Math.max(longest, word.length), 0) };
+    })
+    .filter(({ keywords, score, longestHit }) => score >= (keywords.length <= 2 ? 1 : 2) || longestHit >= 6)
+    .sort((first, second) => second.score - first.score || second.longestHit - first.longestHit)[0]?.resort || null;
+}
+
+function memoryListItems(items = [], fallback = "Not listed") {
+  const values = items.map((item) => String(item || "").trim()).filter(Boolean);
+  return values.length ? values.join(", ") : fallback;
+}
+
+function memoryRoomLine(room) {
+  return `${room.name} - ${formatMemoryPrice(room.price)} for up to ${room.capacity} guest${Number(room.capacity) === 1 ? "" : "s"}${room.description ? `: ${room.description}` : ""}`;
+}
+
 function activeMemoryResortsByPrice() {
   return store.resorts
     .filter((resort) => resort?.isActive !== false && Number.isFinite(Number(resort.startingPrice)))
@@ -1110,6 +1183,51 @@ function buildMemoryDistanceAnswer(query) {
   }
 
   return `Current resort distances from Dandeli bus stand:\n${sorted.map(memoryResortDistanceLine).join("\n")}\n\nPinoxx can confirm pickup guidance after you choose a resort.`;
+}
+
+function buildMemoryResortOverviewAnswer(resort) {
+  return [
+    `${resort.name} is in ${resort.location}.`,
+    resort.shortDescription || resort.description || "Details are available with Pinoxx.",
+    `Prices: sharing ${formatMemoryPrice(resort.sharingPrice || resort.startingPrice)}, couple ${formatMemoryCouplePrice(resort.couplePrice || resort.startingPrice)}.`,
+    `Distance: ${Number(resort.distanceFromBusStandKm || 0).toFixed(1)} km from Dandeli bus stand.`,
+    `Amenities: ${memoryListItems(resort.amenities)}.`,
+    `Activities: ${memoryListItems(resort.activities)}.`
+  ].join("\n");
+}
+
+function buildMemoryResortPriceAnswer(resort) {
+  const lines = [
+    `${resort.name} pricing:`,
+    `Sharing: ${formatMemoryPrice(resort.sharingPrice || resort.startingPrice)}`,
+    `Couple: ${formatMemoryCouplePrice(resort.couplePrice || resort.startingPrice)}`
+  ];
+  if (resort.rooms?.length) lines.push("", "Room prices:", ...resort.rooms.map(memoryRoomLine));
+  lines.push("", "Pinoxx can confirm the final best price for your date and guest count.");
+  return lines.join("\n");
+}
+
+function buildMemoryResortRoomsAnswer(resort) {
+  if (!resort.rooms?.length) return `${resort.name} room categories are not listed yet. Pinoxx can confirm current room options for your dates.`;
+  return `${resort.name} room categories:\n${resort.rooms.map(memoryRoomLine).join("\n")}\n\nShare your dates and members so Pinoxx can confirm availability.`;
+}
+
+function buildMemoryResortLocationAnswer(resort) {
+  return `${resort.name} location:\n${resort.location}\n${Number(resort.distanceFromBusStandKm || 0).toFixed(1)} km from Dandeli bus stand\n${Number(resort.distanceToWaterActivitiesKm || 0).toFixed(1)} km from water activities\n\nPinoxx can guide pickup, route, and sightseeing planning around this stay.`;
+}
+
+function buildMemoryResortFacilitiesAnswer(resort) {
+  return [
+    `${resort.name} saved resort information:`,
+    `Amenities: ${memoryListItems(resort.amenities)}.`,
+    `Activities: ${memoryListItems(resort.activities)}.`,
+    resort.description ? `Details: ${resort.description}` : "",
+    "Exact inclusions can vary by package and date, so Pinoxx will confirm before booking."
+  ].filter(Boolean).join("\n");
+}
+
+function buildMemoryResortTimingAnswer(resort) {
+  return `${resort.name} stay timing:\nCheck-in: ${resort.checkInTime || "12:00 PM"}\nCheck-out: ${resort.checkOutTime || "11:00 AM"}\n\nPinoxx can confirm any early check-in or late check-out request with the resort.`;
 }
 
 const memoryRaftingPackages = [
@@ -1248,7 +1366,7 @@ function buildMemoryTripGuidanceAnswer() {
 }
 
 function memorySupportNumber() {
-  return process.env.BUSINESS_WHATSAPP_NUMBER || "919353431179";
+  return process.env.BUSINESS_WHATSAPP_NUMBER || "919353431173";
 }
 
 function formattedMemorySupportNumber() {
@@ -1277,7 +1395,7 @@ function buildMemoryContactAnswer(query) {
   const phone = formattedMemorySupportNumber();
 
   if (query.includes("email") || query.includes("mail")) {
-    return "You can email Pinoxx at admin@pinoxx.in. For faster help with best prices, sightseeing, and stay guidance, WhatsApp or call +91 9353431179.";
+    return `You can email Pinoxx at admin@pinoxx.in. For faster help with best prices, sightseeing, and stay guidance, WhatsApp or call ${phone}.`;
   }
 
   if (query.includes("callback") || query.includes("call back") || query.includes("later")) {
@@ -1341,11 +1459,18 @@ function buildMemoryPriceAnswer(query) {
 function answerFromMemory(message) {
   const query = String(message || "").toLowerCase();
   const activeResorts = store.resorts.filter((item) => item.isActive !== false);
-  const resort = activeResorts.find((item) => query.includes(item.name.toLowerCase()));
-  const target = resort || activeResorts[0];
+  const resort = findMentionedMemoryResort(activeResorts, query);
 
-  if (!target) {
+  if (!activeResorts.length) {
     return "Pinoxx can help with best-price Dandeli resort options, sightseeing, rafting plans, room options, and check-in to check-out guidance. Share your travel dates and member count.";
+  }
+
+  if (resort && (query.includes("check-in") || query.includes("check in") || query.includes("check-out") || query.includes("check out") || query.includes("timing") || query.includes("time"))) {
+    return buildMemoryResortTimingAnswer(resort);
+  }
+
+  if (resort && (query.includes("room") || query.includes("rooms") || query.includes("cottage") || query.includes("category") || query.includes("capacity") || query.includes("guest"))) {
+    return buildMemoryResortRoomsAnswer(resort);
   }
 
   if (isMemoryTripGuidanceQuery(query)) {
@@ -1356,9 +1481,9 @@ function answerFromMemory(message) {
     return buildMemoryContactAnswer(query);
   }
 
-  if (query.includes("distance") || query.includes("bus")) {
+  if (query.includes("distance") || query.includes("bus") || query.includes("location") || query.includes("where") || query.includes("address") || query.includes("route") || query.includes("pickup")) {
     if (!resort) return buildMemoryDistanceAnswer(query);
-    return `${target.name} is about ${target.distanceFromBusStandKm} km from Dandeli bus stand. Pinoxx can guide you with pickup options and route support.`;
+    return buildMemoryResortLocationAnswer(resort);
   }
 
   if (
@@ -1376,7 +1501,7 @@ function answerFromMemory(message) {
     query.includes("premium")
   ) {
     if (!resort) return buildMemoryPriceAnswer(query);
-    return `${target.name} starts from Rs ${target.startingPrice} per person/package depending on season and room type. Pinoxx can help compare options and get the best possible cheap price for your date and group size.`;
+    return buildMemoryResortPriceAnswer(resort);
   }
 
   if (
@@ -1398,7 +1523,8 @@ function answerFromMemory(message) {
     query.includes("badminton") ||
     query.includes("archery")
   ) {
-    return buildMemoryFacilitiesAnswer(query, target.name);
+    if (!resort) return buildMemoryFacilitiesAnswer(query);
+    return buildMemoryResortFacilitiesAnswer(resort);
   }
 
   if (isMemoryExtraActivitiesQuery(query)) {
@@ -1407,8 +1533,17 @@ function answerFromMemory(message) {
 
   if (query.includes("rafting") || query.includes("activity") || query.includes("adventure")) {
     if (query.includes("rafting")) return buildMemoryRaftingAnswer(query);
-    return `Dandeli adventure plans can include ${target.activities.slice(0, 5).join(", ")}. Availability depends on weather and river conditions.`;
+    if (!resort) return "Dandeli adventure plans can include rafting, sightseeing, jungle safari, water activities, and resort activities. Pinoxx can confirm what fits your date and stay.";
+    return `${resort.name} activities:\n${memoryListItems(resort.activities)}\n\nAvailability depends on weather, river condition, resort rules, and your travel date.`;
   }
 
-  return "I can help with distance, best-price options, facilities, rooms, rafting, sightseeing, and guidance from resort check-in to check-out. Tell me the resort name, travel dates, and number of members.";
+  if (resort && (query.includes("rating") || query.includes("review"))) {
+    return `${resort.name} is currently listed with a ${Number(resort.rating || 0).toFixed(1)} / 5 guest rating.`;
+  }
+
+  if (resort) {
+    return buildMemoryResortOverviewAnswer(resort);
+  }
+
+  return "I can help with uploaded resort information, distance, best-price options, facilities, rooms, rafting, sightseeing, and guidance from resort check-in to check-out. Tell me the resort name, travel dates, and number of members.";
 }

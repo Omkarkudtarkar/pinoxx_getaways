@@ -70,7 +70,7 @@ bookingsRouter.post("/", async (req, res, next) => {
     booking.whatsapp.message = message;
     booking.whatsapp.customerSlip = customerSlip;
     booking.whatsapp.businessUrl = buildWhatsappUrl(
-      process.env.BUSINESS_WHATSAPP_NUMBER || "919353431179",
+      process.env.BUSINESS_WHATSAPP_NUMBER || "919353431173",
       message
     );
     booking.whatsapp.customerUrl = buildWhatsappUrl(
