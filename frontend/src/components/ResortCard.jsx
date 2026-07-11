@@ -1,7 +1,7 @@
 import { Star } from "lucide-react";
 import { Link } from "react-router-dom";
 import { resortImageUrl, useFallbackResortImage } from "../lib/api";
-import { formatCurrency } from "../lib/constants";
+import { formatCouplePrice, formatCurrency } from "../lib/constants";
 
 const resortTypeLabels = {
   bamboo: "Bamboo Stay",
@@ -48,7 +48,7 @@ export function ResortCard({ resort }) {
           </div>
           <div className="flex items-center justify-between gap-3">
             <span className="text-sm text-slate-500">Couple</span>
-            <span className="font-black text-slate-950">{formatCurrency(resort.couplePrice || resort.startingPrice)}</span>
+            <span className="font-black text-slate-950">{formatCouplePrice(resort.couplePrice || resort.startingPrice)}</span>
           </div>
         </div>
       </div>

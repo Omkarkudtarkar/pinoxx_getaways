@@ -6,7 +6,7 @@ import { AdminResortPanel } from "../components/AdminResortPanel";
 import { BookingForm } from "../components/BookingForm";
 import { ReviewForm } from "../components/ReviewForm";
 import { getResort, resortImageUrl, useFallbackResortImage } from "../lib/api";
-import { formatCurrency } from "../lib/constants";
+import { formatCouplePrice, formatCurrency } from "../lib/constants";
 import { Seo } from "../lib/Seo";
 
 const resortTypeLabels = {
@@ -119,7 +119,7 @@ export function ResortDetail() {
     { label: "Resort type", value: resortTypeLabel, Icon: Building2, style: "border-slate-200 bg-white text-slate-800" },
     {
       label: "Prices",
-      value: `Sharing price: ${formatCurrency(resort.sharingPrice || resort.startingPrice)} | Couple price: ${formatCurrency(resort.couplePrice || resort.startingPrice)}`,
+      value: `Sharing price: ${formatCurrency(resort.sharingPrice || resort.startingPrice)} | Couple price: ${formatCouplePrice(resort.couplePrice || resort.startingPrice)}`,
       Icon: IndianRupee,
       style: "border-jungle-100 bg-white text-jungle-800"
     },
@@ -216,7 +216,7 @@ export function ResortDetail() {
                 <IndianRupee size={18} /> Sharing {formatCurrency(resort.sharingPrice || resort.startingPrice)}
               </span>
               <span className="inline-flex items-center gap-2 rounded-lg bg-jungle-50 px-4 py-3 font-black text-jungle-900">
-                <IndianRupee size={18} /> Couple {formatCurrency(resort.couplePrice || resort.startingPrice)}
+                <IndianRupee size={18} /> Couple {formatCouplePrice(resort.couplePrice || resort.startingPrice)}
               </span>
               <button className="inline-flex items-center gap-2 rounded-lg border border-slate-200 px-4 py-3 font-bold" onClick={share}>
                 <Share2 size={18} />

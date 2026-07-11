@@ -17,7 +17,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Navigate } from "react-router-dom";
 import { api, assetUrl, getResorts } from "../lib/api";
 import { useAuth } from "../lib/AuthContext";
-import { whatsappUrl } from "../lib/constants";
+import { formatCouplePrice, whatsappUrl } from "../lib/constants";
 import { Seo } from "../lib/Seo";
 
 const tabs = [
@@ -1033,7 +1033,7 @@ export function AdminDashboard() {
                             {resort.location} - {resort.resortType || "budget"} - {resort.rooms?.length || 0} room category(s)
                           </p>
                           <p className="mt-1 text-sm font-semibold text-slate-700">
-                            Sharing {resort.sharingPrice ? `Rs ${resort.sharingPrice}` : "not set"} - Couple {resort.couplePrice ? `Rs ${resort.couplePrice}` : "not set"}
+                            Sharing {resort.sharingPrice ? `Rs ${resort.sharingPrice}` : "not set"} - Couple {resort.couplePrice ? formatCouplePrice(resort.couplePrice) : "not set"}
                           </p>
                           <p className="mt-1 max-w-3xl text-sm leading-6 text-slate-500">{resort.shortDescription}</p>
                         </div>
