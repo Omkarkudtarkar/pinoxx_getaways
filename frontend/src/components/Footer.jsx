@@ -8,7 +8,7 @@ export function Footer() {
       <div className="mx-auto grid max-w-7xl gap-8 px-4 py-10 sm:px-6 md:grid-cols-[1.2fr_0.8fr_0.8fr] lg:px-8">
         <div>
           <div className="mb-3 flex items-center gap-3">
-            <img src="/pinoxx-logo.jpeg" alt="Pinoxx Getaways logo" className="h-16 w-auto max-w-[9rem] rounded-lg object-contain" />
+            <img src="/pinoxx-getaways-logo.jpeg" alt="Pinoxx Getaways logo" className="h-16 w-auto max-w-[9rem] rounded-lg object-contain" />
             <span className="text-xl font-black">Pinoxx</span>
           </div>
           <p className="max-w-md text-sm leading-6 text-slate-300">
