@@ -24,11 +24,11 @@ export function Footer() {
           </div>
         </div>
         <div>
-          <h3 className="mb-3 text-sm font-bold uppercase tracking-wide text-slate-400">Support</h3>
+          <h3 className="mb-3 text-sm font-bold uppercase tracking-wide text-slate-400">Contact numbers</h3>
           <div className="grid gap-3 text-sm text-slate-300">
             {supportPhoneNumbers.map((phone) => (
               <a key={phone} className="inline-flex items-center gap-2" href={`tel:+${phone}`}>
-                <Phone size={16} /> {formatPhoneNumber(phone)}
+                <Phone size={16} /> Call {formatPhoneNumber(phone)}
               </a>
             ))}
             <a className="inline-flex items-center gap-2" href={whatsappUrl("Hi Pinoxx, I need Dandeli resort pricing, sightseeing, and trip support.")} target="_blank" rel="noreferrer">
