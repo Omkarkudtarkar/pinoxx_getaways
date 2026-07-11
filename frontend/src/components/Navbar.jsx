@@ -1,5 +1,5 @@
 import { Menu, MessageCircle, UserRound, X } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, NavLink } from "react-router-dom";
 import { useAuth } from "../lib/AuthContext";
 
@@ -27,13 +27,30 @@ function initials(name) {
 
 export function Navbar() {
   const [open, setOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const { user, logout } = useAuth();
   const name = displayName(user);
   const linkClass = ({ isActive }) =>
     `rounded-full px-3 py-2 text-sm font-medium transition ${isActive ? "bg-jungle-900 text-white" : "text-slate-700 hover:bg-jungle-50"}`;
 
+  useEffect(() => {
+    function updateScrolled() {
+      setScrolled(window.scrollY > 12);
+    }
+
+    updateScrolled();
+    window.addEventListener("scroll", updateScrolled, { passive: true });
+    return () => window.removeEventListener("scroll", updateScrolled);
+  }, []);
+
   return (
-    <header className="sticky top-0 z-40 border-b border-slate-200 bg-white/90 backdrop-blur">
+    <header
+      className={`sticky top-0 z-40 border-b transition-all duration-300 ${
+        scrolled
+          ? "border-white/40 bg-white/55 shadow-[0_12px_35px_rgba(15,23,42,0.12)] backdrop-blur-xl supports-[backdrop-filter]:bg-white/45"
+          : "border-slate-200 bg-white/95 backdrop-blur"
+      }`}
+    >
       <nav className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         <Link to="/" className="flex items-center gap-3">
           <img src="/pinoxx-getaways-logo.jpeg" alt="Pinoxx Getaways logo" className="h-14 w-auto max-w-[8rem] rounded-lg object-contain" />
@@ -88,7 +105,7 @@ export function Navbar() {
       </nav>
 
       {open && (
-        <div className="border-t border-slate-200 bg-white px-4 py-3 md:hidden">
+        <div className="border-t border-white/50 bg-white/85 px-4 py-3 backdrop-blur-xl md:hidden">
           <div className="grid gap-2">
             {links.map((link) => (
               <NavLink key={link.to} to={link.to} className={linkClass} onClick={() => setOpen(false)}>
