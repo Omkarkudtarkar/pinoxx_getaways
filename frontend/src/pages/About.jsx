@@ -124,8 +124,8 @@ export function About() {
 
       <section className="relative isolate overflow-hidden bg-slate-950 text-white">
         <img src={heroImage} alt="Dandeli river and resort landscape" className="absolute inset-0 -z-30 h-full w-full object-cover" />
-        <div className="absolute inset-0 -z-20 bg-slate-950/75" />
-        <div className="absolute inset-x-0 bottom-0 -z-10 h-44 bg-gradient-to-t from-white via-white/70 to-transparent" />
+        <div className="absolute inset-0 -z-20 bg-[linear-gradient(135deg,rgba(2,6,23,0.96),rgba(2,6,23,0.74))]" />
+        <div className="absolute inset-x-0 bottom-0 -z-10 h-44 bg-gradient-to-t from-white via-white/75 to-transparent" />
 
         <div className="mx-auto grid min-h-[720px] max-w-7xl gap-12 px-4 pb-24 pt-16 sm:px-6 lg:grid-cols-[1fr_0.92fr] lg:items-center lg:px-8">
           <motion.div initial={{ opacity: 0, y: 22 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.65 }} className="max-w-4xl">
@@ -190,10 +190,10 @@ export function About() {
 
       <section className="relative isolate -mt-14 overflow-hidden bg-slate-950 py-12">
         <img src={riverImage} alt="Dandeli resort experience" className="absolute inset-0 -z-30 h-full w-full object-cover" />
-        <div className="absolute inset-0 -z-20 bg-slate-950/78" />
+        <div className="absolute inset-0 -z-20 bg-[linear-gradient(110deg,rgba(2,6,23,0.92),rgba(2,6,23,0.68))]" />
         <div className="absolute inset-x-0 bottom-0 -z-10 h-28 bg-gradient-to-t from-slate-950 to-transparent" />
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="grid overflow-hidden rounded-lg border border-white/15 bg-black/45 shadow-2xl backdrop-blur-md lg:grid-cols-[0.84fr_1.16fr]">
+          <div className="grid overflow-hidden rounded-3xl border border-white/15 bg-slate-950/60 shadow-[0_30px_80px_rgba(0,0,0,0.35)] backdrop-blur-sm lg:grid-cols-[0.84fr_1.16fr]">
             <div className="relative hidden min-h-72 lg:block">
               <img src={forestImage} alt="Dandeli resort stay" className="absolute inset-0 h-full w-full object-cover" />
               <div className="absolute inset-0 bg-gradient-to-r from-black/20 via-black/35 to-black/75" />
@@ -238,8 +238,8 @@ export function About() {
 
       <section className="relative isolate overflow-hidden bg-slate-950 py-20 text-white">
         <img src={forestImage} alt="Dandeli forest resort background" className="absolute inset-0 -z-30 h-full w-full object-cover" />
-        <div className="absolute inset-0 -z-20 bg-slate-950/82" />
-        <div className="absolute inset-x-0 top-0 -z-10 h-24 bg-gradient-to-b from-white to-transparent" />
+        <div className="absolute inset-0 -z-20 bg-[linear-gradient(135deg,rgba(2,6,23,0.92),rgba(2,6,23,0.72))]" />
+        <div className="absolute inset-x-0 top-0 -z-10 h-24 bg-gradient-to-b from-white/70 to-transparent" />
 
         <div className="mx-auto grid max-w-7xl gap-10 px-4 sm:px-6 lg:grid-cols-[0.9fr_1.1fr] lg:items-center lg:px-8">
           <div>
@@ -261,14 +261,14 @@ export function About() {
           </div>
 
           <div className="grid gap-4">
-            <div className="rounded-lg border border-white/15 bg-black/45 p-6 text-white shadow-2xl backdrop-blur-md sm:p-8">
+            <div className="rounded-2xl border border-white/15 bg-slate-950/65 p-6 text-white shadow-[0_20px_60px_rgba(0,0,0,0.32)] backdrop-blur-sm sm:p-8">
               <p className="text-lg leading-9 text-slate-100">
                 Founded in January 2026, Pinoxx Getaways was created to solve one real problem: finding reliable, honest Dandeli resort options with best-price support, sightseeing help, activity planning, and no hidden confusion.
               </p>
             </div>
             <div className="grid gap-4 md:grid-cols-3">
               {trustProof.map((item) => (
-                <div key={item.title} className="rounded-lg border border-white/15 bg-white/10 p-5 backdrop-blur">
+                <div key={item.title} className="rounded-2xl border border-white/15 bg-white/10 p-5 shadow-[0_12px_32px_rgba(0,0,0,0.2)] backdrop-blur-sm">
                   <div className="grid h-11 w-11 place-items-center rounded-lg bg-jungle-400 text-slate-950">
                     <item.icon size={22} />
                   </div>
@@ -297,45 +297,45 @@ export function About() {
         </div>
       </section>
 
-      <section className="bg-slate-50 py-20">
+      <section className="bg-slate-950 py-20 text-white">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="grid gap-8 lg:grid-cols-[0.82fr_1.18fr] lg:items-end">
             <div>
-              <p className="text-sm font-black uppercase tracking-wide text-jungle-700">What we offer</p>
-              <h2 className="mt-3 text-3xl font-black leading-tight text-slate-950 sm:text-5xl">
+              <p className="text-sm font-black uppercase tracking-wide text-jungle-300">What we offer</p>
+              <h2 className="mt-3 text-3xl font-black leading-tight text-white sm:text-5xl">
                 Curated stays for every kind of Dandeli escape.
               </h2>
             </div>
-            <p className="max-w-3xl leading-8 text-slate-600 lg:justify-self-end">
+            <p className="max-w-3xl leading-8 text-slate-300 lg:justify-self-end">
               Whether you are planning a honeymoon, family break, student trip, corporate outing, or activity-focused weekend, Pinoxx keeps the stay options polished, practical, and easy to compare.
             </p>
           </div>
 
           <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
             {offerings.map((offer) => (
-              <div key={offer.title} className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-soft">
-                <div className="grid h-12 w-12 place-items-center rounded-lg bg-jungle-50 text-jungle-800">
+              <div key={offer.title} className="rounded-2xl border border-white/10 bg-white/10 p-6 shadow-[0_12px_32px_rgba(0,0,0,0.22)] transition hover:-translate-y-1 hover:bg-white/15">
+                <div className="grid h-12 w-12 place-items-center rounded-lg bg-jungle-400 text-slate-950">
                   <offer.icon size={24} />
                 </div>
-                <h3 className="mt-5 text-xl font-black text-slate-950">{offer.title}</h3>
-                <p className="mt-3 text-sm leading-6 text-slate-600">{offer.text}</p>
+                <h3 className="mt-5 text-xl font-black text-white">{offer.title}</h3>
+                <p className="mt-3 text-sm leading-6 text-slate-300">{offer.text}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      <section className="bg-white py-20">
+      <section className="bg-slate-950 py-20 text-white">
         <div className="mx-auto grid max-w-7xl gap-10 px-4 sm:px-6 lg:grid-cols-[1.04fr_0.96fr] lg:items-center lg:px-8">
           <div className="grid gap-4 sm:grid-cols-[0.92fr_1.08fr]">
-            <div className="overflow-hidden rounded-lg border border-slate-200 bg-slate-100 shadow-sm sm:mt-14">
+            <div className="overflow-hidden rounded-2xl border border-white/10 bg-slate-900/80 shadow-[0_16px_40px_rgba(0,0,0,0.28)] sm:mt-14">
               <img src={forestImage} alt="Dandeli forest resort setting" className="aspect-[4/5] h-full w-full object-cover" />
             </div>
             <div className="grid gap-4">
-              <div className="overflow-hidden rounded-lg border border-slate-200 bg-slate-100 shadow-sm">
+              <div className="overflow-hidden rounded-2xl border border-white/10 bg-slate-900/80 shadow-[0_16px_40px_rgba(0,0,0,0.28)]">
                 <img src={roomImage} alt="Premium room arranged for a Dandeli stay" className="aspect-[4/3] h-full w-full object-cover" />
               </div>
-              <div className="rounded-lg bg-slate-950 p-6 text-white shadow-soft">
+              <div className="rounded-2xl border border-white/10 bg-slate-900/80 p-6 text-white shadow-[0_16px_40px_rgba(0,0,0,0.28)]">
                 <p className="text-sm font-black uppercase tracking-wide text-jungle-300">Operating standard</p>
                 <p className="mt-3 text-2xl font-black leading-tight">Every listing should be easy to trust before you call.</p>
               </div>
@@ -343,23 +343,23 @@ export function About() {
           </div>
 
           <div>
-            <p className="text-sm font-black uppercase tracking-wide text-jungle-700">How we work</p>
-            <h2 className="mt-3 text-3xl font-black leading-tight text-slate-950 sm:text-5xl">
+            <p className="text-sm font-black uppercase tracking-wide text-jungle-300">How we work</p>
+            <h2 className="mt-3 text-3xl font-black leading-tight text-white sm:text-5xl">
               Verification, price clarity, and personal guidance.
             </h2>
-            <p className="mt-5 leading-8 text-slate-600">
+            <p className="mt-5 leading-8 text-slate-300">
               Every listing includes practical resort details, honest package information, activity inclusions, sightseeing support, and check-in to check-out guidance so travellers can compare and choose with peace of mind.
             </p>
             <div className="mt-8 grid gap-4">
               {process.map((item, index) => (
-                <div key={item.title} className="flex gap-4 rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
-                  <div className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-sky-50 text-river-700">
+                <div key={item.title} className="flex gap-4 rounded-2xl border border-white/10 bg-white/10 p-5 shadow-[0_12px_32px_rgba(0,0,0,0.2)]">
+                  <div className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-jungle-400 text-slate-950">
                     <item.icon size={22} />
                   </div>
                   <div>
                     <p className="text-xs font-black uppercase tracking-wide text-slate-400">Step 0{index + 1}</p>
-                    <h3 className="mt-1 text-lg font-black text-slate-950">{item.title}</h3>
-                    <p className="mt-2 text-sm leading-6 text-slate-600">{item.text}</p>
+                    <h3 className="mt-1 text-lg font-black text-white">{item.title}</h3>
+                    <p className="mt-2 text-sm leading-6 text-slate-300">{item.text}</p>
                   </div>
                 </div>
               ))}
