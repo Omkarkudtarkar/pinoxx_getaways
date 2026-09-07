@@ -74,7 +74,7 @@ const trustStrip = [
 const sightseeingPlaces = [
   {
     title: "Supa Dam",
-    image: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1200&q=80",
+    image: "https://commons.wikimedia.org/wiki/Special:Redirect/file/Supa_Dam.jpg?width=1200",
     alt: "Supa Dam sightseeing near Dandeli",
     tone: "bg-river-700",
     accent: "border-river-500",
@@ -83,7 +83,7 @@ const sightseeingPlaces = [
   },
   {
     title: "Maulangi Eco Park",
-    image: "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&w=1200&q=80",
+    image: "https://dandeli360.com/wp-content/uploads/2024/11/Moulangi-Eco-Park.jpg",
     alt: "Maulangi Eco Park forest entrance near Dandeli",
     tone: "bg-jungle-900",
     accent: "border-jungle-500",
@@ -92,7 +92,7 @@ const sightseeingPlaces = [
   },
   {
     title: "Back Waters",
-    image: "https://images.unsplash.com/photo-1470770841072-f978cf4d019e?auto=format&fit=crop&w=1200&q=80",
+    image: "https://commons.wikimedia.org/wiki/Special:Redirect/file/Supa_dam_back_waters.JPG?width=1200",
     alt: "Dandeli back waters",
     tone: "bg-slate-950",
     accent: "border-cyan-400",
@@ -101,7 +101,7 @@ const sightseeingPlaces = [
   },
   {
     title: "Vajra Falls",
-    image: "https://images.unsplash.com/photo-1433086966358-54859d0ed716?auto=format&fit=crop&w=1200&q=80",
+    image: "https://colourfulpieinthesky.wordpress.com/wp-content/uploads/2022/10/wp-1666233162228.jpg?w=1024",
     alt: "Vajra Falls near Dandeli",
     tone: "bg-ember",
     accent: "border-amber-300",
