@@ -71,6 +71,45 @@ const trustStrip = [
   "Check-in to check-out guidance"
 ];
 
+const sightseeingPlaces = [
+  {
+    title: "Supa Dam",
+    image: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1200&q=80",
+    alt: "Supa Dam sightseeing near Dandeli",
+    tone: "bg-river-700",
+    accent: "border-river-500",
+    cardBg: "bg-cyan-50",
+    shift: "lg:translate-y-8"
+  },
+  {
+    title: "Maulangi Eco Park",
+    image: "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&w=1200&q=80",
+    alt: "Maulangi Eco Park forest entrance near Dandeli",
+    tone: "bg-jungle-900",
+    accent: "border-jungle-500",
+    cardBg: "bg-emerald-50",
+    shift: ""
+  },
+  {
+    title: "Back Waters",
+    image: "https://images.unsplash.com/photo-1470770841072-f978cf4d019e?auto=format&fit=crop&w=1200&q=80",
+    alt: "Dandeli back waters",
+    tone: "bg-slate-950",
+    accent: "border-cyan-400",
+    cardBg: "bg-slate-100",
+    shift: "lg:translate-y-12"
+  },
+  {
+    title: "Vajra Falls",
+    image: "https://images.unsplash.com/photo-1433086966358-54859d0ed716?auto=format&fit=crop&w=1200&q=80",
+    alt: "Vajra Falls near Dandeli",
+    tone: "bg-ember",
+    accent: "border-amber-300",
+    cardBg: "bg-amber-50",
+    shift: "lg:translate-y-4"
+  }
+];
+
 const fadeUp = {
   hidden: { opacity: 0, y: 28 },
   visible: { opacity: 1, y: 0 }
@@ -379,6 +418,114 @@ export function Home() {
               <motion.div key={resort._id || resort.slug} variants={fadeUp} transition={{ duration: 0.5 }} whileHover={{ y: -8 }}>
                 <ResortCard resort={resort} />
               </motion.div>
+            ))}
+          </motion.div>
+        </div>
+      </motion.section>
+
+      <motion.section
+        className="overflow-hidden bg-slate-50 py-16 sm:py-20"
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.18 }}
+        variants={stagger}
+      >
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <motion.div variants={fadeUp} transition={{ duration: 0.55 }} className="mb-8 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+            <div>
+              <p className="text-sm font-black uppercase tracking-wide text-jungle-700">Dandeli sightseeing</p>
+              <h2 className="mt-2 text-3xl font-black leading-tight text-slate-950 sm:text-5xl">Popular places around Dandeli</h2>
+              <p className="mt-3 max-w-2xl leading-7 text-slate-600">
+                Add these sightseeing spots to your resort plan with Pinoxx route, timing, and local guidance.
+              </p>
+            </div>
+            <a
+              className="inline-flex items-center justify-center gap-2 rounded-lg bg-jungle-700 px-5 py-3 font-black text-white transition hover:bg-jungle-900"
+              href={whatsappUrl("Hi Pinoxx, I want to plan Supa Dam, Maulangi Eco Park, Back Waters, and Vajra Falls sightseeing.")}
+              target="_blank"
+              rel="noreferrer"
+            >
+              Plan Sightseeing <ArrowRight size={18} />
+            </a>
+          </motion.div>
+
+          <motion.div className="relative grid gap-5 sm:grid-cols-2 lg:min-h-[460px] lg:grid-cols-4 lg:gap-6" variants={stagger}>
+            {sightseeingPlaces.map((place, index) => (
+              <motion.article
+                key={place.title}
+                variants={fadeUp}
+                transition={{ duration: 0.5 }}
+                whileHover={{ y: -12, rotate: index % 2 === 0 ? -1 : 1 }}
+                className={`group relative ${place.shift}`}
+              >
+                <motion.div
+                  aria-hidden="true"
+                  className={`absolute -inset-2 rounded-lg border-2 ${place.accent}`}
+                  animate={{ rotate: index % 2 === 0 ? [-1.5, 1.5, -1.5] : [1.5, -1.5, 1.5] }}
+                  transition={{ duration: 6 + index, repeat: Infinity, ease: "easeInOut" }}
+                />
+                <motion.div
+                  aria-hidden="true"
+                  className={`absolute inset-0 rounded-lg ${place.cardBg}`}
+                  animate={{
+                    y: index % 2 === 0 ? [10, -8, 10] : [-8, 10, -8],
+                    rotate: index % 2 === 0 ? [2, -1, 2] : [-2, 1, -2]
+                  }}
+                  transition={{ duration: 7 + index * 0.7, repeat: Infinity, ease: "easeInOut" }}
+                />
+                <div className={`relative overflow-hidden rounded-lg border border-white p-2 shadow-soft ${place.cardBg}`}>
+                  <motion.div
+                    aria-hidden="true"
+                    className="absolute inset-0 opacity-60"
+                    style={{
+                      backgroundImage:
+                        "repeating-linear-gradient(135deg, rgba(255,255,255,0.55) 0px, rgba(255,255,255,0.55) 2px, transparent 2px, transparent 18px)"
+                    }}
+                    animate={{ backgroundPosition: ["0px 0px", "72px 72px"] }}
+                    transition={{ duration: 13 + index, repeat: Infinity, ease: "linear" }}
+                  />
+                  <div className={`absolute left-4 top-4 z-10 grid h-11 w-11 place-items-center rounded-lg ${place.tone} text-sm font-black text-white shadow-soft`}>
+                    {String(index + 1).padStart(2, "0")}
+                  </div>
+                  <div className="relative overflow-hidden rounded-md">
+                    <motion.img
+                      src={place.image}
+                      alt={place.alt}
+                      className="aspect-[5/6] w-full object-cover"
+                      animate={{ scale: [1, 1.05, 1], x: index % 2 === 0 ? [0, -8, 0] : [0, 8, 0] }}
+                      transition={{ duration: 9 + index, repeat: Infinity, ease: "easeInOut" }}
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-slate-950/10 to-transparent" />
+                    <motion.div
+                      aria-hidden="true"
+                      className="absolute inset-y-0 -left-1/2 w-1/3 skew-x-[-18deg] bg-white/25"
+                      animate={{ x: ["-120%", "520%"] }}
+                      transition={{ duration: 3.4 + index * 0.25, repeat: Infinity, repeatDelay: 1.4, ease: "easeInOut" }}
+                    />
+                  </div>
+                  <motion.div
+                    className="relative mt-2 overflow-hidden rounded-md border border-white/70 bg-white/95 px-4 py-5 text-left text-slate-950 shadow-soft backdrop-blur"
+                    animate={{
+                      y: [0, -3, 0],
+                      boxShadow: [
+                        "0 18px 50px rgba(15, 23, 42, 0.12)",
+                        "0 24px 60px rgba(15, 23, 42, 0.22)",
+                        "0 18px 50px rgba(15, 23, 42, 0.12)"
+                      ]
+                    }}
+                    transition={{ duration: 4.8 + index * 0.35, repeat: Infinity, ease: "easeInOut" }}
+                  >
+                    <motion.span
+                      aria-hidden="true"
+                      className={`absolute inset-x-0 top-0 h-1 ${place.tone}`}
+                      animate={{ scaleX: [0.35, 1, 0.35] }}
+                      transition={{ duration: 3.2 + index * 0.3, repeat: Infinity, ease: "easeInOut" }}
+                    />
+                    <p className="text-xs font-black uppercase tracking-wide text-jungle-700">Dandeli</p>
+                    <h3 className="mt-1 text-2xl font-black leading-tight">{place.title}</h3>
+                  </motion.div>
+                </div>
+              </motion.article>
             ))}
           </motion.div>
         </div>
