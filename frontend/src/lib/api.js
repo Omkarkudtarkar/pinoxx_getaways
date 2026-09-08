@@ -3,7 +3,14 @@ import { businessWhatsappNumber, formatPhoneNumber } from "./constants";
 import { sampleResorts, sampleReviews } from "./sampleData";
 
 const defaultApiUrl = import.meta.env.PROD ? "/api" : "http://localhost:5000/api";
-const apiBaseUrl = import.meta.env.VITE_API_URL || defaultApiUrl;
+function normalizeApiUrl(url) {
+  const value = String(url || "").trim().replace(/\/+$/, "");
+  if (!value) return defaultApiUrl;
+  if (value.endsWith("/api")) return value;
+  return `${value}/api`;
+}
+
+const apiBaseUrl = normalizeApiUrl(import.meta.env.VITE_API_URL);
 export const fallbackResortImage = "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1400&q=80";
 
 export const api = axios.create({

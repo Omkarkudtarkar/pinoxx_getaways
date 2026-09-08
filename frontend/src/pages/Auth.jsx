@@ -23,10 +23,7 @@ export function AuthPage({ mode }) {
       const user = isSignup ? await signup(form) : await login({ email: form.email, password: form.password });
       navigate(user.role === "admin" ? "/admin" : location.state?.from || "/resorts");
     } catch (err) {
-      setError(
-        err.response?.data?.message ||
-          "Authentication failed because the backend API is offline. Start MongoDB and run npm run dev."
-      );
+      setError(authErrorMessage(err));
     }
   }
 
@@ -90,4 +87,12 @@ export function AuthPage({ mode }) {
       </div>
     </main>
   );
+}
+
+function authErrorMessage(error) {
+  if (error.response?.data?.message) return error.response.data.message;
+  if (error.request) {
+    return "Authentication failed because the backend API is not reachable. Run npm run dev, then open http://localhost:5173.";
+  }
+  return "Authentication failed. Please try again.";
 }

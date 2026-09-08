@@ -1,6 +1,7 @@
 import { GoogleLogin, GoogleOAuthProvider } from "@react-oauth/google";
 
 const defaultMissingMessage = "Google login is not configured. Add VITE_GOOGLE_CLIENT_ID in the frontend .env file and your Vercel environment, then rebuild.";
+const defaultGoogleClientId = "611343899369-2itb08p2u9rhumhh9a308c82r82mektg.apps.googleusercontent.com";
 
 export function GoogleAuthButton({
   onCredential,
@@ -9,7 +10,7 @@ export function GoogleAuthButton({
   disabled = false,
   missingMessage = defaultMissingMessage
 }) {
-  const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+  const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || defaultGoogleClientId;
 
   function handleSuccess(response) {
     if (!response?.credential) {
