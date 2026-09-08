@@ -29,7 +29,9 @@ Example values:
 
 ## Production deployment
 
-For Vercel, deploy from the repository root, not from `frontend`. The root `vercel.json` defines two services: `frontend` from `frontend/` and `backend` from `backend/`. A fallback `frontend/vercel.json` is also included for Vercel imports that accidentally set the root directory to `frontend`, but the repository root setup is preferred.
+For Vercel, deploy from the repository root, not from `frontend`. The root `vercel.json` defines two services: `frontend` from `frontend/` and `backend` from `backend/`.
+
+Do not set the Vercel project Root Directory to `frontend`. A service root cannot escape the selected project root, so `frontend` cannot deploy the sibling `backend/` directory.
 
 Required Vercel environment variables:
 
