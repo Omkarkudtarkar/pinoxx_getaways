@@ -65,11 +65,11 @@ export function createMemoryRouter() {
   });
 
   router.post("/api/auth/login", async (req, res) => {
-    const email = req.body.email?.toLowerCase().trim();
-    const user = store.users.find((item) => item.email === email);
+    const identifier = String(req.body.email || req.body.username || "").toLowerCase().trim();
+    const user = store.users.find((item) => item.email === identifier || item.username === identifier);
 
     if (!user || !(await bcrypt.compare(req.body.password || "", user.password))) {
-      return res.status(401).json({ message: "Invalid email or password" });
+      return res.status(401).json({ message: "Invalid username/email or password" });
     }
 
     res.json({ token: signMemoryToken(user), user: serializeUser(user) });
@@ -535,7 +535,7 @@ export function createMemoryRouter() {
 
 function createStore() {
   const now = new Date().toISOString();
-  const adminPassword = bcrypt.hashSync("Admin@12345", 8);
+  const adminPassword = bcrypt.hashSync("pinoxx@getaways", 8);
   const guestPassword = bcrypt.hashSync("Guest@12345", 8);
 
   const resorts = [
@@ -670,6 +670,7 @@ function createStore() {
         _id: "user-admin",
         name: "Pinoxx Admin",
         email: "admin@pinoxx.in",
+        username: "pinoxxgetaways.in",
         phone: "919999999999",
         password: adminPassword,
         role: "admin",
@@ -754,6 +755,7 @@ function signMemoryToken(user) {
       role: user.role,
       name: user.name,
       email: user.email,
+      username: user.username,
       avatarUrl: user.avatarUrl || "",
       authProvider: user.authProvider || "password"
     },
@@ -798,6 +800,7 @@ function serializeUser(user) {
     _id: user._id,
     name: user.name,
     email: user.email,
+    username: user.username,
     phone: user.phone,
     avatarUrl: user.avatarUrl || "",
     authProvider: user.authProvider || "password",

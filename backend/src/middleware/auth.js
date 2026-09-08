@@ -1,10 +1,18 @@
 import jwt from "jsonwebtoken";
 import { User } from "../models/User.js";
 
+function jwtSecret() {
+  if (process.env.JWT_SECRET) return process.env.JWT_SECRET;
+
+  const error = new Error("JWT_SECRET is not configured. Add JWT_SECRET in Vercel Environment Variables and redeploy.");
+  error.status = 503;
+  throw error;
+}
+
 export function signToken(user) {
   return jwt.sign(
     { id: user._id, role: user.role },
-    process.env.JWT_SECRET,
+    jwtSecret(),
     { expiresIn: process.env.JWT_EXPIRES_IN || "7d" }
   );
 }
@@ -18,7 +26,7 @@ export async function requireAuth(req, res, next) {
       return res.status(401).json({ message: "Authentication required" });
     }
 
-    const payload = jwt.verify(token, process.env.JWT_SECRET);
+    const payload = jwt.verify(token, jwtSecret());
     const user = await User.findById(payload.id);
 
     if (!user) {
@@ -27,8 +35,10 @@ export async function requireAuth(req, res, next) {
 
     req.user = user;
     next();
-  } catch {
-    res.status(401).json({ message: "Invalid or expired token" });
+  } catch (error) {
+    res.status(error.status || 401).json({
+      message: error.status ? error.message : "Invalid or expired token"
+    });
   }
 }
 
@@ -38,4 +48,3 @@ export function requireAdmin(req, res, next) {
   }
   next();
 }
-

@@ -18,6 +18,14 @@ const userSchema = new mongoose.Schema(
       trim: true,
       validate: [validator.isEmail, "Invalid email"]
     },
+    username: {
+      type: String,
+      unique: true,
+      sparse: true,
+      lowercase: true,
+      trim: true,
+      maxlength: 80
+    },
     phone: {
       type: String,
       trim: true,

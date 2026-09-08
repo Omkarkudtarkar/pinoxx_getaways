@@ -1,5 +1,6 @@
 import dotenv from "dotenv";
 import { connectDb } from "../backend/src/config/db.js";
+import { ensureAdminUser } from "../backend/src/utils/bootstrapAdmin.js";
 
 dotenv.config();
 
@@ -14,6 +15,7 @@ async function prepareApp() {
 
       try {
         await connectDb({ allowMemoryFallback });
+        await ensureAdminUser();
       } catch (error) {
         console.error("Database connection failed.", error);
         process.env.USE_MEMORY_DB = "false";

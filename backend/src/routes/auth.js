@@ -1,6 +1,7 @@
 import express from "express";
 import { User } from "../models/User.js";
 import { requireAuth, signToken } from "../middleware/auth.js";
+import { adminEmail, adminUsername, ensureAdminUser } from "../utils/bootstrapAdmin.js";
 import { verifyGoogleCredential } from "../utils/googleAuth.js";
 
 export const authRouter = express.Router();
@@ -13,7 +14,8 @@ function serializeUser(user) {
     phone: user.phone,
     role: user.role,
     avatarUrl: user.avatarUrl,
-    authProvider: user.authProvider
+    authProvider: user.authProvider,
+    username: user.username
   };
 }
 
@@ -40,11 +42,29 @@ authRouter.post("/signup", async (req, res, next) => {
 
 authRouter.post("/login", async (req, res, next) => {
   try {
-    const { email, password } = req.body;
-    const user = await User.findOne({ email }).select("+password");
+    if (process.env.DATABASE_READY === "false") {
+      return res.status(503).json({
+        message: "Database is not connected. Check MONGODB_URI and MongoDB Atlas Network Access in Vercel, then redeploy."
+      });
+    }
+
+    const identifier = String(req.body.email || req.body.username || "").toLowerCase().trim();
+    const { password } = req.body;
+    const isAdminIdentifier = identifier === adminEmail() || identifier === adminUsername();
+
+    if (isAdminIdentifier) {
+      await ensureAdminUser();
+    }
+
+    const user = await User.findOne({
+      $or: [
+        { email: identifier },
+        { username: identifier }
+      ]
+    }).select("+password");
 
     if (!user || !user.password || !(await user.comparePassword(password))) {
-      return res.status(401).json({ message: "Invalid email or password" });
+      return res.status(401).json({ message: "Invalid username/email or password" });
     }
 
     const token = signToken(user);

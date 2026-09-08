@@ -55,7 +55,16 @@ export function AuthPage({ mode }) {
                 <input className="rounded-lg border border-slate-200 px-3 py-2" name="phone" value={form.phone} onChange={update} placeholder="Phone" />
               </>
             )}
-            <input className="rounded-lg border border-slate-200 px-3 py-2" name="email" value={form.email} onChange={update} type="email" placeholder="Email" required />
+            <input
+              className="rounded-lg border border-slate-200 px-3 py-2"
+              name="email"
+              value={form.email}
+              onChange={update}
+              type={isSignup ? "email" : "text"}
+              placeholder={isSignup ? "Email" : "Username or email"}
+              autoComplete={isSignup ? "email" : "username"}
+              required
+            />
             <input className="rounded-lg border border-slate-200 px-3 py-2" name="password" value={form.password} onChange={update} type="password" placeholder="Password" required minLength="8" />
             {error && <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>}
             <button className="rounded-lg bg-jungle-700 px-4 py-3 font-bold text-white hover:bg-jungle-900" disabled={loading}>

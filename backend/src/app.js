@@ -16,6 +16,7 @@ import { contactRouter } from "./routes/contact.js";
 import { createMemoryRouter } from "./routes/memory.js";
 import { pinoxxReviewsRouter } from "./routes/pinoxxReviews.js";
 import { resortsRouter } from "./routes/resorts.js";
+import { adminEmail, adminUsername } from "./utils/bootstrapAdmin.js";
 
 dotenv.config();
 dotenv.config({ path: path.resolve(process.cwd(), "../.env") });
@@ -138,6 +139,9 @@ app.get("/health", (_req, res) => {
       process.env.CLOUDINARY_API_SECRET
     ),
     googleLoginConfigured: Boolean(process.env.GOOGLE_CLIENT_ID || process.env.VITE_GOOGLE_CLIENT_ID),
+    jwtConfigured: Boolean(process.env.JWT_SECRET),
+    adminEmail: adminEmail(),
+    adminUsername: adminUsername(),
     databaseError: database.ok ? undefined : process.env.MONGODB_ERROR
   });
 });
