@@ -7,8 +7,9 @@ dotenv.config();
 dotenv.config({ path: path.resolve(process.cwd(), "../.env") });
 
 const port = process.env.PORT || 5000;
+const allowMemoryFallback = process.env.NODE_ENV !== "production" || process.env.ALLOW_MEMORY_FALLBACK === "true";
 
-connectDb({ allowMemoryFallback: true })
+connectDb({ allowMemoryFallback })
   .then(() => ensureAdminUser())
   .then(() => {
     return import("./app.js");

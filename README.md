@@ -29,7 +29,7 @@ Example values:
 
 ## Production deployment
 
-For Vercel, deploy from the repository root, not from `frontend`. The root deployment is required because the serverless API lives in `api/` and imports the Express backend from `backend/`.
+For Vercel, deploy from the repository root, not from `frontend`. The root `vercel.json` defines two services: `frontend` from `frontend/` and `backend` from `backend/`. Keep only this root Vercel config in the project.
 
 Required Vercel environment variables:
 
