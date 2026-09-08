@@ -99,7 +99,7 @@ app.use(rateLimit({
   standardHeaders: "draft-8",
   legacyHeaders: false
 }));
-app.use(["/api/auth", "/api/admin"], rateLimit({
+app.use(["/api/auth", "/api/admin", "/auth", "/admin"], rateLimit({
   windowMs: 15 * 60 * 1000,
   limit: 50,
   standardHeaders: "draft-8",
@@ -172,13 +172,21 @@ if (process.env.USE_MEMORY_DB === "true") {
 }
 
 app.use("/api/auth", authRouter);
+app.use("/auth", authRouter);
 app.use("/api/resorts", resortsRouter);
+app.use("/resorts", resortsRouter);
 app.use("/api/availability", availabilityRouter);
+app.use("/availability", availabilityRouter);
 app.use("/api/bookings", bookingsRouter);
+app.use("/bookings", bookingsRouter);
 app.use("/api/admin", adminRouter);
+app.use("/admin", adminRouter);
 app.use("/api/contact", contactRouter);
+app.use("/contact", contactRouter);
 app.use("/api/chatbot", chatbotRouter);
+app.use("/chatbot", chatbotRouter);
 app.use("/api/pinoxx-reviews", pinoxxReviewsRouter);
+app.use("/pinoxx-reviews", pinoxxReviewsRouter);
 
 app.get(/^\/(?!api(?:\/|$)|uploads(?:\/|$)|assets(?:\/|$)|health$).*/, (_req, res, next) => {
   res.setHeader("Cache-Control", "no-store");
