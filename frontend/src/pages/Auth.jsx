@@ -92,6 +92,9 @@ export function AuthPage({ mode }) {
 function authErrorMessage(error) {
   if (error.response?.data?.message) return error.response.data.message;
   if (error.request) {
+    if (import.meta.env.PROD) {
+      return "Authentication failed because the backend API is not reachable. Please try again in a moment.";
+    }
     return "Authentication failed because the backend API is not reachable. Run npm run dev, then open http://localhost:5173.";
   }
   return "Authentication failed. Please try again.";
