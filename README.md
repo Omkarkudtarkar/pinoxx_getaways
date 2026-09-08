@@ -29,9 +29,9 @@ Example values:
 
 ## Production deployment
 
-For Vercel, deploy from the repository root, not from `frontend`. The root `vercel.json` defines two services: `frontend` from `frontend/` and `backend` from `backend/`.
+For Vercel, deploy from the repository root, not from `frontend`. The root `server.js` starts the Express backend, and Express serves both the `/api` routes and the built frontend from `frontend/dist`.
 
-Do not set the Vercel project Root Directory to `frontend`. A service root cannot escape the selected project root, so `frontend` cannot deploy the sibling `backend/` directory.
+Do not set the Vercel project Root Directory to `frontend`, because that deploys only the React app and leaves the backend API unavailable.
 
 Required Vercel environment variables:
 
