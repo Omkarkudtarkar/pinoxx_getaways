@@ -670,7 +670,7 @@ function createStore() {
         _id: "user-admin",
         name: "Pinoxx Admin",
         email: "admin@pinoxx.in",
-        username: "pinoxxgetaways.in",
+        username: "pinoxx@getaways.in",
         phone: "919999999999",
         password: adminPassword,
         role: "admin",

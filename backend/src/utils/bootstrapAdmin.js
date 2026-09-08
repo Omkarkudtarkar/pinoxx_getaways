@@ -2,7 +2,7 @@ import { User } from "../models/User.js";
 
 const defaultAdmin = {
   email: "admin@pinoxx.in",
-  username: "pinoxxgetaways.in",
+  username: "pinoxx@getaways.in",
   password: "pinoxx@getaways",
   name: "Pinoxx Admin",
   phone: "919999999999"

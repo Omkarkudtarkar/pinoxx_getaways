@@ -151,7 +151,7 @@ async function seed() {
   const admin = await User.create({
     name: "Pinoxx Admin",
     email: "admin@pinoxx.in",
-    username: "pinoxxgetaways.in",
+    username: "pinoxx@getaways.in",
     phone: "919999999999",
     password: "pinoxx@getaways",
     role: "admin"
@@ -230,7 +230,7 @@ async function seed() {
   ]);
 
   console.log("Seed complete");
-  console.log("Admin login: pinoxxgetaways.in / pinoxx@getaways");
+  console.log("Admin login: pinoxx@getaways.in / pinoxx@getaways");
   console.log("Guest login: guest@example.com / Guest@12345");
   await process.exit(0);
 }
