@@ -29,5 +29,17 @@ Example values:
 
 ## Production deployment
 
-For Vercel, add the same Google variables in the project environment settings and redeploy.
+For Vercel, deploy from the repository root, not from `frontend`. The root deployment is required because the serverless API lives in `api/` and imports the Express backend from `backend/`.
+
+Required Vercel environment variables:
+
+- `MONGODB_URI`
+- `JWT_SECRET`
+- `ADMIN_USERNAME=pinoxx@getaways.in`
+- `ADMIN_PASSWORD=pinoxx@getaways`
+- `ADMIN_RESET_PASSWORD=true`
+- `VITE_GOOGLE_CLIENT_ID`
+- `GOOGLE_CLIENT_ID`
+
+After redeploying, open `/api/health` on the production domain. It should return JSON with `service: "pinoxx-api"`, `ok: true`, `mongoConfigured: true`, and `jwtConfigured: true`. Then login with username `pinoxx@getaways.in` and password `pinoxx@getaways`.
 

@@ -124,7 +124,7 @@ app.use(express.static(frontendDistPath, {
   }
 }));
 
-app.get("/health", (_req, res) => {
+app.get(["/health", "/api/health"], (_req, res) => {
   const database = databaseHealth();
 
   res.status(database.ok ? 200 : 503);
