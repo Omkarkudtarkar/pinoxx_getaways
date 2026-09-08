@@ -2,13 +2,16 @@ import axios from "axios";
 import { businessWhatsappNumber, formatPhoneNumber } from "./constants";
 import { sampleResorts, sampleReviews } from "./sampleData";
 
-const defaultApiUrl = import.meta.env.PROD ? "/api" : "http://localhost:5000/api";
+const productionApiUrl = "/api";
+const defaultApiUrl = import.meta.env.PROD ? productionApiUrl : "http://localhost:5000/api";
 const localApiPattern = /^https?:\/\/(?:localhost|127\.0\.0\.1|\[::1\])(?::\d+)?(?:\/|$)/i;
 
 function normalizeApiUrl(url) {
+  if (import.meta.env.PROD) return productionApiUrl;
+
   const value = String(url || "").trim().replace(/\/+$/, "");
   if (!value) return defaultApiUrl;
-  if (import.meta.env.PROD && localApiPattern.test(value)) return defaultApiUrl;
+  if (localApiPattern.test(value)) return defaultApiUrl;
   if (value.endsWith("/api")) return value;
   return `${value}/api`;
 }
