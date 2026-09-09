@@ -261,7 +261,7 @@ function customerWhatsappUrl(contact) {
 function availabilityReplyUrl(contact, available) {
   const phone = String(contact.phone || "").replace(/[^\d]/g, "");
   const bookingUrl = contact.bookingUrl ||
-    (contact.resortSlug ? `${window.location.origin}/resorts/${contact.resortSlug}` : `${window.location.origin}/resorts`);
+    (contact.resortSlug ? `${window.location.origin}/resort/${contact.resortSlug}` : `${window.location.origin}/resorts`);
   const dateText = [contact.checkIn || contact.preferredDate, contact.checkOut].filter(Boolean).join(" to ");
   const message = available
     ? [

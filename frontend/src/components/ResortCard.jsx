@@ -16,7 +16,7 @@ export function ResortCard({ resort }) {
 
   return (
     <Link
-      to={`/resorts/${resort.slug}`}
+      to={`/resort/${resort.slug}`}
       className="group overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-soft"
     >
       <div className="aspect-[4/3] overflow-hidden bg-slate-100">

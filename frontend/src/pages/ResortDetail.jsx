@@ -127,7 +127,7 @@ export function ResortDetail() {
   ];
 
   async function share() {
-    const url = window.location.href;
+    const url = `${window.location.origin}/resort/${resort.slug}`;
     if (navigator.share) {
       await navigator.share({ title: resort.name, text: resort.shortDescription, url });
     } else {

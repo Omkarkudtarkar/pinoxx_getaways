@@ -168,9 +168,29 @@ async function databaseHealth() {
   };
 }
 
+function acceptsHtmlRequest(req) {
+  return String(req.headers.accept || "").includes("text/html");
+}
+
+function sendFrontendIndex(_req, res, next) {
+  res.setHeader("Cache-Control", "no-store");
+  res.sendFile(path.join(frontendDistPath, "index.html"), (error) => {
+    if (error) next();
+  });
+}
+
 if (process.env.USE_MEMORY_DB === "true") {
   app.use(createMemoryRouter());
 }
+
+app.get(/^\/(?:resorts(?:\/[^/]+)?|admin|contact)\/?$/, (req, res, next) => {
+  if (!acceptsHtmlRequest(req)) {
+    next();
+    return;
+  }
+
+  sendFrontendIndex(req, res, next);
+});
 
 app.use([
   "/api/auth",
@@ -204,12 +224,7 @@ app.use("/chatbot", chatbotRouter);
 app.use("/api/pinoxx-reviews", pinoxxReviewsRouter);
 app.use("/pinoxx-reviews", pinoxxReviewsRouter);
 
-app.get(/^\/(?!api(?:\/|$)|uploads(?:\/|$)|assets(?:\/|$)|health$).*/, (_req, res, next) => {
-  res.setHeader("Cache-Control", "no-store");
-  res.sendFile(path.join(frontendDistPath, "index.html"), (error) => {
-    if (error) next();
-  });
-});
+app.get(/^\/(?!api(?:\/|$)|uploads(?:\/|$)|assets(?:\/|$)|health$).*/, sendFrontendIndex);
 
 app.use((req, res) => {
   res.status(404).json({ message: `Route not found: ${req.method} ${req.originalUrl}` });
