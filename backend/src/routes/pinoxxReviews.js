@@ -2,7 +2,7 @@ import express from "express";
 import jwt from "jsonwebtoken";
 import { PinoxxReview } from "../models/PinoxxReview.js";
 import { User } from "../models/User.js";
-import { isMongoDatabaseReady, sendMongoDatabaseUnavailable } from "../middleware/database.js";
+import { ensureMongoDatabaseReady, sendMongoDatabaseUnavailable } from "../middleware/database.js";
 
 export const pinoxxReviewsRouter = express.Router();
 
@@ -70,7 +70,7 @@ async function requireGoogleReviewAuth(req, res, next) {
         role: payload.role
       };
     } else {
-      if (!isMongoDatabaseReady()) {
+      if (!(await ensureMongoDatabaseReady())) {
         return sendMongoDatabaseUnavailable(res);
       }
 
@@ -102,7 +102,7 @@ pinoxxReviewsRouter.get("/", async (_req, res, next) => {
       });
     }
 
-    if (!isMongoDatabaseReady()) {
+    if (!(await ensureMongoDatabaseReady())) {
       return sendMongoDatabaseUnavailable(res);
     }
 
@@ -151,7 +151,7 @@ pinoxxReviewsRouter.post("/", requireGoogleReviewAuth, async (req, res, next) =>
       return res.status(201).json({ review: serializeReview(review) });
     }
 
-    if (!isMongoDatabaseReady()) {
+    if (!(await ensureMongoDatabaseReady())) {
       return sendMongoDatabaseUnavailable(res);
     }
 
@@ -194,7 +194,7 @@ pinoxxReviewsRouter.post("/:id/vote", async (req, res, next) => {
       return res.json({ review: serializeReview(review) });
     }
 
-    if (!isMongoDatabaseReady()) {
+    if (!(await ensureMongoDatabaseReady())) {
       return sendMongoDatabaseUnavailable(res);
     }
 

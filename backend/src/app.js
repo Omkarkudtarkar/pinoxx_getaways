@@ -16,7 +16,7 @@ import { contactRouter } from "./routes/contact.js";
 import { createMemoryRouter } from "./routes/memory.js";
 import { pinoxxReviewsRouter } from "./routes/pinoxxReviews.js";
 import { resortsRouter } from "./routes/resorts.js";
-import { isMongoDatabaseReady, requireMongoDatabase } from "./middleware/database.js";
+import { ensureMongoDatabaseReady, requireMongoDatabase } from "./middleware/database.js";
 import { adminEmail, adminUsername } from "./utils/bootstrapAdmin.js";
 
 dotenv.config();
@@ -125,8 +125,8 @@ app.use(express.static(frontendDistPath, {
   }
 }));
 
-app.get(["/health", "/api/health"], (_req, res) => {
-  const database = databaseHealth();
+app.get(["/health", "/api/health"], async (_req, res) => {
+  const database = await databaseHealth();
 
   res.status(database.ok ? 200 : 503);
   res.json({
@@ -147,7 +147,7 @@ app.get(["/health", "/api/health"], (_req, res) => {
   });
 });
 
-function databaseHealth() {
+async function databaseHealth() {
   if (process.env.USE_MEMORY_DB === "true") {
     return {
       ok: process.env.NODE_ENV !== "production",
@@ -155,7 +155,7 @@ function databaseHealth() {
     };
   }
 
-  if (!isMongoDatabaseReady()) {
+  if (!(await ensureMongoDatabaseReady())) {
     return {
       ok: false,
       dataMode: "unavailable"
