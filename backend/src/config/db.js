@@ -1,5 +1,8 @@
 import mongoose from "mongoose";
 
+mongoose.set("strictQuery", true);
+mongoose.set("bufferCommands", false);
+
 export async function connectDb({ allowMemoryFallback = false } = {}) {
   const uri = process.env.MONGODB_URI;
 
@@ -12,7 +15,6 @@ export async function connectDb({ allowMemoryFallback = false } = {}) {
     throw new Error("MONGODB_URI is required");
   }
 
-  mongoose.set("strictQuery", true);
   try {
     await mongoose.connect(uri, {
       serverSelectionTimeoutMS: Number(process.env.MONGODB_TIMEOUT_MS || 5000)

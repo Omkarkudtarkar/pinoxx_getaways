@@ -2,6 +2,7 @@ import express from "express";
 import jwt from "jsonwebtoken";
 import { PinoxxReview } from "../models/PinoxxReview.js";
 import { User } from "../models/User.js";
+import { isMongoDatabaseReady, sendMongoDatabaseUnavailable } from "../middleware/database.js";
 
 export const pinoxxReviewsRouter = express.Router();
 
@@ -69,6 +70,10 @@ async function requireGoogleReviewAuth(req, res, next) {
         role: payload.role
       };
     } else {
+      if (!isMongoDatabaseReady()) {
+        return sendMongoDatabaseUnavailable(res);
+      }
+
       const user = await User.findById(payload.id);
       if (!user) {
         return res.status(401).json({ message: "Invalid token" });
@@ -95,6 +100,10 @@ pinoxxReviewsRouter.get("/", async (_req, res, next) => {
           .sort((first, second) => new Date(second.createdAt) - new Date(first.createdAt))
           .map(serializeReview)
       });
+    }
+
+    if (!isMongoDatabaseReady()) {
+      return sendMongoDatabaseUnavailable(res);
     }
 
     const reviews = await PinoxxReview.find({ status: "approved" })
@@ -142,6 +151,10 @@ pinoxxReviewsRouter.post("/", requireGoogleReviewAuth, async (req, res, next) =>
       return res.status(201).json({ review: serializeReview(review) });
     }
 
+    if (!isMongoDatabaseReady()) {
+      return sendMongoDatabaseUnavailable(res);
+    }
+
     const existing = await PinoxxReview.findOne({ user: req.user._id });
     if (existing) {
       return res.status(409).json({ message: "You have already added a Pinoxx review" });
@@ -179,6 +192,10 @@ pinoxxReviewsRouter.post("/:id/vote", async (req, res, next) => {
 
       review[field] = Number(review[field] || 0) + 1;
       return res.json({ review: serializeReview(review) });
+    }
+
+    if (!isMongoDatabaseReady()) {
+      return sendMongoDatabaseUnavailable(res);
     }
 
     const review = await PinoxxReview.findByIdAndUpdate(

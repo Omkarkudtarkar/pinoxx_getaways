@@ -16,6 +16,7 @@ import { contactRouter } from "./routes/contact.js";
 import { createMemoryRouter } from "./routes/memory.js";
 import { pinoxxReviewsRouter } from "./routes/pinoxxReviews.js";
 import { resortsRouter } from "./routes/resorts.js";
+import { isMongoDatabaseReady, requireMongoDatabase } from "./middleware/database.js";
 import { adminEmail, adminUsername } from "./utils/bootstrapAdmin.js";
 
 dotenv.config();
@@ -154,7 +155,7 @@ function databaseHealth() {
     };
   }
 
-  if (process.env.DATABASE_READY === "false") {
+  if (!isMongoDatabaseReady()) {
     return {
       ok: false,
       dataMode: "unavailable"
@@ -170,6 +171,21 @@ function databaseHealth() {
 if (process.env.USE_MEMORY_DB === "true") {
   app.use(createMemoryRouter());
 }
+
+app.use([
+  "/api/auth",
+  "/auth",
+  "/api/resorts",
+  "/resorts",
+  "/api/availability",
+  "/availability",
+  "/api/bookings",
+  "/bookings",
+  "/api/admin",
+  "/admin",
+  "/api/contact",
+  "/contact"
+], requireMongoDatabase);
 
 app.use("/api/auth", authRouter);
 app.use("/auth", authRouter);
