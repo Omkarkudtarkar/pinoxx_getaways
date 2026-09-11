@@ -165,7 +165,18 @@ adminRouter.patch("/reviews/:id", async (req, res, next) => {
 
 adminRouter.post("/resorts", uploadImages.array("images", 80), async (req, res, next) => {
   try {
-    const resort = await Resort.create(resortPayload(req.body, req.files));
+    const payload = resortPayload(req.body, req.files);
+    const existingResort = payload.slug ? await Resort.findOne({ slug: payload.slug }) : null;
+
+    if (existingResort && existingResort.isActive !== false) {
+      return res.status(409).json({
+        message: "A resort with this name already exists. Update the existing resort or use a different resort name."
+      });
+    }
+
+    const resort = existingResort
+      ? await reactivateResort(existingResort, payload)
+      : await Resort.create(payload);
     let availabilityImport = null;
     let availabilityError = null;
 
@@ -186,7 +197,7 @@ adminRouter.post("/resorts", uploadImages.array("images", 80), async (req, res, 
 adminRouter.patch("/resorts/:id", uploadImages.array("images", 80), async (req, res, next) => {
   try {
     const payload = resortPayload(req.body, req.files);
-    const resort = await Resort.findByIdAndUpdate(req.params.id, payload, { new: true });
+    const resort = await Resort.findByIdAndUpdate(req.params.id, payload, { new: true, runValidators: true });
 
     if (!resort) {
       return res.status(404).json({ message: "Resort not found" });
@@ -207,6 +218,14 @@ adminRouter.patch("/resorts/:id", uploadImages.array("images", 80), async (req, 
     next(error);
   }
 });
+
+async function reactivateResort(resort, payload) {
+  resort.set({
+    ...payload,
+    isActive: true
+  });
+  return resort.save();
+}
 
 adminRouter.post("/resorts/:id/availability/sync", async (req, res, next) => {
   try {

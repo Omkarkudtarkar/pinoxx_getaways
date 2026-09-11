@@ -223,7 +223,23 @@ function uploadErrorMessage(error, fallback) {
   if (error.response?.status === 413) {
     return "Images are too large for Vercel. Select fewer or smaller images, then try again.";
   }
-  return error.response?.data?.message || error.message || fallback;
+
+  const serverMessage = error.response?.data?.message;
+  const databaseError = error.response?.data?.databaseError;
+  if (serverMessage && databaseError) return `${serverMessage} ${databaseError}`;
+  return serverMessage || error.message || fallback;
+}
+
+function isCloudinaryUploadRequiredError(error) {
+  return error.response?.status === 503 && /Cloudinary is required/i.test(error.response?.data?.message || "");
+}
+
+function hasUploadFiles(files, roomItems = []) {
+  return Array.from(files || []).length > 0 || roomItems.some((room) => Array.from(room.imageFiles || []).length > 0);
+}
+
+function appendResortPayloadWithoutUploads(body, form, rooms) {
+  appendResortPayload(body, form, rooms, [], rooms.map(() => []));
 }
 
 function appendResortPayload(body, form, rooms, files, preparedRoomFileLists) {
@@ -608,7 +624,24 @@ export function AdminDashboard() {
       setMessage("Preparing images...");
       const preparedImages = await prepareResortImages(rooms, resortFiles);
       appendResortPayload(body, resortForm, rooms, preparedImages.resortFiles, preparedImages.roomFileLists);
-      const { data } = await api.post("/admin/resorts", body);
+      let data;
+      let skippedUploads = false;
+
+      try {
+        const response = await api.post("/admin/resorts", body);
+        data = response.data;
+      } catch (error) {
+        if (!isCloudinaryUploadRequiredError(error) || !hasUploadFiles(preparedImages.resortFiles, rooms)) {
+          throw error;
+        }
+
+        const retryBody = new FormData();
+        appendResortPayloadWithoutUploads(retryBody, resortForm, rooms);
+        const response = await api.post("/admin/resorts", retryBody);
+        data = response.data;
+        skippedUploads = true;
+      }
+
       const createdResort = data.resort;
       setResorts((items) => [createdResort, ...items]);
       setSelectedResort(createdResort._id);
@@ -616,7 +649,9 @@ export function AdminDashboard() {
       setResortForm(initialResortForm);
       setRooms([{ ...emptyRoom }]);
       setResortFiles([]);
-      setMessage(`Created ${createdResort.name}.`);
+      setMessage(skippedUploads
+        ? `Created ${createdResort.name} without uploaded image files because Cloudinary is not configured. Add Cloudinary image URLs in the resort editor.`
+        : `Created ${createdResort.name}.`);
     } catch (err) {
       setMessage(uploadErrorMessage(err, "Resort could not be created."));
     } finally {
@@ -645,12 +680,31 @@ export function AdminDashboard() {
       setMessage("Preparing images...");
       const preparedImages = await prepareResortImages(editRooms, editFiles);
       appendResortPayload(body, editForm, editRooms, preparedImages.resortFiles, preparedImages.roomFileLists);
-      const { data } = await api.patch(`/admin/resorts/${editingResortId}`, body);
+      let data;
+      let skippedUploads = false;
+
+      try {
+        const response = await api.patch(`/admin/resorts/${editingResortId}`, body);
+        data = response.data;
+      } catch (error) {
+        if (!isCloudinaryUploadRequiredError(error) || !hasUploadFiles(preparedImages.resortFiles, editRooms)) {
+          throw error;
+        }
+
+        const retryBody = new FormData();
+        appendResortPayloadWithoutUploads(retryBody, editForm, editRooms);
+        const response = await api.patch(`/admin/resorts/${editingResortId}`, retryBody);
+        data = response.data;
+        skippedUploads = true;
+      }
+
       setResorts((items) => items.map((item) => (item._id === editingResortId ? data.resort : item)));
       setSelectedResort(data.resort._id);
       setEditingResortId("");
       setEditFiles([]);
-      setMessage(`Updated ${data.resort.name}.`);
+      setMessage(skippedUploads
+        ? `Updated ${data.resort.name} without uploaded image files because Cloudinary is not configured. Add Cloudinary image URLs in the resort editor.`
+        : `Updated ${data.resort.name}.`);
     } catch (err) {
       setMessage(uploadErrorMessage(err, "Resort could not be updated."));
     }

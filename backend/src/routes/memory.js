@@ -411,12 +411,24 @@ export function createMemoryRouter() {
 
   router.post("/api/admin/resorts", uploadImages.array("images", 80), async (req, res, next) => {
     try {
-      const resort = {
+      const payload = memoryResortPayload(req.body, req.files);
+      const existingResort = store.resorts.find((item) => item.slug === payload.slug);
+
+      if (existingResort && existingResort.isActive !== false) {
+        return res.status(409).json({
+          message: "A resort with this name already exists. Update the existing resort or use a different resort name."
+        });
+      }
+
+      const resort = existingResort || {
         _id: makeId("resort"),
-        ...memoryResortPayload(req.body, req.files),
         createdAt: new Date().toISOString()
       };
-      store.resorts.push(resort);
+      Object.assign(resort, payload, { isActive: true });
+
+      if (!existingResort) {
+        store.resorts.push(resort);
+      }
 
       let availabilityImport = null;
       let availabilityError = null;
@@ -843,19 +855,21 @@ function memoryResortPayload(body, files = []) {
 
   return {
     name,
-    slug: body.slug || slugify(name || "", { lower: true, strict: true }),
-    location: body.location,
-    shortDescription: body.shortDescription,
-    description: body.description,
+    slug: normalizeSlug(body.slug, name),
+    location: body.location?.trim(),
+    shortDescription: body.shortDescription?.trim(),
+    description: body.description?.trim(),
     resortType: normalizeResortType(body.resortType),
     startingPrice: resolveStartingPrice(body.startingPrice, sharingPrice, couplePrice),
     sharingPrice: sharingPrice ?? 0,
     couplePrice: couplePrice ?? 0,
-    rating: Number(body.rating || 4.5),
-    distanceFromBusStandKm: Number(body.distanceFromBusStandKm),
+    rating: optionalNumber(body.rating) ?? 4.5,
+    distanceFromBusStandKm: optionalNumber(body.distanceFromBusStandKm) ?? 0,
     distanceToWaterActivitiesKm: optionalNumber(body.distanceToWaterActivitiesKm) ?? 0,
     amenities: parseList(body.amenities),
     activities: parseList(body.activities),
+    checkInTime: body.checkInTime?.trim() || "",
+    checkOutTime: body.checkOutTime?.trim() || "",
     images: [
       ...parseJsonArray(body.images),
       ...resortFiles.map(fileToImage)
@@ -878,6 +892,10 @@ function memoryResortPayload(body, files = []) {
     seoDescription: body.seoDescription || "",
     isActive: body.isActive !== "false"
   };
+}
+
+function normalizeSlug(value, name) {
+  return slugify(String(value || name || "").trim(), { lower: true, strict: true });
 }
 
 function optionalNumber(value) {

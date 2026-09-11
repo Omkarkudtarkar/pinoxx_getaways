@@ -90,16 +90,16 @@ export function resortPayload(body, files = []) {
 
   return {
     name,
-    slug: body.slug || slugify(name || "", { lower: true, strict: true }),
-    location: body.location,
-    shortDescription: body.shortDescription,
-    description: body.description,
+    slug: normalizeSlug(body.slug, name),
+    location: body.location?.trim(),
+    shortDescription: body.shortDescription?.trim(),
+    description: body.description?.trim(),
     resortType: normalizeResortType(body.resortType),
     startingPrice: resolveStartingPrice(body.startingPrice, sharingPrice, couplePrice),
     sharingPrice: sharingPrice ?? 0,
     couplePrice: couplePrice ?? 0,
-    rating: Number(body.rating || 4.5),
-    distanceFromBusStandKm: Number(body.distanceFromBusStandKm),
+    rating: optionalNumber(body.rating) ?? 4.5,
+    distanceFromBusStandKm: optionalNumber(body.distanceFromBusStandKm) ?? 0,
     distanceToWaterActivitiesKm: optionalNumber(body.distanceToWaterActivitiesKm) ?? 0,
     amenities: parseList(body.amenities),
     activities: parseList(body.activities),
@@ -123,10 +123,14 @@ export function resortPayload(body, files = []) {
       };
     }),
     availabilitySheetUrl: body.availabilitySheetUrl?.trim() || "",
-    seoTitle: body.seoTitle,
-    seoDescription: body.seoDescription,
+    seoTitle: body.seoTitle?.trim() || "",
+    seoDescription: body.seoDescription?.trim() || "",
     isActive: body.isActive !== "false"
   };
+}
+
+function normalizeSlug(value, name) {
+  return slugify(String(value || name || "").trim(), { lower: true, strict: true });
 }
 
 function optionalNumber(value) {

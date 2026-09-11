@@ -232,8 +232,15 @@ app.use((req, res) => {
 
 app.use((error, _req, res, _next) => {
   console.error(error);
-  const status = error.status || 500;
+  const duplicateField = error.code === 11000 ? Object.keys(error.keyPattern || error.keyValue || {})[0] : "";
+  const validationMessage = error.name === "ValidationError"
+    ? Object.values(error.errors || {}).map((item) => item.message).filter(Boolean).join(" ")
+    : "";
+  const status = error.status || (error.code === 11000 ? 409 : error.name === "ValidationError" || error.name === "CastError" ? 400 : 500);
+
   res.status(status).json({
-    message: error.message || "Internal server error"
+    message: duplicateField
+      ? `A record with this ${duplicateField} already exists. Use a different value.`
+      : validationMessage || error.message || "Internal server error"
   });
 });
