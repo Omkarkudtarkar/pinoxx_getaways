@@ -230,12 +230,26 @@ function uploadErrorMessage(error, fallback) {
   return serverMessage || error.message || fallback;
 }
 
-function isCloudinaryUploadRequiredError(error) {
-  return error.response?.status === 503 && /Cloudinary is required/i.test(error.response?.data?.message || "");
+function isRetryableUploadError(error) {
+  const status = error.response?.status;
+  const message = error.response?.data?.message || error.message || "";
+  return (
+    status === 413 ||
+    [400, 500, 502, 503, 504].includes(status) &&
+      /cloudinary|upload|image|file|multipart|too large|invalid image/i.test(message)
+  );
 }
 
 function hasUploadFiles(files, roomItems = []) {
   return Array.from(files || []).length > 0 || roomItems.some((room) => Array.from(room.imageFiles || []).length > 0);
+}
+
+function emptyPreparedImages(rooms = []) {
+  return {
+    resortFiles: [],
+    roomFileLists: rooms.map(() => []),
+    totalBytes: 0
+  };
 }
 
 function appendResortPayloadWithoutUploads(body, form, rooms) {
@@ -621,17 +635,29 @@ export function AdminDashboard() {
 
     try {
       const body = new FormData();
+      let preparedImages = emptyPreparedImages(rooms);
+      let skippedUploads = false;
+      let uploadWarning = "";
+
       setMessage("Preparing images...");
-      const preparedImages = await prepareResortImages(rooms, resortFiles);
+      try {
+        preparedImages = await prepareResortImages(rooms, resortFiles);
+      } catch (error) {
+        if (!hasUploadFiles(resortFiles, rooms)) {
+          throw error;
+        }
+        skippedUploads = true;
+        uploadWarning = error.message || "Selected image files could not be prepared.";
+      }
+
       appendResortPayload(body, resortForm, rooms, preparedImages.resortFiles, preparedImages.roomFileLists);
       let data;
-      let skippedUploads = false;
 
       try {
         const response = await api.post("/admin/resorts", body);
         data = response.data;
       } catch (error) {
-        if (!isCloudinaryUploadRequiredError(error) || !hasUploadFiles(preparedImages.resortFiles, rooms)) {
+        if (!isRetryableUploadError(error) || !hasUploadFiles(preparedImages.resortFiles, rooms)) {
           throw error;
         }
 
@@ -640,6 +666,7 @@ export function AdminDashboard() {
         const response = await api.post("/admin/resorts", retryBody);
         data = response.data;
         skippedUploads = true;
+        uploadWarning = uploadErrorMessage(error, "Uploaded image files could not be saved.");
       }
 
       const createdResort = data.resort;
@@ -650,7 +677,7 @@ export function AdminDashboard() {
       setRooms([{ ...emptyRoom }]);
       setResortFiles([]);
       setMessage(skippedUploads
-        ? `Created ${createdResort.name} without uploaded image files because Cloudinary is not configured. Add Cloudinary image URLs in the resort editor.`
+        ? `Created ${createdResort.name} without uploaded image files. ${uploadWarning} Add image URLs in the resort editor or upload smaller JPG/PNG images later.`
         : `Created ${createdResort.name}.`);
     } catch (err) {
       setMessage(uploadErrorMessage(err, "Resort could not be created."));
@@ -677,17 +704,29 @@ export function AdminDashboard() {
 
     try {
       const body = new FormData();
+      let preparedImages = emptyPreparedImages(editRooms);
+      let skippedUploads = false;
+      let uploadWarning = "";
+
       setMessage("Preparing images...");
-      const preparedImages = await prepareResortImages(editRooms, editFiles);
+      try {
+        preparedImages = await prepareResortImages(editRooms, editFiles);
+      } catch (error) {
+        if (!hasUploadFiles(editFiles, editRooms)) {
+          throw error;
+        }
+        skippedUploads = true;
+        uploadWarning = error.message || "Selected image files could not be prepared.";
+      }
+
       appendResortPayload(body, editForm, editRooms, preparedImages.resortFiles, preparedImages.roomFileLists);
       let data;
-      let skippedUploads = false;
 
       try {
         const response = await api.patch(`/admin/resorts/${editingResortId}`, body);
         data = response.data;
       } catch (error) {
-        if (!isCloudinaryUploadRequiredError(error) || !hasUploadFiles(preparedImages.resortFiles, editRooms)) {
+        if (!isRetryableUploadError(error) || !hasUploadFiles(preparedImages.resortFiles, editRooms)) {
           throw error;
         }
 
@@ -696,6 +735,7 @@ export function AdminDashboard() {
         const response = await api.patch(`/admin/resorts/${editingResortId}`, retryBody);
         data = response.data;
         skippedUploads = true;
+        uploadWarning = uploadErrorMessage(error, "Uploaded image files could not be saved.");
       }
 
       setResorts((items) => items.map((item) => (item._id === editingResortId ? data.resort : item)));
@@ -703,7 +743,7 @@ export function AdminDashboard() {
       setEditingResortId("");
       setEditFiles([]);
       setMessage(skippedUploads
-        ? `Updated ${data.resort.name} without uploaded image files because Cloudinary is not configured. Add Cloudinary image URLs in the resort editor.`
+        ? `Updated ${data.resort.name} without uploaded image files. ${uploadWarning} Add image URLs in the resort editor or upload smaller JPG/PNG images later.`
         : `Updated ${data.resort.name}.`);
     } catch (err) {
       setMessage(uploadErrorMessage(err, "Resort could not be updated."));
