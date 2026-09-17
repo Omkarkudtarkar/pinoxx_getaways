@@ -43,5 +43,10 @@ Required Vercel environment variables:
 - `VITE_GOOGLE_CLIENT_ID`
 - `GOOGLE_CLIENT_ID`
 
+Optional admin tuning:
+
+- `ADMIN_JWT_EXPIRES_IN=30d` controls how long admin logins stay valid.
+- `ADMIN_RATE_LIMIT_PER_WINDOW=300` controls admin API requests per 15 minutes.
+
 After redeploying, open `/api/health` on the production domain. It should return JSON with `service: "pinoxx-api"`, `ok: true`, `mongoConfigured: true`, and `jwtConfigured: true`. Then login with username `pinoxx@getaways.in` and password `pinoxx@getaways`.
 

@@ -772,7 +772,7 @@ function signMemoryToken(user) {
       authProvider: user.authProvider || "password"
     },
     process.env.JWT_SECRET || "pinoxx-dev-secret",
-    { expiresIn: process.env.JWT_EXPIRES_IN || "7d" }
+    { expiresIn: user?.role === "admin" ? process.env.ADMIN_JWT_EXPIRES_IN || "30d" : process.env.JWT_EXPIRES_IN || "7d" }
   );
 }
 
@@ -793,6 +793,7 @@ function requireMemoryAuth(req, res, next) {
     }
 
     req.user = user;
+    res.setHeader("x-pinoxx-token", signMemoryToken(user));
     next();
   } catch {
     res.status(401).json({ message: "Invalid or expired token" });

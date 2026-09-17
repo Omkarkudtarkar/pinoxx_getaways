@@ -89,7 +89,8 @@ function resolveCorsOrigin(origin, callback) {
 
 app.use(cors({
   origin: resolveCorsOrigin,
-  credentials: true
+  credentials: true,
+  exposedHeaders: ["x-pinoxx-token"]
 }));
 app.use(express.json({ limit: "1mb" }));
 app.use(express.urlencoded({ extended: true }));
@@ -100,9 +101,16 @@ app.use(rateLimit({
   standardHeaders: "draft-8",
   legacyHeaders: false
 }));
-app.use(["/api/auth", "/api/admin", "/auth", "/admin"], rateLimit({
+
+app.use(["/api/auth", "/auth"], rateLimit({
   windowMs: 15 * 60 * 1000,
   limit: 50,
+  standardHeaders: "draft-8",
+  legacyHeaders: false
+}));
+app.use(["/api/admin", "/admin"], rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: Number(process.env.ADMIN_RATE_LIMIT_PER_WINDOW || 300),
   standardHeaders: "draft-8",
   legacyHeaders: false
 }));

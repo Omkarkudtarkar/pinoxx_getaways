@@ -9,11 +9,19 @@ function jwtSecret() {
   throw error;
 }
 
+function tokenExpiresIn(user) {
+  if (user?.role === "admin") {
+    return process.env.ADMIN_JWT_EXPIRES_IN || "30d";
+  }
+
+  return process.env.JWT_EXPIRES_IN || "7d";
+}
+
 export function signToken(user) {
   return jwt.sign(
     { id: user._id, role: user.role },
     jwtSecret(),
-    { expiresIn: process.env.JWT_EXPIRES_IN || "7d" }
+    { expiresIn: tokenExpiresIn(user) }
   );
 }
 
@@ -34,6 +42,7 @@ export async function requireAuth(req, res, next) {
     }
 
     req.user = user;
+    res.setHeader("x-pinoxx-token", signToken(user));
     next();
   } catch (error) {
     res.status(error.status || 401).json({

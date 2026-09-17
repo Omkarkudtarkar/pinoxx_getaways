@@ -36,6 +36,33 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+api.interceptors.response.use(
+  (response) => {
+    const refreshedToken = response.headers?.["x-pinoxx-token"];
+    if (refreshedToken) {
+      try {
+        localStorage.setItem("pinoxx_token", refreshedToken);
+      } catch {
+        // The current request still succeeds even if storage is unavailable.
+      }
+    }
+    return response;
+  },
+  (error) => {
+    const message = error.response?.data?.message || "";
+    if (error.response?.status === 401 && /auth|token/i.test(message)) {
+      try {
+        localStorage.removeItem("pinoxx_token");
+        localStorage.removeItem("pinoxx_user");
+        window.dispatchEvent(new CustomEvent("pinoxx-auth-expired", { detail: { message } }));
+      } catch {
+        // Ignore browser storage/event failures.
+      }
+    }
+    return Promise.reject(error);
+  }
+);
+
 export function assetUrl(url) {
   if (!url) return "";
   if (url.startsWith("http")) return url;

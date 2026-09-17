@@ -46,6 +46,15 @@ export function AuthProvider({ children }) {
       .catch(() => logout());
   }, []);
 
+  useEffect(() => {
+    function handleAuthExpired() {
+      setUser(null);
+    }
+
+    window.addEventListener("pinoxx-auth-expired", handleAuthExpired);
+    return () => window.removeEventListener("pinoxx-auth-expired", handleAuthExpired);
+  }, []);
+
   async function login(payload) {
     setLoading(true);
     try {
