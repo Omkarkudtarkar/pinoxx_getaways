@@ -1,4 +1,5 @@
 import { Star } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { resortImageUrl, useFallbackResortImage } from "../lib/api";
 import { formatPerPersonPrice } from "../lib/constants";
@@ -11,22 +12,58 @@ const resortTypeLabels = {
 };
 
 export function ResortCard({ resort }) {
-  const image = resort.images?.[0]?.url;
+  const images = useMemo(() => (
+    (resort.images || []).filter((image) => image?.url)
+  ), [resort.images]);
+  const [activeImage, setActiveImage] = useState(0);
   const typeLabel = resortTypeLabels[resort.resortType] || "Budget";
+
+  useEffect(() => {
+    setActiveImage(0);
+  }, [resort.slug]);
+
+  useEffect(() => {
+    if (images.length <= 1) return undefined;
+
+    const interval = window.setInterval(() => {
+      setActiveImage((index) => (index + 1) % images.length);
+    }, 2800);
+
+    return () => window.clearInterval(interval);
+  }, [images.length]);
+
+  const fallbackAlt = resort.name || "Resort";
 
   return (
     <Link
       to={`/resort/${resort.slug}`}
       className="group overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-soft"
     >
-      <div className="aspect-[4/3] overflow-hidden bg-slate-100">
-        <img
-          src={resortImageUrl(image)}
-          alt={resort.images?.[0]?.alt || resort.name}
-          className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
-          loading="lazy"
-          onError={useFallbackResortImage}
-        />
+      <div className="relative aspect-[4/3] overflow-hidden bg-slate-100">
+        {(images.length ? images : [{ url: "", alt: fallbackAlt }]).map((image, index) => (
+          <img
+            key={`${image.url || "fallback"}-${index}`}
+            src={resortImageUrl(image.url)}
+            alt={image.alt || fallbackAlt}
+            className={`absolute inset-0 h-full w-full object-cover transition duration-700 group-hover:scale-105 ${
+              index === activeImage ? "opacity-100" : "opacity-0"
+            }`}
+            loading={index === 0 ? "eager" : "lazy"}
+            onError={useFallbackResortImage}
+          />
+        ))}
+        {images.length > 1 ? (
+          <div className="absolute inset-x-0 bottom-3 flex justify-center gap-1.5">
+            {images.map((image, index) => (
+              <span
+                key={`${image.url}-dot-${index}`}
+                className={`h-1.5 rounded-full bg-white shadow-sm transition-all ${
+                  index === activeImage ? "w-5 opacity-95" : "w-1.5 opacity-60"
+                }`}
+              />
+            ))}
+          </div>
+        ) : null}
       </div>
       <div className="grid gap-3 p-4">
         <div className="flex items-start justify-between gap-3">
