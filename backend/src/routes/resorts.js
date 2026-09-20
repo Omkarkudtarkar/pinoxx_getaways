@@ -101,6 +101,7 @@ export function resortPayload(body, files = []) {
     rating: optionalNumber(body.rating) ?? 4.5,
     distanceFromBusStandKm: optionalNumber(body.distanceFromBusStandKm) ?? 0,
     distanceToWaterActivitiesKm: optionalNumber(body.distanceToWaterActivitiesKm) ?? 0,
+    meals: parseList(body.meals, ["Breakfast", "Lunch", "Dinner"]),
     amenities: parseList(body.amenities),
     activities: parseList(body.activities),
     checkInTime: body.checkInTime?.trim() || "",
@@ -150,12 +151,13 @@ function normalizeResortType(value) {
   return ["bamboo", "mamboo", "budget", "premium"].includes(value) ? (value === "mamboo" ? "bamboo" : value) : "budget";
 }
 
-function parseList(value) {
+function parseList(value, fallback = []) {
   if (Array.isArray(value)) return value;
-  return String(value || "")
+  const items = String(value || "")
     .split(",")
     .map((item) => item.trim())
     .filter(Boolean);
+  return items.length ? items : fallback;
 }
 
 function parseJsonArray(value) {

@@ -38,6 +38,10 @@ const resortSchema = new mongoose.Schema(
     rating: { type: Number, min: 0, max: 5, default: 4.5 },
     distanceFromBusStandKm: { type: Number, required: true, min: 0 },
     distanceToWaterActivitiesKm: { type: Number, min: 0, default: 0 },
+    meals: {
+      type: [{ type: String, trim: true }],
+      default: ["Breakfast", "Lunch", "Dinner"]
+    },
     amenities: [{ type: String, trim: true }],
     activities: [{ type: String, trim: true }],
     checkInTime: { type: String, default: "", trim: true },

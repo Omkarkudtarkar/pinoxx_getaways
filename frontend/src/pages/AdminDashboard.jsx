@@ -56,6 +56,7 @@ const initialResortForm = {
   rating: "4.5",
   distanceFromBusStandKm: "",
   distanceToWaterActivitiesKm: "",
+  meals: "Breakfast, Lunch, Dinner",
   amenities: "",
   activities: "",
   checkInTime: "",
@@ -119,6 +120,7 @@ function resortToForm(resort) {
     rating: resort.rating || "4.5",
     distanceFromBusStandKm: resort.distanceFromBusStandKm || "",
     distanceToWaterActivitiesKm: resort.distanceToWaterActivitiesKm || "",
+    meals: toCsv(resort.meals?.length ? resort.meals : ["Breakfast", "Lunch", "Dinner"]),
     amenities: toCsv(resort.amenities),
     activities: toCsv(resort.activities),
     checkInTime: resort.checkInTime || "",
@@ -858,6 +860,7 @@ export function AdminDashboard() {
         <input className="rounded-lg border border-slate-200 px-3 py-2" name="seoTitle" value={form.seoTitle} onChange={update} placeholder="SEO title optional" />
         <input className="rounded-lg border border-slate-200 px-3 py-2 md:col-span-2" name="shortDescription" value={form.shortDescription} onChange={update} placeholder="Short description" required />
         <textarea className="min-h-24 rounded-lg border border-slate-200 px-3 py-2 md:col-span-2" name="description" value={form.description} onChange={update} placeholder="Full resort description" required />
+        <input className="rounded-lg border border-slate-200 px-3 py-2" name="meals" value={form.meals} onChange={update} placeholder="Meals, comma separated" />
         <input className="rounded-lg border border-slate-200 px-3 py-2" name="amenities" value={form.amenities} onChange={update} placeholder="Amenities, comma separated" />
         <input className="rounded-lg border border-slate-200 px-3 py-2" name="activities" value={form.activities} onChange={update} placeholder="Activities, comma separated" />
         <input className="rounded-lg border border-slate-200 px-3 py-2 md:col-span-2" name="availabilitySheetUrl" value={form.availabilitySheetUrl} onChange={update} placeholder="Google Sheet availability URL" />

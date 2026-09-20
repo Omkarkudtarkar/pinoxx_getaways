@@ -14,6 +14,7 @@ export const sampleResorts = [
     rating: 4.8,
     distanceFromBusStandKm: 3.2,
     distanceToWaterActivitiesKm: 1.4,
+    meals: ["Breakfast", "Lunch", "Dinner"],
     amenities: ["River view", "Meals", "Parking", "Bonfire", "Swimming pool", "Power backup", "Guide support"],
     activities: ["River rafting", "Kayaking", "Zipline", "Jungle safari", "Campfire"],
     images: [
@@ -72,6 +73,7 @@ export const sampleResorts = [
     rating: 4.6,
     distanceFromBusStandKm: 8.5,
     distanceToWaterActivitiesKm: 2.8,
+    meals: ["Breakfast", "Lunch", "Dinner"],
     amenities: ["Forest view", "Meals", "Indoor games", "Campfire", "Nature trail", "Doctor on call"],
     activities: ["Bird watching", "Nature walk", "River rafting", "Cycling", "Boating"],
     images: [
@@ -114,6 +116,7 @@ export const sampleResorts = [
     rating: 4.4,
     distanceFromBusStandKm: 5.1,
     distanceToWaterActivitiesKm: 0.9,
+    meals: ["Breakfast", "Lunch", "Dinner"],
     amenities: ["Swimming pool", "Meals", "DJ on request", "Parking", "Activity desk", "First-aid support"],
     activities: ["River rafting", "Zipline", "Kayaking", "Zorbing", "Rain dance"],
     images: [

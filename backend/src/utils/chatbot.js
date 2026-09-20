@@ -131,6 +131,10 @@ function roomLine(room) {
   return `${room.name}: ${formatPerPersonPrice(room.price)} for up to ${room.capacity} guest${Number(room.capacity) === 1 ? "" : "s"}${room.description ? ` - ${room.description}` : ""}`;
 }
 
+function resortMeals(resort) {
+  return resort?.meals?.length ? resort.meals : ["Breakfast", "Lunch", "Dinner"];
+}
+
 function categoryForIndex(index, total) {
   if (total <= 1) return "budget";
   if (index < Math.ceil(total / 3)) return "budget";
@@ -218,6 +222,7 @@ function buildResortOverviewAnswer(resort) {
     `Sharing price: ${formatPerPersonPrice(resort.sharingPrice || resort.startingPrice)}`,
     `Couple price: ${formatPerPersonPrice(resort.couplePrice || resort.startingPrice)}`,
     `Distance: ${distance}${activityDistance}`,
+    `Meals: ${listItems(resortMeals(resort))}`,
     `Amenities: ${listItems(resort.amenities)}`,
     `Activities: ${listItems(resort.activities)}`
   ]);
@@ -253,6 +258,7 @@ function buildResortFacilitiesAnswer(resort) {
   return formatAnswer(
     `${resort.name} saved resort information`,
     [
+      `Meals: ${listItems(resortMeals(resort))}`,
       `Amenities: ${listItems(resort.amenities)}`,
       `Activities: ${listItems(resort.activities)}`,
       resort.description ? `Details: ${resort.description}` : ""
@@ -607,11 +613,13 @@ function buildAllRoomsAnswer(resorts) {
 
 function buildAllFacilitiesAnswer(resorts) {
   const points = activeResortsByPrice(resorts).map((resort) => {
+    const meals = listItems(resortMeals(resort), "");
     const amenities = listItems(resort.amenities, "");
     const activities = listItems(resort.activities, "");
-    if (!amenities && !activities) return "";
+    if (!meals && !amenities && !activities) return "";
     return [
       resort.name,
+      meals ? `Meals: ${meals}` : "",
       amenities ? `Amenities: ${amenities}` : "",
       activities ? `Activities: ${activities}` : ""
     ].filter(Boolean).join(" - ");
@@ -713,6 +721,7 @@ export async function answerLocally(message) {
   if (
     query.includes("facility") ||
     query.includes("amenity") ||
+    query.includes("meals") ||
     query.includes("food") ||
     query.includes("meal") ||
     query.includes("breakfast") ||

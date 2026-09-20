@@ -566,6 +566,7 @@ function createStore() {
       rating: 4.8,
       distanceFromBusStandKm: 3.2,
       distanceToWaterActivitiesKm: 1.4,
+      meals: ["Breakfast", "Lunch", "Dinner"],
       amenities: ["River view", "Meals", "Parking", "Bonfire", "Swimming pool", "Power backup", "Guide support"],
       activities: ["River rafting", "Kayaking", "Zipline", "Jungle safari", "Campfire"],
       images: [
@@ -609,6 +610,7 @@ function createStore() {
       rating: 4.6,
       distanceFromBusStandKm: 8.5,
       distanceToWaterActivitiesKm: 2.8,
+      meals: ["Breakfast", "Lunch", "Dinner"],
       amenities: ["Forest view", "Meals", "Indoor games", "Campfire", "Nature trail", "Doctor on call"],
       activities: ["Bird watching", "Nature walk", "River rafting", "Cycling", "Boating"],
       images: [
@@ -652,6 +654,7 @@ function createStore() {
       rating: 4.4,
       distanceFromBusStandKm: 5.1,
       distanceToWaterActivitiesKm: 0.9,
+      meals: ["Breakfast", "Lunch", "Dinner"],
       amenities: ["Swimming pool", "Meals", "DJ on request", "Parking", "Activity desk", "First-aid support"],
       activities: ["River rafting", "Zipline", "Kayaking", "Zorbing", "Rain dance"],
       images: [
@@ -867,6 +870,7 @@ function memoryResortPayload(body, files = []) {
     rating: optionalNumber(body.rating) ?? 4.5,
     distanceFromBusStandKm: optionalNumber(body.distanceFromBusStandKm) ?? 0,
     distanceToWaterActivitiesKm: optionalNumber(body.distanceToWaterActivitiesKm) ?? 0,
+    meals: parseList(body.meals, ["Breakfast", "Lunch", "Dinner"]),
     amenities: parseList(body.amenities),
     activities: parseList(body.activities),
     checkInTime: body.checkInTime?.trim() || "",
@@ -916,12 +920,13 @@ function normalizeResortType(value) {
   return ["bamboo", "mamboo", "budget", "premium"].includes(value) ? (value === "mamboo" ? "bamboo" : value) : "budget";
 }
 
-function parseList(value) {
+function parseList(value, fallback = []) {
   if (Array.isArray(value)) return value;
-  return String(value || "")
+  const items = String(value || "")
     .split(",")
     .map((item) => item.trim())
     .filter(Boolean);
+  return items.length ? items : fallback;
 }
 
 function parseJsonArray(value) {
@@ -1141,6 +1146,10 @@ function memoryListItems(items = [], fallback = "Not listed") {
   return values.length ? values.join(", ") : fallback;
 }
 
+function memoryResortMeals(resort) {
+  return resort?.meals?.length ? resort.meals : ["Breakfast", "Lunch", "Dinner"];
+}
+
 function memoryRoomLine(room) {
   return `${room.name} - ${formatMemoryPerPersonPrice(room.price)} for up to ${room.capacity} guest${Number(room.capacity) === 1 ? "" : "s"}${room.description ? `: ${room.description}` : ""}`;
 }
@@ -1213,6 +1222,7 @@ function buildMemoryResortOverviewAnswer(resort) {
     resort.shortDescription || resort.description || "Details are available with Pinoxx.",
     `Prices: sharing ${formatMemoryPerPersonPrice(resort.sharingPrice || resort.startingPrice)}, couple ${formatMemoryPerPersonPrice(resort.couplePrice || resort.startingPrice)}.`,
     `Distance: ${Number(resort.distanceFromBusStandKm || 0).toFixed(1)} km from Dandeli bus stand.`,
+    `Meals: ${memoryListItems(memoryResortMeals(resort))}.`,
     `Amenities: ${memoryListItems(resort.amenities)}.`,
     `Activities: ${memoryListItems(resort.activities)}.`
   ].join("\n");
@@ -1241,6 +1251,7 @@ function buildMemoryResortLocationAnswer(resort) {
 function buildMemoryResortFacilitiesAnswer(resort) {
   return [
     `${resort.name} saved resort information:`,
+    `Meals: ${memoryListItems(memoryResortMeals(resort))}.`,
     `Amenities: ${memoryListItems(resort.amenities)}.`,
     `Activities: ${memoryListItems(resort.activities)}.`,
     resort.description ? `Details: ${resort.description}` : "",

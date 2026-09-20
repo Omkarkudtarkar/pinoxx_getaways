@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { BedDouble, Building2, ChevronLeft, ChevronRight, Clock3, Images, IndianRupee, MapPin, Share2, Star, UsersRound, Waves, Wifi, X } from "lucide-react";
+import { BedDouble, Building2, ChevronLeft, ChevronRight, Clock3, Images, IndianRupee, MapPin, Share2, Star, UsersRound, Utensils, Waves, Wifi, X } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 import { AdminResortPanel } from "../components/AdminResortPanel";
@@ -53,6 +53,10 @@ function ratingAverage(reviews = [], fallbackRating = 0) {
   return (total / reviews.length).toFixed(1);
 }
 
+function resortMeals(resort) {
+  return resort?.meals?.length ? resort.meals : ["Breakfast", "Lunch", "Dinner"];
+}
+
 export function ResortDetail() {
   const { slug } = useParams();
   const [resort, setResort] = useState(() => getLocalResort(slug).resort);
@@ -99,6 +103,7 @@ export function ResortDetail() {
   const heroGallery = fullGallery.length ? fullGallery : gallery;
   const resortTypeLabel = resortTypeLabels[resort?.resortType] || "Budget";
   const averageReviewRating = ratingAverage(reviews, resort?.rating);
+  const meals = resortMeals(resort);
 
   useEffect(() => {
     if (!viewer) return undefined;
@@ -128,6 +133,7 @@ export function ResortDetail() {
     { label: "Distance from bus stand", value: `${resort.distanceFromBusStandKm} km`, Icon: MapPin, style: "border-slate-200 bg-slate-50 text-slate-800" },
     { label: "Distance to water activities", value: formatDistance(resort.distanceToWaterActivitiesKm), Icon: Waves, style: "border-sky-100 bg-sky-50 text-river-700" },
     { label: "Stay timing", value: "Check-in: 12:00 PM | Check-out: 11:00 AM", Icon: Clock3, style: "border-amber-100 bg-amber-50 text-amber-800" },
+    { label: "Meals", value: meals.join(", "), Icon: Utensils, style: "border-orange-100 bg-orange-50 text-orange-800" },
     { label: "Resort type", value: resortTypeLabel, Icon: Building2, style: "border-slate-200 bg-white text-slate-800" },
     {
       label: "Prices",
@@ -297,7 +303,23 @@ export function ResortDetail() {
               <Wifi className="text-jungle-700" size={22} />
               <h2 className="text-2xl font-black text-slate-950">Amenities & Activities</h2>
             </div>
-            <div className="grid gap-5 md:grid-cols-2">
+            <div className="grid gap-5 md:grid-cols-3">
+              <motion.div variants={resortInfoItemReveal}>
+                <h3 className="mb-3 font-black">Meals</h3>
+                <div className="flex flex-wrap gap-2">
+                  {meals.map((item, index) => (
+                    <motion.span
+                      key={item}
+                      variants={resortInfoItemReveal}
+                      whileHover={{ y: -2, scale: 1.04 }}
+                      className="rounded-full bg-orange-50 px-3 py-2 text-sm font-semibold text-orange-900 shadow-sm"
+                      transition={{ delay: index * 0.02 }}
+                    >
+                      {item}
+                    </motion.span>
+                  ))}
+                </div>
+              </motion.div>
               <motion.div variants={resortInfoItemReveal}>
                 <h3 className="mb-3 font-black">Amenities</h3>
                 <div className="flex flex-wrap gap-2">
