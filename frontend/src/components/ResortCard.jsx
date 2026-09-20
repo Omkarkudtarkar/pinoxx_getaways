@@ -1,4 +1,4 @@
-import { Star } from "lucide-react";
+import { Star, Utensils } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { resortImageUrl, useFallbackResortImage } from "../lib/api";
@@ -17,6 +17,7 @@ export function ResortCard({ resort }) {
   ), [resort.images]);
   const [activeImage, setActiveImage] = useState(0);
   const typeLabel = resortTypeLabels[resort.resortType] || "Budget";
+  const meals = resort.meals?.length ? resort.meals : ["Breakfast", "Lunch", "Dinner"];
 
   useEffect(() => {
     setActiveImage(0);
@@ -77,6 +78,10 @@ export function ResortCard({ resort }) {
         <span className="w-fit rounded-full bg-slate-100 px-3 py-1 text-xs font-black uppercase tracking-wide text-slate-700">
           {typeLabel}
         </span>
+        <div className="flex items-start gap-2 rounded-lg bg-orange-50 px-3 py-2 text-sm font-bold text-orange-900">
+          <Utensils className="mt-0.5 shrink-0" size={15} />
+          <span className="line-clamp-2">Meals: {meals.join(", ")}</span>
+        </div>
         <p className="line-clamp-2 text-sm leading-6 text-slate-600">{resort.shortDescription}</p>
         <div className="grid gap-2 border-t border-slate-100 pt-3">
           <div className="flex items-center justify-between gap-3">
