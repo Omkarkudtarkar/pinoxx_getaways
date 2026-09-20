@@ -5,8 +5,8 @@ import { useParams } from "react-router-dom";
 import { AdminResortPanel } from "../components/AdminResortPanel";
 import { BookingForm } from "../components/BookingForm";
 import { ReviewForm } from "../components/ReviewForm";
-import { getResort, resortImageUrl, useFallbackResortImage } from "../lib/api";
-import { formatCurrency, formatPerPersonPrice } from "../lib/constants";
+import { getLocalResort, getResort, resortImageUrl, useFallbackResortImage } from "../lib/api";
+import { formatPerPersonPrice } from "../lib/constants";
 import { Seo } from "../lib/Seo";
 
 const resortTypeLabels = {
@@ -55,8 +55,8 @@ function ratingAverage(reviews = [], fallbackRating = 0) {
 
 export function ResortDetail() {
   const { slug } = useParams();
-  const [resort, setResort] = useState(null);
-  const [reviews, setReviews] = useState([]);
+  const [resort, setResort] = useState(() => getLocalResort(slug).resort);
+  const [reviews, setReviews] = useState(() => getLocalResort(slug).reviews);
   const [active, setActive] = useState(0);
   const [clicks, setClicks] = useState(0);
   const [adminOpen, setAdminOpen] = useState(false);
@@ -64,10 +64,22 @@ export function ResortDetail() {
   const [touchStart, setTouchStart] = useState(null);
 
   useEffect(() => {
+    let cancelled = false;
+    const localData = getLocalResort(slug);
+
+    setResort(localData.resort);
+    setReviews(localData.reviews || []);
+    setActive(0);
+
     getResort(slug).then(({ resort: item, reviews: resortReviews }) => {
+      if (cancelled) return;
       setResort(item);
       setReviews(resortReviews || []);
     });
+
+    return () => {
+      cancelled = true;
+    };
   }, [slug]);
 
   useEffect(() => {
@@ -349,7 +361,7 @@ export function ResortDetail() {
                   <div className="p-4">
                     <div className="flex items-start justify-between gap-3">
                       <h3 className="font-black text-slate-950">{room.name}</h3>
-                      <span className="font-black text-jungle-700">{formatCurrency(room.price)}</span>
+                      <span className="font-black text-jungle-700">{formatPerPersonPrice(room.price)}</span>
                     </div>
                     <p className="mt-2 flex items-center gap-1 text-sm text-slate-600">
                       <UsersRound size={16} /> Up to {room.capacity} guests

@@ -11,7 +11,7 @@ let appPromise;
 async function prepareApp() {
   if (!appPromise) {
     appPromise = (async () => {
-      const allowMemoryFallback = process.env.NODE_ENV !== "production" || process.env.ALLOW_MEMORY_FALLBACK === "true";
+      const allowMemoryFallback = process.env.ALLOW_MEMORY_FALLBACK === "true";
 
       try {
         await connectDb({ allowMemoryFallback });

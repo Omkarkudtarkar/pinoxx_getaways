@@ -212,7 +212,9 @@ app.use([
   "/api/admin",
   "/admin",
   "/api/contact",
-  "/contact"
+  "/contact",
+  "/api/chatbot",
+  "/chatbot"
 ], requireMongoDatabase);
 
 app.use("/api/auth", authRouter);

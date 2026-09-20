@@ -3,8 +3,12 @@ import { businessWhatsappNumber, formatPhoneNumber } from "./constants";
 import { sampleResorts, sampleReviews } from "./sampleData";
 
 const productionApiUrl = "/api";
-const defaultApiUrl = import.meta.env.PROD ? productionApiUrl : "http://localhost:5000/api";
+const defaultApiUrl = productionApiUrl;
 const localApiPattern = /^https?:\/\/(?:localhost|127\.0\.0\.1|\[::1\])(?::\d+)?(?:\/|$)/i;
+const resortRequestTimeoutMs = 900;
+const chatbotRequestTimeoutMs = 5000;
+const resortCacheKey = "pinoxx_resorts_cache";
+let resortCache = [];
 
 function normalizeApiUrl(url) {
   if (import.meta.env.PROD) return productionApiUrl;
@@ -82,11 +86,23 @@ export function useFallbackResortImage(event) {
 
 export async function getResorts(params) {
   try {
-    const { data } = await api.get("/resorts", { params });
+    const { data } = await api.get("/resorts", { params, timeout: resortRequestTimeoutMs });
+    if (!Array.isArray(data?.resorts)) {
+      throw new Error("Invalid resorts response");
+    }
+    if (hasActiveParams(params)) {
+      updateLocalResortCache(data.resorts);
+    } else {
+      replaceCachedResorts(data.resorts);
+    }
     return data.resorts;
   } catch {
-    return filterLocalResorts(sampleResorts, params);
+    return filterLocalResorts(readLocalResortCache(), params);
   }
+}
+
+function hasActiveParams(params = {}) {
+  return Object.values(params || {}).some((value) => value !== undefined && value !== null && value !== "");
 }
 
 function filterLocalResorts(resorts, params = {}) {
@@ -111,12 +127,102 @@ function filterLocalResorts(resorts, params = {}) {
 
 export async function getResort(slug) {
   try {
-    const { data } = await api.get(`/resorts/${slug}`);
+    const { data } = await api.get(`/resorts/${slug}`, { timeout: resortRequestTimeoutMs });
+    if (!data?.resort) {
+      throw new Error("Invalid resort response");
+    }
+    updateLocalResortCache([data.resort]);
     return data;
   } catch {
-    const resort = sampleResorts.find((item) => item.slug === slug) || sampleResorts[0];
-    return { resort, reviews: sampleReviews };
+    return getLocalResort(slug);
   }
+}
+
+export function getLocalResort(slug) {
+  const resorts = readLocalResortCache();
+  const resort = resorts.find((item) => item.slug === slug) || sampleResorts.find((item) => item.slug === slug) || sampleResorts[0];
+  return { resort, reviews: sampleReviews };
+}
+
+export function getCachedResorts() {
+  return readLocalResortCache();
+}
+
+export function replaceCachedResorts(resorts) {
+  writeLocalResortCache(Array.isArray(resorts) && resorts.length ? resorts : []);
+}
+
+export function removeCachedResort(idOrSlug) {
+  const value = String(idOrSlug || "");
+  const current = resortCache.length ? resortCache : readStoredResorts();
+  writeLocalResortCache(current.filter((resort) => resort._id !== value && resort.slug !== value));
+}
+
+function readLocalResortCache() {
+  const cached = readStoredResorts();
+  if (cached.length) {
+    resortCache = cached;
+  }
+  return resortCache.length ? resortCache : sampleResorts;
+}
+
+function readStoredResorts() {
+  try {
+    const cached = JSON.parse(localStorage.getItem(resortCacheKey) || "[]");
+    return Array.isArray(cached) ? cached.filter((resort) => resort?.slug && resort?.isActive !== false) : [];
+  } catch {
+    return [];
+  }
+}
+
+function readSavedResortCache() {
+  const cached = readStoredResorts();
+  const savedResorts = cached.filter((resort) => !isSampleResort(resort));
+  if (savedResorts.length) {
+    resortCache = savedResorts;
+    return savedResorts;
+  }
+  return resortCache.filter((resort) => !isSampleResort(resort));
+}
+
+async function fetchSavedResortsForChatbot() {
+  try {
+    const { data } = await api.get("/resorts", { timeout: resortRequestTimeoutMs });
+    if (Array.isArray(data?.resorts)) {
+      const savedResorts = data.resorts.filter((resort) => !isSampleResort(resort));
+      replaceCachedResorts(savedResorts);
+      return savedResorts;
+    }
+  } catch {
+    // The caller will decide how to respond when saved resorts are unavailable.
+  }
+  return readSavedResortCache();
+}
+
+function isSampleResort(resort) {
+  return String(resort?._id || "").startsWith("sample-");
+}
+
+function updateLocalResortCache(resorts) {
+  if (!Array.isArray(resorts) || resorts.length === 0) return;
+  writeLocalResortCache(mergeResorts(resorts, resortCache));
+}
+
+function writeLocalResortCache(resorts) {
+  resortCache = Array.isArray(resorts) ? resorts.filter((resort) => resort?.slug && resort?.isActive !== false) : [];
+  try {
+    localStorage.setItem(resortCacheKey, JSON.stringify(resortCache));
+  } catch {
+    // Keep the in-memory cache even if localStorage is unavailable.
+  }
+}
+
+function mergeResorts(primary = [], secondary = []) {
+  const bySlug = new Map();
+  [...secondary, ...primary].forEach((resort) => {
+    if (resort?.slug) bySlug.set(resort.slug, resort);
+  });
+  return Array.from(bySlug.values());
 }
 
 function formatPrice(value) {
@@ -231,6 +337,31 @@ function buildLocalDistanceAnswer(resorts, message) {
   }
 
   return formatAnswer("Current resort distances", sorted.map(line), "Pinoxx can confirm pickup guidance after you choose a resort.");
+}
+
+function buildLocalResortListAnswer(resorts) {
+  const activeResorts = [...(resorts || [])]
+    .filter((resort) => resort?.isActive !== false)
+    .sort((first, second) => Number(first.startingPrice || 0) - Number(second.startingPrice || 0));
+
+  if (!activeResorts.length) {
+    return "No active resorts are available in the saved resort list right now. Add resorts from the admin panel, then ask me again.";
+  }
+
+  return formatAnswer(
+    "Available resorts",
+    activeResorts.map((resort) => {
+      const price = resort.startingPrice ? `from ${formatPerPersonPrice(resort.startingPrice)}` : "price on request";
+      const location = resort.location ? ` in ${resort.location}` : "";
+      const type = resort.resortType ? ` (${resort.resortType})` : "";
+      return `${resort.name}${type}${location}: ${price}`;
+    }),
+    "Tell me a resort name to see rooms, price, distance, amenities, and activities."
+  );
+}
+
+function savedResortDataUnavailableAnswer() {
+  return "I could not access the saved resort database right now. Please check the API/database connection, then ask again. I will only answer resort-specific questions from saved resort data.";
 }
 
 const raftingPackages = [
@@ -447,10 +578,44 @@ function buildLocalContactAnswer(message) {
 
 export async function askChatbot(message) {
   try {
-    const { data } = await api.post("/chatbot", { message }, { timeout: 700 });
+    const { data } = await api.post("/chatbot", { message }, { timeout: chatbotRequestTimeoutMs });
     return data.answer;
   } catch {
     const text = message.toLowerCase();
+    const isResortDataQuestion =
+      text.includes("resort") ||
+      text.includes("stay") ||
+      text.includes("option") ||
+      text.includes("available") ||
+      text.includes("price") ||
+      text.includes("package") ||
+      text.includes("budget") ||
+      text.includes("cheap") ||
+      text.includes("best price") ||
+      text.includes("best-price") ||
+      text.includes("deal") ||
+      text.includes("discount") ||
+      text.includes("comfort") ||
+      text.includes("comport") ||
+      text.includes("premium") ||
+      text.includes("distance") ||
+      text.includes("bus") ||
+      text.includes("pickup") ||
+      text.includes("route") ||
+      text.includes("room") ||
+      text.includes("rooms") ||
+      text.includes("facility") ||
+      text.includes("amenity") ||
+      text.includes("food") ||
+      text.includes("meal") ||
+      text.includes("pool") ||
+      text.includes("activity");
+    const localResorts = isResortDataQuestion ? await fetchSavedResortsForChatbot() : readSavedResortCache();
+
+    if (isResortDataQuestion && localResorts.length === 0) {
+      return savedResortDataUnavailableAnswer();
+    }
+
     if (isTripGuidanceQuestion(text)) return buildLocalTripGuidanceAnswer();
     if (isContactQuestion(text)) return buildLocalContactAnswer(message);
     if (
@@ -466,10 +631,10 @@ export async function askChatbot(message) {
       text.includes("comport") ||
       text.includes("premium")
     ) {
-      return buildLocalPriceAnswer(sampleResorts, message);
+      return buildLocalPriceAnswer(localResorts, message);
     }
     if (text.includes("distance") || text.includes("bus") || text.includes("pickup") || text.includes("route")) {
-      return buildLocalDistanceAnswer(sampleResorts, message);
+      return buildLocalDistanceAnswer(localResorts, message);
     }
     if (isExtraActivitiesQuestion(text)) return buildLocalExtraActivitiesAnswer(message);
     if (text.includes("rafting")) return buildLocalRaftingAnswer(message);
@@ -493,6 +658,9 @@ export async function askChatbot(message) {
       text.includes("archery")
     ) {
       return buildLocalFacilitiesAnswer(message);
+    }
+    if (text.includes("resort") || text.includes("stay") || text.includes("option") || text.includes("available")) {
+      return buildLocalResortListAnswer(localResorts);
     }
     return "Share your dates, member count, budget, and preferred resort. Pinoxx will help with best-price options, sightseeing, activities, and guidance from check-in to check-out.";
   }

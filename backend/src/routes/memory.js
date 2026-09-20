@@ -1142,7 +1142,7 @@ function memoryListItems(items = [], fallback = "Not listed") {
 }
 
 function memoryRoomLine(room) {
-  return `${room.name} - ${formatMemoryPrice(room.price)} for up to ${room.capacity} guest${Number(room.capacity) === 1 ? "" : "s"}${room.description ? `: ${room.description}` : ""}`;
+  return `${room.name} - ${formatMemoryPerPersonPrice(room.price)} for up to ${room.capacity} guest${Number(room.capacity) === 1 ? "" : "s"}${room.description ? `: ${room.description}` : ""}`;
 }
 
 function activeMemoryResortsByPrice() {
@@ -1478,6 +1478,37 @@ function buildMemoryPriceAnswer(query) {
   return `Current resort prices by category:\n${sections}\n\nShare your date and member count so Pinoxx can help find the best-value and cheap-price option for your trip.`;
 }
 
+function isMemoryResortListQuery(query) {
+  return (
+    query.includes("available") ||
+    query.includes("availability") ||
+    query.includes("all resort") ||
+    query.includes("all stay") ||
+    query.includes("resorts") ||
+    query.includes("stays") ||
+    query.includes("options") ||
+    query.includes("list")
+  );
+}
+
+function buildMemoryResortListAnswer() {
+  const activeResorts = activeMemoryResortsByPrice();
+
+  if (!activeResorts.length) {
+    return "No active resorts are available in the saved resort list right now.";
+  }
+
+  return [
+    "Available resorts",
+    activeResorts.map((resort) => {
+      const location = resort.location ? ` in ${resort.location}` : "";
+      const type = resort.resortType ? ` (${resort.resortType})` : "";
+      return `- ${resort.name}${type}${location}: from ${formatMemoryPerPersonPrice(resort.startingPrice)}`;
+    }).join("\n"),
+    "Tell me a resort name to see rooms, price, distance, amenities, and activities."
+  ].join("\n\n");
+}
+
 function answerFromMemory(message) {
   const query = String(message || "").toLowerCase();
   const activeResorts = store.resorts.filter((item) => item.isActive !== false);
@@ -1524,6 +1555,10 @@ function answerFromMemory(message) {
   ) {
     if (!resort) return buildMemoryPriceAnswer(query);
     return buildMemoryResortPriceAnswer(resort);
+  }
+
+  if (!resort && isMemoryResortListQuery(query)) {
+    return buildMemoryResortListAnswer();
   }
 
   if (

@@ -94,6 +94,35 @@ const topics = [
   }
 ];
 
+function MessageText({ message }) {
+  if (message.role === "user") return message.text;
+
+  return (
+    <div className="grid gap-2">
+      {String(message.text || "")
+        .split("\n")
+        .map((line) => line.trim())
+        .filter(Boolean)
+        .map((line, index) => {
+          if (line.startsWith("- ")) {
+            return (
+              <p key={`${line}-${index}`} className="flex gap-2">
+                <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-jungle-600" />
+                <span>{line.slice(2)}</span>
+              </p>
+            );
+          }
+
+          return (
+            <p key={`${line}-${index}`} className={index === 0 ? "font-black text-slate-950" : ""}>
+              {line}
+            </p>
+          );
+        })}
+    </div>
+  );
+}
+
 export function Chatbot() {
   const [open, setOpen] = useState(false);
   const [showNudge, setShowNudge] = useState(false);
@@ -308,7 +337,7 @@ export function Chatbot() {
                 key={`${message.role}-${index}`}
                 className={`w-fit max-w-[88%] whitespace-pre-line break-words rounded-lg px-3 py-2 text-left text-sm leading-6 shadow-sm ${message.role === "user" ? "ml-auto bg-jungle-700 text-white" : "mr-auto bg-white text-slate-800"}`}
               >
-                {message.text}
+                <MessageText message={message} />
               </div>
             ))}
             {loading && (

@@ -7,7 +7,7 @@ dotenv.config();
 dotenv.config({ path: path.resolve(process.cwd(), "../.env") });
 
 const port = process.env.PORT || 5000;
-const allowMemoryFallback = process.env.NODE_ENV !== "production" || process.env.ALLOW_MEMORY_FALLBACK === "true";
+const allowMemoryFallback = process.env.ALLOW_MEMORY_FALLBACK === "true";
 
 async function startServer() {
   try {

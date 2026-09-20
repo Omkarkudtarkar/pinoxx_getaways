@@ -132,7 +132,7 @@ chatbotRouter.post("/", async (req, res, next) => {
     }
 
     const answer = await answerLocally(message);
-    res.json({ answer, source: "local" });
+    res.json({ answer, source: process.env.USE_MEMORY_DB === "true" ? "memory" : "database" });
   } catch (error) {
     next(error);
   }

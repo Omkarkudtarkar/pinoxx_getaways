@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import { CalendarCheck, CheckCircle2, Clock3, CreditCard, Loader2, MessageCircle, Send, ShieldCheck } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { api } from "../lib/api";
-import { formatCurrency } from "../lib/constants";
+import { formatCurrency, formatPerPersonPrice } from "../lib/constants";
 
 const today = new Date().toISOString().slice(0, 10);
 const dayInMs = 24 * 60 * 60 * 1000;
@@ -207,7 +207,7 @@ export function BookingForm({ resort }) {
         <select className="rounded-lg border border-slate-200 px-3 py-3 font-semibold" name="roomCategory" value={form.roomCategory} onChange={update} required>
           {resort.rooms?.map((room) => (
             <option key={room.name} value={room.name}>
-              {room.name} - {formatCurrency(room.price)}
+              {room.name} - {formatPerPersonPrice(room.price)}
             </option>
           ))}
         </select>

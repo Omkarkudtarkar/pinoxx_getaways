@@ -128,7 +128,7 @@ function listItems(items = [], fallback = "Not listed") {
 }
 
 function roomLine(room) {
-  return `${room.name}: ${formatPrice(room.price)} for up to ${room.capacity} guest${Number(room.capacity) === 1 ? "" : "s"}${room.description ? ` - ${room.description}` : ""}`;
+  return `${room.name}: ${formatPerPersonPrice(room.price)} for up to ${room.capacity} guest${Number(room.capacity) === 1 ? "" : "s"}${room.description ? ` - ${room.description}` : ""}`;
 }
 
 function categoryForIndex(index, total) {
@@ -558,6 +558,36 @@ function buildPriceAnswer(resorts, query) {
   return `Current resort prices by category\n\n${sections}\n\nShare your date and member count so Pinoxx can help find the best-value and cheap-price option for your trip.`;
 }
 
+function isResortListQuery(query) {
+  return (
+    query.includes("available") ||
+    query.includes("availability") ||
+    query.includes("all resort") ||
+    query.includes("all stay") ||
+    query.includes("resorts") ||
+    query.includes("stays") ||
+    query.includes("options") ||
+    query.includes("list")
+  );
+}
+
+function buildResortListAnswer(resorts) {
+  const activeResorts = activeResortsByPrice(resorts);
+
+  if (!activeResorts.length) {
+    return "No active resorts are available in the saved resort list right now.";
+  }
+
+  return formatAnswer(
+    "Available resorts",
+    activeResorts.map((resort) => {
+      const location = resort.location ? ` in ${resort.location}` : "";
+      return `${resort.name}${location}: ${resortTypeLabel(resort.resortType)}, from ${formatPerPersonPrice(resort.startingPrice)}`;
+    }),
+    "Tell me a resort name to see rooms, price, distance, amenities, and activities."
+  );
+}
+
 export async function answerLocally(message) {
   const query = normalize(message);
   const resorts = await Resort.find({ isActive: true }).sort({ startingPrice: 1 }).lean();
@@ -604,6 +634,10 @@ export async function answerLocally(message) {
   ) {
     if (!resort) return buildPriceAnswer(resorts, query);
     return buildResortPriceAnswer(resort);
+  }
+
+  if (!resort && isResortListQuery(query)) {
+    return buildResortListAnswer(resorts);
   }
 
   if (

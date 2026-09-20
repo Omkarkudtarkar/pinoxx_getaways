@@ -15,7 +15,7 @@ import {
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { Navigate } from "react-router-dom";
-import { api, assetUrl, getResorts } from "../lib/api";
+import { api, assetUrl, getResorts, removeCachedResort, replaceCachedResorts } from "../lib/api";
 import { useAuth } from "../lib/AuthContext";
 import { formatPerPersonPrice, whatsappUrl } from "../lib/constants";
 import { Seo } from "../lib/Seo";
@@ -499,7 +499,11 @@ export function AdminDashboard() {
       const body = new FormData();
       preparedFiles.forEach((file) => body.append("images", file));
       const { data } = await api.post(`/admin/resorts/${selectedResort}/images`, body);
-      setResorts((items) => items.map((item) => (item._id === selectedResort ? data.resort : item)));
+      setResorts((items) => {
+        const nextItems = items.map((item) => (item._id === selectedResort ? data.resort : item));
+        replaceCachedResorts(nextItems);
+        return nextItems;
+      });
       setMessage("Images uploaded successfully.");
       setFiles([]);
     } catch (err) {
@@ -670,7 +674,11 @@ export function AdminDashboard() {
       }
 
       const createdResort = data.resort;
-      setResorts((items) => [createdResort, ...items]);
+      setResorts((items) => {
+        const nextItems = [createdResort, ...items];
+        replaceCachedResorts(nextItems);
+        return nextItems;
+      });
       setSelectedResort(createdResort._id);
       setSummary((value) => value ? { ...value, resorts: (value.resorts || 0) + 1 } : value);
       setResortForm(initialResortForm);
@@ -738,7 +746,11 @@ export function AdminDashboard() {
         uploadWarning = uploadErrorMessage(error, "Uploaded image files could not be saved.");
       }
 
-      setResorts((items) => items.map((item) => (item._id === editingResortId ? data.resort : item)));
+      setResorts((items) => {
+        const nextItems = items.map((item) => (item._id === editingResortId ? data.resort : item));
+        replaceCachedResorts(nextItems);
+        return nextItems;
+      });
       setSelectedResort(data.resort._id);
       setEditingResortId("");
       setEditFiles([]);
@@ -757,7 +769,12 @@ export function AdminDashboard() {
 
     try {
       await api.delete(`/admin/resorts/${id}`);
-      setResorts((items) => items.filter((item) => item._id !== id));
+      setResorts((items) => {
+        const nextItems = items.filter((item) => item._id !== id);
+        replaceCachedResorts(nextItems);
+        return nextItems;
+      });
+      removeCachedResort(id);
       setSelectedResort((value) => value === id ? "" : value);
       setSummary((value) => value ? { ...value, resorts: Math.max(0, (value.resorts || 1) - 1) } : value);
       setMessage("Resort deleted from public listings.");
