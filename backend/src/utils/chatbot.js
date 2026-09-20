@@ -588,6 +588,72 @@ function buildResortListAnswer(resorts) {
   );
 }
 
+function buildAllRoomsAnswer(resorts) {
+  const points = activeResortsByPrice(resorts).flatMap((resort) => {
+    const rooms = resort.rooms?.length ? resort.rooms : [];
+    return rooms.map((room) => `${resort.name} - ${roomLine(room)}`);
+  });
+
+  if (!points.length) {
+    return "Room categories are not saved for the active resorts yet. Add room details in the admin resort profile so I can answer from the database.";
+  }
+
+  return formatAnswer(
+    "Saved room categories",
+    points,
+    "These room details are from the active resort profiles saved in the database."
+  );
+}
+
+function buildAllFacilitiesAnswer(resorts) {
+  const points = activeResortsByPrice(resorts).map((resort) => {
+    const amenities = listItems(resort.amenities, "");
+    const activities = listItems(resort.activities, "");
+    if (!amenities && !activities) return "";
+    return [
+      resort.name,
+      amenities ? `Amenities: ${amenities}` : "",
+      activities ? `Activities: ${activities}` : ""
+    ].filter(Boolean).join(" - ");
+  }).filter(Boolean);
+
+  if (!points.length) {
+    return "Facilities are not saved for the active resorts yet. Add amenities and activities in the admin resort profile so I can answer from the database.";
+  }
+
+  return formatAnswer(
+    "Saved resort facilities",
+    points,
+    "These facilities come from the active resort profiles saved in the database."
+  );
+}
+
+function buildAllActivitiesAnswer(resorts, query) {
+  const wantsRafting = query.includes("rafting");
+  const points = activeResortsByPrice(resorts)
+    .map((resort) => {
+      const activities = (resort.activities || []).map((item) => String(item || "").trim()).filter(Boolean);
+      const selectedActivities = wantsRafting
+        ? activities.filter((item) => normalize(item).includes("raft"))
+        : activities;
+      if (!selectedActivities.length) return "";
+      return `${resort.name}: ${selectedActivities.join(", ")}`;
+    })
+    .filter(Boolean);
+
+  if (!points.length) {
+    return wantsRafting
+      ? "Rafting details are not saved in the active resort profiles yet. Add rafting in resort activities so I can answer from the database."
+      : "Activity details are not saved for the active resorts yet. Add activities in the admin resort profile so I can answer from the database.";
+  }
+
+  return formatAnswer(
+    wantsRafting ? "Saved rafting details" : "Saved resort activities",
+    points,
+    "These details come from the active resort profiles saved in the database."
+  );
+}
+
 export async function answerLocally(message) {
   const query = normalize(message);
   const resorts = await Resort.find({ isActive: true }).sort({ startingPrice: 1 }).lean();
@@ -603,6 +669,10 @@ export async function answerLocally(message) {
 
   if (resort && (query.includes("room") || query.includes("rooms") || query.includes("cottage") || query.includes("category") || query.includes("capacity") || query.includes("guest"))) {
     return buildResortRoomsAnswer(resort);
+  }
+
+  if (!resort && (query.includes("room") || query.includes("rooms") || query.includes("cottage") || query.includes("category") || query.includes("capacity") || query.includes("guest"))) {
+    return buildAllRoomsAnswer(resorts);
   }
 
   if (isTripGuidanceQuery(query)) {
@@ -659,17 +729,17 @@ export async function answerLocally(message) {
     query.includes("badminton") ||
     query.includes("archery")
   ) {
-    if (!resort) return buildFacilitiesAnswer(query);
+    if (!resort) return buildAllFacilitiesAnswer(resorts);
     return buildResortFacilitiesAnswer(resort);
   }
 
   if (isExtraActivitiesQuery(query)) {
-    return buildExtraActivitiesAnswer(query);
+    if (!resort) return buildAllActivitiesAnswer(resorts, query);
+    return buildResortActivitiesAnswer(resort);
   }
 
   if (query.includes("rafting") || query.includes("activity") || query.includes("adventure")) {
-    if (query.includes("rafting")) return buildRaftingAnswer(query);
-    if (!resort) return "Dandeli adventure plans can include rafting, sightseeing, jungle safari, water activities, and resort activities. Pinoxx can confirm what fits your date and stay.";
+    if (!resort) return buildAllActivitiesAnswer(resorts, query);
     return buildResortActivitiesAnswer(resort);
   }
 
