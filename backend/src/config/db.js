@@ -1,9 +1,12 @@
 import mongoose from "mongoose";
+import dns from "node:dns";
 
 mongoose.set("strictQuery", true);
 mongoose.set("bufferCommands", false);
 
 export async function connectDb({ allowMemoryFallback = false } = {}) {
+  configureMongoDnsServers();
+
   const uri = process.env.MONGODB_URI;
 
   if (!uri) {
@@ -32,6 +35,17 @@ export async function connectDb({ allowMemoryFallback = false } = {}) {
     }
     throw error;
   }
+}
+
+function configureMongoDnsServers() {
+  const servers = (process.env.MONGODB_DNS_SERVERS || "")
+    .split(",")
+    .map((server) => server.trim())
+    .filter(Boolean);
+
+  if (!servers.length) return;
+
+  dns.setServers(servers);
 }
 
 function enableMemoryDb(reason) {

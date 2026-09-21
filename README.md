@@ -48,5 +48,9 @@ Optional admin tuning:
 - `ADMIN_JWT_EXPIRES_IN=30d` controls how long admin logins stay valid.
 - `ADMIN_RATE_LIMIT_PER_WINDOW=300` controls admin API requests per 15 minutes.
 
+Optional MongoDB troubleshooting:
+
+- `MONGODB_DNS_SERVERS=1.1.1.1,8.8.8.8` can be used when a `mongodb+srv` Atlas URI fails with `querySrv ECONNREFUSED` on the local network.
+
 After redeploying, open `/api/health` on the production domain. It should return JSON with `service: "pinoxx-api"`, `ok: true`, `mongoConfigured: true`, and `jwtConfigured: true`. Then login with username `pinoxx@getaways.in` and password `pinoxx@getaways`.
 

@@ -1,8 +1,8 @@
-import dotenv from "dotenv";
 import { connectDb } from "../backend/src/config/db.js";
+import { loadEnv } from "../backend/src/config/env.js";
 import { ensureAdminUser } from "../backend/src/utils/bootstrapAdmin.js";
 
-dotenv.config();
+loadEnv();
 
 process.env.MONGODB_TIMEOUT_MS ||= "5000";
 

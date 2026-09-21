@@ -1,10 +1,8 @@
-import dotenv from "dotenv";
-import path from "path";
 import { connectDb } from "./config/db.js";
+import { loadEnv } from "./config/env.js";
 import { ensureAdminUser } from "./utils/bootstrapAdmin.js";
 
-dotenv.config();
-dotenv.config({ path: path.resolve(process.cwd(), "../.env") });
+loadEnv();
 
 const port = process.env.PORT || 5000;
 const allowMemoryFallback = process.env.ALLOW_MEMORY_FALLBACK === "true";

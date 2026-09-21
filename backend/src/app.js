@@ -1,5 +1,4 @@
 import cors from "cors";
-import dotenv from "dotenv";
 import express from "express";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
@@ -16,11 +15,11 @@ import { contactRouter } from "./routes/contact.js";
 import { createMemoryRouter } from "./routes/memory.js";
 import { pinoxxReviewsRouter } from "./routes/pinoxxReviews.js";
 import { resortsRouter } from "./routes/resorts.js";
+import { loadEnv } from "./config/env.js";
 import { ensureMongoDatabaseReady, requireMongoDatabase } from "./middleware/database.js";
 import { adminEmail, adminUsername } from "./utils/bootstrapAdmin.js";
 
-dotenv.config();
-dotenv.config({ path: path.resolve(process.cwd(), "../.env") });
+loadEnv();
 
 export const app = express();
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
