@@ -110,6 +110,8 @@ const sightseeingPlaces = [
   }
 ];
 
+const raftingHeroImage = "/dandeli-rafting-forest.jpg";
+
 const fadeUp = {
   hidden: { opacity: 0, y: 28 },
   visible: { opacity: 1, y: 0 }
@@ -151,13 +153,15 @@ export function Home() {
       />
 
       <section className="relative isolate overflow-hidden bg-slate-950">
-        <img
-          src={secondaryImage || heroImage}
-          alt=""
-          aria-hidden="true"
+        <motion.img
+          src={raftingHeroImage}
+          alt="Rafting through a green Dandeli forest river"
           className="absolute inset-0 -z-30 h-full w-full object-cover"
+          initial={{ scale: 1.03, x: 0 }}
+          animate={{ scale: [1.03, 1.09, 1.03], x: [0, -18, 0] }}
+          transition={{ duration: 16, repeat: Infinity, ease: "easeInOut" }}
         />
-        <div className="absolute inset-0 -z-20 bg-slate-950/70" />
+        <div className="absolute inset-0 -z-20 bg-slate-950/62" />
         <div className="absolute inset-x-0 bottom-0 -z-10 h-32 bg-gradient-to-t from-white to-transparent" />
 
         <div className="mx-auto flex min-h-[calc(100vh-4rem)] max-w-7xl items-center px-4 py-14 sm:px-6 lg:px-8">
