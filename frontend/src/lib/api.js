@@ -5,7 +5,7 @@ import { sampleResorts, sampleReviews } from "./sampleData";
 const productionApiUrl = "/api";
 const defaultApiUrl = productionApiUrl;
 const localApiPattern = /^https?:\/\/(?:localhost|127\.0\.0\.1|\[::1\])(?::\d+)?(?:\/|$)/i;
-const resortRequestTimeoutMs = 900;
+const resortRequestTimeoutMs = 10000;
 const chatbotRequestTimeoutMs = 5000;
 const resortCacheKey = "pinoxx_resorts_cache";
 let resortCache = [];
