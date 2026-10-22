@@ -8,6 +8,7 @@ import {
   PhoneCall,
   Plus,
   Save,
+  WalletCards,
   ShieldAlert,
   Trash2,
   UsersRound,
@@ -23,6 +24,7 @@ import { Seo } from "../lib/Seo";
 const tabs = [
   { id: "requests", label: "Call Requests", icon: PhoneCall },
   { id: "bookings", label: "Bookings", icon: Check },
+  { id: "activity-pricing", label: "Activity Pricing", icon: WalletCards },
   { id: "resorts", label: "Resorts", icon: Building2 },
   { id: "reviews", label: "Reviews", icon: ShieldAlert },
   { id: "analytics", label: "Customer Graph", icon: BarChart3 }
@@ -436,6 +438,12 @@ export function AdminDashboard() {
   const [editForm, setEditForm] = useState(initialResortForm);
   const [editRooms, setEditRooms] = useState([{ ...emptyRoom }]);
   const [savingResort, setSavingResort] = useState(false);
+  const [activityPrices, setActivityPrices] = useState({
+    adventureCombo: "",
+    riverRafting: "",
+    riverZipline: ""
+  });
+  const [savingActivityPrices, setSavingActivityPrices] = useState(false);
   const [graphRange, setGraphRange] = useState("week");
 
   useEffect(() => {
@@ -445,16 +453,48 @@ export function AdminDashboard() {
       api.get("/admin/bookings"),
       api.get("/admin/contacts"),
       api.get("/admin/reviews"),
+      api.get("/admin/activity-pricing"),
       getResorts()
-    ]).then(([summaryResponse, bookingsResponse, contactsResponse, reviewsResponse, resortList]) => {
+    ]).then(([summaryResponse, bookingsResponse, contactsResponse, reviewsResponse, pricingResponse, resortList]) => {
       setSummary(summaryResponse.data);
       setBookings(bookingsResponse.data.bookings || []);
       setContacts(contactsResponse.data.contacts || []);
       setReviews(reviewsResponse.data.reviews || []);
+      setActivityPrices(Object.fromEntries(
+        Object.entries(pricingResponse.data.prices || {}).map(([key, value]) => [key, String(value)])
+      ));
       setResorts(resortList || []);
       setSelectedResort(resortList?.[0]?._id || "");
     });
   }, [user]);
+
+  async function saveActivityPrices(event) {
+    event.preventDefault();
+    const keys = ["adventureCombo", "riverRafting", "riverZipline"];
+    const prices = {};
+    for (const key of keys) {
+      const value = activityPrices[key];
+      const price = Number(value);
+      if (String(value).trim() === "" || !Number.isFinite(price) || price < 0) {
+        setMessage("Enter a valid non-negative price for each activity set.");
+        return;
+      }
+      prices[key] = price;
+    }
+
+    setSavingActivityPrices(true);
+    try {
+      const { data } = await api.put("/admin/activity-pricing", { prices });
+      setActivityPrices(Object.fromEntries(
+        Object.entries(data.prices).map(([key, value]) => [key, String(value)])
+      ));
+      setMessage("Activity prices saved. The booking form will use the updated prices.");
+    } catch (err) {
+      setMessage(err.response?.data?.message || "Activity prices could not be saved.");
+    } finally {
+      setSavingActivityPrices(false);
+    }
+  }
 
   const graphData = useMemo(() => buildCustomerGraph(contacts, bookings, graphRange), [contacts, bookings, graphRange]);
   const graphMax = Math.max(1, ...graphData.map((item) => item.requests + item.bookings));
@@ -1090,6 +1130,46 @@ export function AdminDashboard() {
                 </tbody>
               </table>
             </div>
+          </section>
+        )}
+
+        {activeTab === "activity-pricing" && (
+          <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+            <div className="mb-5">
+              <h2 className="text-xl font-black text-slate-950">Activity Pricing</h2>
+              <p className="mt-1 text-sm leading-6 text-slate-500">Set the price charged per booking for each optional activity set. Adventure Combo is one combined price.</p>
+            </div>
+            <form className="grid max-w-2xl gap-4" onSubmit={saveActivityPrices}>
+              {[
+                { key: "adventureCombo", label: "Adventure Combo", detail: "Kayaking, River Zorbing, and River Boating" },
+                { key: "riverRafting", label: "River Rafting", detail: "River Rafting" },
+                { key: "riverZipline", label: "River Zipline", detail: "River Zipline Adventure" }
+              ].map((activity) => (
+                <label key={activity.key} className="grid gap-1 text-sm font-bold text-slate-700">
+                  <span>{activity.label}</span>
+                  <span className="text-xs font-normal text-slate-500">{activity.detail}</span>
+                  <span className="flex items-center gap-2">
+                    <span className="font-black">₹</span>
+                    <input
+                      className="w-full rounded-lg border border-slate-200 px-3 py-2 text-slate-950"
+                      type="number"
+                      min="0"
+                      step="1"
+                      required
+                      value={activityPrices[activity.key]}
+                      onChange={(event) => setActivityPrices((current) => ({
+                        ...current,
+                        [activity.key]: event.target.value
+                      }))}
+                    />
+                  </span>
+                </label>
+              ))}
+              <button className="inline-flex w-fit items-center gap-2 rounded-lg bg-jungle-700 px-4 py-3 font-bold text-white" disabled={savingActivityPrices}>
+                <Save size={17} />
+                {savingActivityPrices ? "Saving..." : "Save Activity Prices"}
+              </button>
+            </form>
           </section>
         )}
 

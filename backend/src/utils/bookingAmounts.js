@@ -1,5 +1,8 @@
+import { activityOptions, validateActivityIds } from "./activityPricing.js";
+
 const DAY_IN_MS = 24 * 60 * 60 * 1000;
-const ADVANCE_RATE = 0.2;
+const STANDARD_ADVANCE_RATE = 0.2;
+const COUPLE_ADVANCE_RATE = 0.4;
 
 function bookingAmountError(message) {
   const error = new Error(message);
@@ -20,7 +23,17 @@ function positiveCount(value, fallback = 0) {
   return Number.isFinite(count) ? Math.max(0, count) : fallback;
 }
 
-export function calculateBookingAmounts({ resort, roomCategory, checkIn, checkOut, adults, children5To11 }) {
+export function calculateBookingAmounts({
+  resort,
+  roomCategory,
+  checkIn,
+  checkOut,
+  adults,
+  children5To11,
+  childrenUnder5,
+  activityIds = [],
+  activityPrices = {}
+}) {
   const room = resort.rooms?.find((item) => item.name === roomCategory);
 
   if (!room) {
@@ -36,6 +49,7 @@ export function calculateBookingAmounts({ resort, roomCategory, checkIn, checkOu
 
   const adultCount = positiveCount(adults);
   const child5To11Count = positiveCount(children5To11);
+  const childUnder5Count = positiveCount(childrenUnder5);
 
   if (adultCount < 1) {
     throw bookingAmountError("At least one adult is required");
@@ -43,14 +57,28 @@ export function calculateBookingAmounts({ resort, roomCategory, checkIn, checkOu
 
   const nights = Math.max(1, Math.round((end - start) / DAY_IN_MS));
   const chargeableGuests = adultCount + child5To11Count * 0.5;
-  const totalAmount = Math.round(Number(room.price || 0) * chargeableGuests * nights);
-  const advanceAmount = Math.ceil(totalAmount * ADVANCE_RATE);
+  const roomAmount = Math.round(Number(room.price || 0) * chargeableGuests * nights);
+  const selectedActivityIds = validateActivityIds(activityIds);
+  const selectedActivities = selectedActivityIds.map((id) => {
+    const activity = activityOptions.find((item) => item.id === id);
+    return { id, label: activity.label, price: Number(activityPrices[id] || 0) };
+  });
+  const activityCharges = selectedActivities.reduce((total, activity) => total + activity.price, 0);
+  const totalAmount = roomAmount + activityCharges;
+  const totalGuests = adultCount + child5To11Count + childUnder5Count;
+  const advanceRate = totalGuests === 2 ? COUPLE_ADVANCE_RATE : STANDARD_ADVANCE_RATE;
+  const advanceAmount = Math.ceil(totalAmount * advanceRate);
 
   return {
     room,
     nights,
     chargeableGuests,
+    roomAmount,
+    totalGuests,
+    selectedActivities,
+    activityCharges,
     totalAmount,
+    advanceRate,
     advanceAmount
   };
 }

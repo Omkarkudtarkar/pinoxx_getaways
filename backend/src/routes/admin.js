@@ -1,6 +1,7 @@
 import express from "express";
 import multer from "multer";
 import { Availability } from "../models/Availability.js";
+import { ActivityPricing } from "../models/ActivityPricing.js";
 import { Booking } from "../models/Booking.js";
 import { Contact } from "../models/Contact.js";
 import { Resort } from "../models/Resort.js";
@@ -10,6 +11,7 @@ import { requireAdmin, requireAuth } from "../middleware/auth.js";
 import { fileToImage, uploadImages } from "../middleware/upload.js";
 import { parseAvailabilityUpload } from "../utils/availabilityImport.js";
 import { syncResortAvailability } from "../utils/availabilitySync.js";
+import { defaultActivityPrices, getSavedActivityPrices } from "../utils/activityPricing.js";
 import { resortPayload } from "./resorts.js";
 
 export const adminRouter = express.Router();
@@ -19,6 +21,40 @@ const uploadSheet = multer({
 });
 
 adminRouter.use(requireAuth, requireAdmin);
+
+adminRouter.get("/activity-pricing", async (_req, res, next) => {
+  try {
+    res.json({ prices: await getSavedActivityPrices() });
+  } catch (error) {
+    next(error);
+  }
+});
+
+adminRouter.put("/activity-pricing", async (req, res, next) => {
+  try {
+    const prices = req.body.prices;
+    const keys = Object.keys(defaultActivityPrices);
+    if (!prices || typeof prices !== "object" || keys.some((key) =>
+      !Object.prototype.hasOwnProperty.call(prices, key) ||
+      !Number.isFinite(prices[key]) ||
+      prices[key] < 0
+    )) {
+      return res.status(400).json({ message: "Enter a valid non-negative price for each activity set" });
+    }
+
+    const saved = await ActivityPricing.findOneAndUpdate(
+      { _id: "default" },
+      { $set: Object.fromEntries(keys.map((key) => [key, prices[key]])) },
+      { new: true, upsert: true, runValidators: true, setDefaultsOnInsert: true }
+    ).lean();
+
+    res.json({
+      prices: Object.fromEntries(keys.map((key) => [key, Number(saved[key])]))
+    });
+  } catch (error) {
+    next(error);
+  }
+});
 
 adminRouter.get("/summary", async (_req, res, next) => {
   try {

@@ -7,6 +7,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import fs from "fs";
 import { adminRouter } from "./routes/admin.js";
+import { activityPricingRouter } from "./routes/activityPricing.js";
 import { authRouter } from "./routes/auth.js";
 import { availabilityRouter } from "./routes/availability.js";
 import { bookingsRouter } from "./routes/bookings.js";
@@ -212,6 +213,8 @@ app.use([
   "/admin",
   "/api/contact",
   "/contact",
+  "/api/activity-pricing",
+  "/activity-pricing",
   "/api/chatbot",
   "/chatbot"
 ], requireMongoDatabase);
@@ -228,6 +231,8 @@ app.use("/api/admin", adminRouter);
 app.use("/admin", adminRouter);
 app.use("/api/contact", contactRouter);
 app.use("/contact", contactRouter);
+app.use("/api/activity-pricing", activityPricingRouter);
+app.use("/activity-pricing", activityPricingRouter);
 app.use("/api/chatbot", chatbotRouter);
 app.use("/chatbot", chatbotRouter);
 app.use("/api/pinoxx-reviews", pinoxxReviewsRouter);

@@ -13,6 +13,7 @@ import {
   buildWhatsappUrl
 } from "../utils/bookingLinks.js";
 import { calculateBookingAmounts } from "../utils/bookingAmounts.js";
+import { defaultActivityPrices } from "../utils/activityPricing.js";
 import { fileToImage, uploadImages } from "../middleware/upload.js";
 import { sendWhatsAppText } from "../utils/whatsappCloud.js";
 import { verifyGoogleCredential } from "../utils/googleAuth.js";
@@ -149,6 +150,10 @@ export function createMemoryRouter() {
     res.json({ resort, reviews });
   });
 
+  router.get("/api/activity-pricing", (_req, res) => {
+    res.json({ prices: store.activityPrices });
+  });
+
   router.post("/api/resorts/:id/reviews", requireMemoryAuth, uploadImages.array("images", 6), (req, res) => {
     const resort = store.resorts.find((item) => item._id === req.params.id);
 
@@ -238,7 +243,10 @@ export function createMemoryRouter() {
       checkIn: req.body.checkIn,
       checkOut: req.body.checkOut,
       adults: req.body.adults,
-      children5To11: req.body.children5To11
+      children5To11: req.body.children5To11,
+      childrenUnder5: req.body.childrenUnder5,
+      activityIds: req.body.activityIds,
+      activityPrices: store.activityPrices
     });
 
     const booking = {
@@ -250,8 +258,16 @@ export function createMemoryRouter() {
       roomCategory: req.body.roomCategory || "",
       checkIn: req.body.checkIn,
       checkOut: req.body.checkOut,
+      adults: Number(req.body.adults),
+      children5To11: Number(req.body.children5To11 || 0),
+      childrenUnder5: Number(req.body.childrenUnder5 || 0),
+      nights: amounts.nights,
       specialRequests: req.body.specialRequests || "",
+      roomAmount: amounts.roomAmount,
+      selectedActivities: amounts.selectedActivities,
+      activityCharges: amounts.activityCharges,
       totalAmount: amounts.totalAmount,
+      advanceRate: amounts.advanceRate,
       advanceAmount: amounts.advanceAmount,
       holdExpiresAt: new Date(Date.now() + memoryHoldMinutes * 60 * 1000).toISOString(),
       commissionPerGuest: 100,
@@ -285,6 +301,45 @@ export function createMemoryRouter() {
   });
 
   router.post("/api/contact", async (req, res) => {
+    let messageText = req.body.message;
+    if (
+      req.body.contactType === "availability_check" &&
+      req.body.resortSlug &&
+      req.body.roomCategory &&
+      req.body.checkIn &&
+      req.body.checkOut
+    ) {
+      const resort = store.resorts.find((item) => item.slug === req.body.resortSlug && item.isActive !== false);
+      if (!resort) {
+        return res.status(404).json({ message: "Resort not found" });
+      }
+      const amounts = calculateBookingAmounts({
+        resort,
+        roomCategory: req.body.roomCategory,
+        checkIn: req.body.checkIn,
+        checkOut: req.body.checkOut,
+        adults: req.body.adults,
+        children5To11: req.body.children5To11,
+        childrenUnder5: req.body.childrenUnder5,
+        activityIds: req.body.activityIds,
+        activityPrices: store.activityPrices
+      });
+      const formatRupees = (amount) => `₹${Number(amount).toLocaleString("en-IN")}`;
+      messageText = [
+        `Stay: ${amounts.nights} ${amounts.nights === 1 ? "night" : "nights"}`,
+        `Adults: ${Number(req.body.adults || 0)}`,
+        `Children 5-11: ${Number(req.body.children5To11 || 0)}`,
+        `Children under 5: ${Number(req.body.childrenUnder5 || 0)} (free)`,
+        `Room charges: ${formatRupees(amounts.roomAmount)}`,
+        ...amounts.selectedActivities.map((activity) => `${activity.label}: ${formatRupees(activity.price)}`),
+        `Selected activities: ${amounts.selectedActivities.map((activity) => activity.label).join(", ") || "None"}`,
+        `Total activity charges: ${formatRupees(amounts.activityCharges)}`,
+        `Final booking total: ${formatRupees(amounts.totalAmount)}`,
+        `UPI advance (${Math.round(amounts.advanceRate * 100)}%): ${formatRupees(amounts.advanceAmount)}`,
+        req.body.message?.trim() ? `Special request: ${req.body.message.trim()}` : ""
+      ].filter(Boolean).join("\n");
+    }
+
     const contact = {
       _id: makeId("contact"),
       name: req.body.name,
@@ -301,7 +356,7 @@ export function createMemoryRouter() {
       bookingUrl: req.body.bookingUrl || "",
       preferredDate: req.body.preferredDate || "",
       preferredTime: req.body.preferredTime || "",
-      message: req.body.message,
+      message: messageText,
       status: "new",
       createdAt: new Date().toISOString()
     };
@@ -337,6 +392,24 @@ export function createMemoryRouter() {
   });
 
   router.use("/api/admin", requireMemoryAuth, requireMemoryAdmin);
+
+  router.get("/api/admin/activity-pricing", (_req, res) => {
+    res.json({ prices: store.activityPrices });
+  });
+
+  router.put("/api/admin/activity-pricing", (req, res) => {
+    const prices = req.body.prices;
+    const keys = Object.keys(defaultActivityPrices);
+    if (!prices || typeof prices !== "object" || keys.some((key) =>
+      !Object.prototype.hasOwnProperty.call(prices, key) ||
+      !Number.isFinite(prices[key]) ||
+      prices[key] < 0
+    )) {
+      return res.status(400).json({ message: "Enter a valid non-negative price for each activity set" });
+    }
+    store.activityPrices = Object.fromEntries(keys.map((key) => [key, prices[key]]));
+    res.json({ prices: store.activityPrices });
+  });
 
   router.get("/api/admin/summary", (_req, res) => {
     res.json({
@@ -568,7 +641,7 @@ function createStore() {
       distanceToWaterActivitiesKm: 1.4,
       meals: ["Breakfast", "Lunch", "Dinner"],
       amenities: ["River view", "Meals", "Parking", "Bonfire", "Swimming pool", "Power backup", "Guide support"],
-      activities: ["River rafting", "Kayaking", "Zipline", "Jungle safari", "Campfire"],
+      activities: ["Kayaking", "River Zorbing", "River Boating", "Zipline Adventure", "River Rafting", "River swimming"],
       images: [
         { url: resortImages.river, alt: "Kali river side resort view" },
         { url: resortImages.pool, alt: "Resort swimming pool" },
@@ -612,7 +685,7 @@ function createStore() {
       distanceToWaterActivitiesKm: 2.8,
       meals: ["Breakfast", "Lunch", "Dinner"],
       amenities: ["Forest view", "Meals", "Indoor games", "Campfire", "Nature trail", "Doctor on call"],
-      activities: ["Bird watching", "Nature walk", "River rafting", "Cycling", "Boating"],
+      activities: ["Kayaking", "River Zorbing", "River Boating", "Zipline Adventure", "River Rafting", "River swimming"],
       images: [
         { url: resortImages.forest, alt: "Forest retreat" },
         { url: resortImages.cottage, alt: "Jungle cottage" },
@@ -656,7 +729,7 @@ function createStore() {
       distanceToWaterActivitiesKm: 0.9,
       meals: ["Breakfast", "Lunch", "Dinner"],
       amenities: ["Swimming pool", "Meals", "DJ on request", "Parking", "Activity desk", "First-aid support"],
-      activities: ["River rafting", "Zipline", "Kayaking", "Zorbing", "Rain dance"],
+      activities: ["Kayaking", "River Zorbing", "River Boating", "Zipline Adventure", "River Rafting", "River swimming"],
       images: [
         { url: resortImages.pool, alt: "Pool resort in Dandeli" },
         { url: resortImages.river, alt: "River adventure" },
@@ -680,6 +753,7 @@ function createStore() {
 
   return {
     resorts,
+    activityPrices: { ...defaultActivityPrices },
     users: [
       {
         _id: "user-admin",

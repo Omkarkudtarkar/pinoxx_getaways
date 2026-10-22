@@ -3,6 +3,7 @@ import { Booking } from "../models/Booking.js";
 import { Resort } from "../models/Resort.js";
 import { requireAdmin, requireAuth } from "../middleware/auth.js";
 import { calculateBookingAmounts } from "../utils/bookingAmounts.js";
+import { getSavedActivityPrices } from "../utils/activityPricing.js";
 import { HOLD_MINUTES } from "../utils/availabilityQuote.js";
 import {
   buildBookingMessage,
@@ -23,6 +24,7 @@ bookingsRouter.post("/", async (req, res, next) => {
       roomCategory,
       checkIn,
       checkOut,
+      activityIds,
       specialRequests
     } = req.body;
     const resort = await Resort.findById(resortId);
@@ -41,7 +43,10 @@ bookingsRouter.post("/", async (req, res, next) => {
       checkIn,
       checkOut,
       adults: req.body.adults,
-      children5To11: req.body.children5To11
+      children5To11: req.body.children5To11,
+      childrenUnder5: req.body.childrenUnder5,
+      activityIds,
+      activityPrices: await getSavedActivityPrices()
     });
 
     const booking = new Booking({
@@ -52,8 +57,16 @@ bookingsRouter.post("/", async (req, res, next) => {
       roomCategory,
       checkIn,
       checkOut,
+      adults: Number(req.body.adults),
+      children5To11: Number(req.body.children5To11 || 0),
+      childrenUnder5: Number(req.body.childrenUnder5 || 0),
+      nights: amounts.nights,
       specialRequests,
+      roomAmount: amounts.roomAmount,
+      selectedActivities: amounts.selectedActivities,
+      activityCharges: amounts.activityCharges,
       totalAmount: amounts.totalAmount,
+      advanceRate: amounts.advanceRate,
       advanceAmount: amounts.advanceAmount,
       holdExpiresAt: new Date(Date.now() + HOLD_MINUTES * 60 * 1000),
       status: "payment_initiated"

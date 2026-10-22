@@ -7,6 +7,23 @@ import { formatCurrency, formatPerPersonPrice } from "../lib/constants";
 const today = new Date().toISOString().slice(0, 10);
 const dayInMs = 24 * 60 * 60 * 1000;
 const stayTimingNote = "Check-in: 12:00 PM. Check-out: 11:00 AM.";
+const activitySets = [
+  {
+    id: "adventureCombo",
+    title: "Adventure Combo",
+    activities: "Kayaking, River Zorbing, River Boating"
+  },
+  {
+    id: "riverRafting",
+    title: "River Rafting",
+    activities: "River Rafting"
+  },
+  {
+    id: "riverZipline",
+    title: "River Zipline",
+    activities: "River Zipline Adventure"
+  }
+];
 
 function draftKey(resortSlug) {
   return `pinoxx_availability_request_${resortSlug}`;
@@ -44,6 +61,7 @@ export function BookingForm({ resort }) {
     adults: 2,
     children5To11: 0,
     childrenUnder5: 0,
+    activityIds: [],
     roomCategory: "",
     checkIn: "",
     checkOut: "",
@@ -55,6 +73,8 @@ export function BookingForm({ resort }) {
   const [loading, setLoading] = useState(false);
   const [paymentLoading, setPaymentLoading] = useState(false);
   const [upiOpened, setUpiOpened] = useState(false);
+  const [activityPrices, setActivityPrices] = useState(null);
+  const [activityPricingError, setActivityPricingError] = useState("");
 
   const selectedRoom = useMemo(
     () => resort.rooms?.find((room) => room.name === form.roomCategory),
@@ -67,13 +87,35 @@ export function BookingForm({ resort }) {
   const chargeableGuests = adults + children5To11 * 0.5;
   const selectedNights = stayNights(form.checkIn, form.checkOut);
   const selectedNightLabel = nightLabel(selectedNights);
-  const estimatedBaseAmount = selectedRoom ? selectedRoom.price * chargeableGuests * selectedNights : 0;
-  const estimatedAdvanceAmount = Math.ceil(estimatedBaseAmount * 0.2);
+  const roomAmount = selectedRoom ? Math.round(selectedRoom.price * chargeableGuests * selectedNights) : 0;
+  const selectedActivities = activitySets
+    .filter((activity) => form.activityIds.includes(activity.id))
+    .map((activity) => ({ ...activity, price: Number(activityPrices?.[activity.id] || 0) }));
+  const activityCharges = selectedActivities.reduce((total, activity) => total + activity.price, 0);
+  const estimatedTotalAmount = roomAmount + activityCharges;
+  const advanceRate = totalGuests === 2 ? 0.4 : 0.2;
+  const advancePercent = Math.round(advanceRate * 100);
+  const estimatedAdvanceAmount = Math.ceil(estimatedTotalAmount * advanceRate);
   const adultTotal = selectedRoom ? selectedRoom.price * adults * selectedNights : 0;
   const childHalfPrice = selectedRoom ? selectedRoom.price * 0.5 : 0;
   const child5To11Total = childHalfPrice * children5To11 * selectedNights;
-  const guestPricingNote = `Stay: ${selectedNightLabel}. ${stayTimingNote} Adults: ${adults}, Children 5-11: ${children5To11} at 50%, Children under 5: ${childrenUnder5} free. Chargeable guests: ${chargeableGuests}. Estimated total: ${formatCurrency(estimatedBaseAmount)}.`;
-  const advancePricingNote = `UPI advance 20%: ${formatCurrency(estimatedAdvanceAmount)}.`;
+  useEffect(() => {
+    let cancelled = false;
+    setActivityPrices(null);
+    setActivityPricingError("");
+    api.get("/activity-pricing")
+      .then(({ data }) => {
+        if (!cancelled) setActivityPrices(data.prices);
+      })
+      .catch((err) => {
+        if (!cancelled) {
+          setActivityPricingError(err.response?.data?.message || "Activity prices could not be loaded.");
+        }
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [resort.slug]);
 
   useEffect(() => {
     const savedDraft = localStorage.getItem(draftKey(resort.slug));
@@ -86,6 +128,7 @@ export function BookingForm({ resort }) {
           adults: parsedDraft.adults ?? parsedDraft.members ?? value.adults,
           children5To11: parsedDraft.children5To11 ?? 0,
           childrenUnder5: parsedDraft.childrenUnder5 ?? 0,
+          activityIds: Array.isArray(parsedDraft.activityIds) ? parsedDraft.activityIds : [],
           roomCategory: parsedDraft.roomCategory || value.roomCategory || resort.rooms?.[0]?.name || ""
         }));
         return;
@@ -123,6 +166,10 @@ export function BookingForm({ resort }) {
       setError("Fill name, phone, room, dates, and at least one adult before payment.");
       return false;
     }
+    if (!activityPrices) {
+      setError(activityPricingError || "Activity prices are still loading. Please try again.");
+      return false;
+    }
     return true;
   }
 
@@ -133,11 +180,6 @@ export function BookingForm({ resort }) {
     setLoading(true);
 
     const bookingUrl = window.location.href;
-    const availabilityMessage = [
-      guestPricingNote,
-      form.specialRequests.trim() ? `Special request: ${form.specialRequests.trim()}` : ""
-    ].filter(Boolean).join("\n");
-
     try {
       const { data } = await api.post("/contact", {
         name: form.customerName,
@@ -150,9 +192,13 @@ export function BookingForm({ resort }) {
         roomCategory: form.roomCategory,
         checkIn: form.checkIn,
         checkOut: form.checkOut,
+        adults,
+        children5To11,
+        childrenUnder5,
+        activityIds: form.activityIds,
         bookingUrl,
         preferredDate: form.checkIn,
-        message: availabilityMessage
+        message: form.specialRequests.trim()
       });
       setResult(data);
 
@@ -177,7 +223,7 @@ export function BookingForm({ resort }) {
         resortId: resort._id,
         ...form,
         members: totalGuests,
-        specialRequests: [guestPricingNote, advancePricingNote, form.specialRequests].filter(Boolean).join("\n")
+        specialRequests: form.specialRequests
       });
       setPaymentResult(data);
     } catch (err) {
@@ -270,18 +316,58 @@ export function BookingForm({ resort }) {
                 <span>Total guests: {totalGuests}; chargeable guests: {chargeableGuests}; stay: {selectedNightLabel}.</span>
               </li>
             </ul>
-            {selectedRoom ? (
-              <div className="mt-4 rounded-lg bg-white px-4 py-3 shadow-sm">
-                <p className="text-xs font-black uppercase tracking-wide text-slate-500">Final price for selected guests and dates</p>
-                <p className="mt-1 text-3xl font-black leading-tight text-orange-600">{formatCurrency(estimatedBaseAmount)}</p>
-                <p className="mt-2 text-sm font-black text-slate-700">UPI advance 20%: {formatCurrency(estimatedAdvanceAmount)}</p>
-              </div>
-            ) : null}
           </div>
         </div>
+        <section className="grid gap-3 rounded-lg border border-slate-200 bg-white p-4">
+          <div>
+            <h3 className="font-black text-slate-950">Add Adventure Activities (Optional)</h3>
+            <p className="mt-1 text-xs leading-5 text-slate-500">Choose any combination. Adventure Combo includes all three listed activities at one price.</p>
+          </div>
+          {activitySets.map((activity) => (
+            <label key={activity.id} className="flex cursor-pointer items-start justify-between gap-3 rounded-lg border border-slate-200 p-3">
+              <span className="flex items-start gap-3">
+                <input
+                  className="mt-1 h-4 w-4 accent-emerald-700"
+                  type="checkbox"
+                  checked={form.activityIds.includes(activity.id)}
+                  onChange={(event) => {
+                    const activityIds = event.target.checked
+                      ? [...form.activityIds, activity.id]
+                      : form.activityIds.filter((id) => id !== activity.id);
+                    setForm((current) => ({ ...current, activityIds }));
+                    setResult(null);
+                    setPaymentResult(null);
+                  }}
+                  disabled={!activityPrices}
+                />
+                <span>
+                  <span className="block text-sm font-black text-slate-950">{activity.title}</span>
+                  <span className="mt-1 block text-xs leading-5 text-slate-500">{activity.activities}</span>
+                </span>
+              </span>
+              <span className="shrink-0 text-sm font-black text-slate-950">
+                {activityPrices ? formatCurrency(activityPrices[activity.id]) : "Loading..."}
+              </span>
+            </label>
+          ))}
+          {activityPricingError && <p className="text-sm font-bold text-red-700">{activityPricingError}</p>}
+        </section>
+
+        <section className="grid gap-2 rounded-lg border border-orange-200 bg-orange-50 p-4 text-sm text-orange-950">
+          <h3 className="font-black text-slate-950">Price Summary</h3>
+          <div className="flex justify-between gap-3"><span>Room Charges</span><strong>{formatCurrency(roomAmount)}</strong></div>
+          {selectedActivities.map((activity) => (
+            <div className="flex justify-between gap-3" key={activity.id}>
+              <span>{activity.title}</span><strong>{formatCurrency(activity.price)}</strong>
+            </div>
+          ))}
+          <div className="flex justify-between gap-3 border-t border-orange-200 pt-2"><span>Total Activity Charges</span><strong>{formatCurrency(activityCharges)}</strong></div>
+          <div className="flex justify-between gap-3 text-base font-black"><span>Final Total</span><strong>{formatCurrency(estimatedTotalAmount)}</strong></div>
+          <div className="flex justify-between gap-3 font-black text-slate-700"><span>UPI Advance ({advancePercent}%)</span><strong>{formatCurrency(estimatedAdvanceAmount)}</strong></div>
+        </section>
         <textarea className="min-h-20 rounded-lg border border-slate-200 px-3 py-3" name="specialRequests" value={form.specialRequests} onChange={update} placeholder="Special requests (optional)" />
 
-        <button className="inline-flex items-center justify-center gap-2 rounded-lg bg-jungle-700 px-4 py-3 font-black text-white hover:bg-jungle-900" disabled={loading}>
+        <button className="inline-flex items-center justify-center gap-2 rounded-lg bg-jungle-700 px-4 py-3 font-black text-white hover:bg-jungle-900" disabled={loading || !activityPrices}>
           {loading ? <Loader2 className="animate-spin" size={18} /> : <Send size={18} />}
           {loading ? "Sending..." : "Send Availability on WhatsApp"}
         </button>
@@ -302,7 +388,7 @@ export function BookingForm({ resort }) {
             <div className="flex items-start gap-2">
               <Clock3 className="mt-0.5 shrink-0 text-orange-600" size={18} />
               <p>
-                After Pinoxx confirms availability, come back here and pay the 20% UPI advance
+                After Pinoxx confirms availability, come back here and pay the {advancePercent}% UPI advance
                 {selectedRoom ? ` (${formatCurrency(estimatedAdvanceAmount)})` : ""} for the selected date.
               </p>
             </div>
@@ -313,7 +399,7 @@ export function BookingForm({ resort }) {
               disabled={paymentLoading}
             >
               {paymentLoading ? <Loader2 className="animate-spin" size={18} /> : <CreditCard size={18} />}
-              {paymentLoading ? "Opening UPI..." : "Pay 20% UPI Advance"}
+              {paymentLoading ? "Opening UPI..." : `Pay ${advancePercent}% UPI Advance`}
             </button>
           </div>
         )}
