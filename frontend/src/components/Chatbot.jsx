@@ -1,5 +1,6 @@
 import { ArrowLeft, Bot, CheckCircle2, Compass, IndianRupee, MapPin, PhoneCall, Send, Sparkles, Utensils, Volume2, VolumeX, Waves, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { useLocation } from "react-router-dom";
 import { askChatbot } from "../lib/api";
 
 const starter = {
@@ -124,6 +125,7 @@ function MessageText({ message }) {
 }
 
 export function Chatbot() {
+  const location = useLocation();
   const [open, setOpen] = useState(false);
   const [showNudge, setShowNudge] = useState(false);
   const [soundOn, setSoundOn] = useState(true);
@@ -136,6 +138,7 @@ export function Chatbot() {
   const audioRef = useRef(null);
 
   const activeTopic = topics.find((topic) => topic.id === activeTopicId);
+  const isResortDetail = /^\/resorts?\/[^/]+\/?$/.test(location.pathname);
 
   useEffect(() => {
     if (!localStorage.getItem("pinoxx_chat_seen")) {
@@ -156,6 +159,17 @@ export function Chatbot() {
   useEffect(() => {
     messagesRef.current?.scrollTo({ top: messagesRef.current.scrollHeight, behavior: "smooth" });
   }, [messages, loading]);
+
+  useEffect(() => {
+    function openFromResortPrompt() {
+      setOpen(true);
+      setShowNudge(false);
+      setTimeout(() => inputRef.current?.focus(), 100);
+    }
+
+    window.addEventListener("pinoxx-open-chat", openFromResortPrompt);
+    return () => window.removeEventListener("pinoxx-open-chat", openFromResortPrompt);
+  }, []);
 
   function getAudioContext() {
     if (!soundOn || typeof window === "undefined") return null;
@@ -292,7 +306,7 @@ export function Chatbot() {
   return (
     <div className="fixed inset-x-3 bottom-[calc(0.75rem+env(safe-area-inset-bottom))] z-50 flex flex-col items-end sm:inset-x-auto sm:bottom-4 sm:right-4">
       {!open && showNudge && (
-        <div className="relative mb-3 w-full max-w-[22rem] rounded-lg border border-slate-200 bg-white p-4 shadow-soft sm:w-[300px]">
+        <div className={`${isResortDetail ? "hidden lg:block " : ""}relative mb-3 w-full max-w-[22rem] rounded-lg border border-slate-200 bg-white p-4 shadow-soft sm:w-[300px]`}>
           <button className="absolute right-2 top-2 rounded-lg p-1 text-slate-400 hover:bg-slate-100" onClick={() => setShowNudge(false)} aria-label="Hide chatbot prompt">
             <X size={15} />
           </button>

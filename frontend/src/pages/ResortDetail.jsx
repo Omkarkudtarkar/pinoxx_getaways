@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { BedDouble, Building2, ChevronLeft, ChevronRight, Clock3, Images, IndianRupee, MapPin, Share2, Star, UsersRound, Utensils, Waves, Wifi, X } from "lucide-react";
+import { BedDouble, Building2, ChevronLeft, ChevronRight, Clock3, Images, IndianRupee, MapPin, Share2, Sparkles, Star, UsersRound, Utensils, Waves, Wifi, X } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 import { AdminResortPanel } from "../components/AdminResortPanel";
@@ -56,6 +56,29 @@ function ratingAverage(reviews = [], fallbackRating = 0) {
 
 function resortMeals(resort) {
   return resort?.meals?.length ? resort.meals : ["Breakfast", "Lunch", "Dinner"];
+}
+
+function ResortHelpPrompt() {
+  const [open, setOpen] = useState(false);
+
+  if (open) return null;
+
+  return (
+    <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm lg:hidden">
+      <p className="text-sm font-black text-slate-950">Need help choosing a resort?</p>
+      <p className="mt-1 text-xs leading-5 text-slate-600">Ask about best price, sightseeing, distance, rafting, facilities, or full trip guidance.</p>
+      <button
+        className="mt-3 inline-flex items-center gap-2 rounded-lg bg-slate-950 px-3 py-2 text-xs font-black text-white hover:bg-jungle-900"
+        onClick={() => {
+          setOpen(true);
+          window.dispatchEvent(new Event("pinoxx-open-chat"));
+        }}
+        type="button"
+      >
+        Ask Pinoxx <Sparkles size={14} />
+      </button>
+    </div>
+  );
 }
 
 export function ResortDetail() {
@@ -203,11 +226,15 @@ export function ResortDetail() {
                   {heroGallery.map((image, index) => (
                     <button
                       key={`${image.url}-${index}`}
-                      className={`aspect-square overflow-hidden rounded-lg border-2 bg-slate-100 ${
+                      className={`aspect-square overflow-hidden rounded-lg border-2 bg-slate-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-jungle-700 ${
                         active === index ? "border-jungle-700" : "border-transparent"
                       }`}
                       type="button"
-                      onClick={() => setActive(index)}
+                      aria-label={`View ${image.alt || `${resort.name} photo ${index + 1}`}`}
+                      onClick={() => {
+                        setActive(index);
+                        openViewer(heroGallery, index, resort.name);
+                      }}
                     >
                       <img src={resortImageUrl(image.url)} alt={image.alt || resort.name} className="h-full w-full object-cover" onError={useFallbackResortImage} />
                     </button>
@@ -402,9 +429,15 @@ export function ResortDetail() {
               ))}
             </div>
           </section>
+        </div>
 
+        <aside className="grid content-start gap-4 lg:col-start-2 lg:row-start-1 lg:sticky lg:top-24 lg:self-start">
+          <BookingForm resort={resort} />
+          <ResortHelpPrompt />
+        </aside>
+
+        <div className="grid gap-8 lg:col-start-1 lg:row-start-2">
           <ReviewForm resortId={resort._id} />
-
           <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
             <div className="mb-5 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
               <div>
@@ -476,10 +509,6 @@ export function ResortDetail() {
             </div>
           </section>
         </div>
-
-        <aside className="lg:sticky lg:top-24 lg:self-start">
-          <BookingForm resort={resort} />
-        </aside>
       </section>
 
       {adminOpen && <AdminResortPanel resort={resort} onClose={() => setAdminOpen(false)} />}

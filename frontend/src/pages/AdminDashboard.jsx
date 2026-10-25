@@ -24,7 +24,7 @@ import { Seo } from "../lib/Seo";
 const tabs = [
   { id: "requests", label: "Call Requests", icon: PhoneCall },
   { id: "bookings", label: "Bookings", icon: Check },
-  { id: "activity-pricing", label: "Activity Pricing", icon: WalletCards },
+  { id: "activity-pricing", label: "Water Activity Prices", icon: WalletCards },
   { id: "resorts", label: "Resorts", icon: Building2 },
   { id: "reviews", label: "Reviews", icon: ShieldAlert },
   { id: "analytics", label: "Customer Graph", icon: BarChart3 }
@@ -1136,12 +1136,14 @@ export function AdminDashboard() {
         {activeTab === "activity-pricing" && (
           <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
             <div className="mb-5">
-              <h2 className="text-xl font-black text-slate-950">Activity Pricing</h2>
-              <p className="mt-1 text-sm leading-6 text-slate-500">Set the price charged per booking for each optional activity set. Adventure Combo is one combined price.</p>
+              <h2 className="text-xl font-black text-slate-950">Water Activities Pricing</h2>
+              <p className="mt-1 text-sm leading-6 text-slate-500">
+                Add or update prices for the optional water activities. Saved prices appear on every resort booking form.
+              </p>
             </div>
             <form className="grid max-w-2xl gap-4" onSubmit={saveActivityPrices}>
               {[
-                { key: "adventureCombo", label: "Adventure Combo", detail: "Kayaking, River Zorbing, and River Boating" },
+                { key: "adventureCombo", label: "Adventure Combo (one combined price)", detail: "Kayaking, River Zorbing, and River Boating" },
                 { key: "riverRafting", label: "River Rafting", detail: "River Rafting" },
                 { key: "riverZipline", label: "River Zipline", detail: "River Zipline Adventure" }
               ].map((activity) => (
@@ -1167,7 +1169,7 @@ export function AdminDashboard() {
               ))}
               <button className="inline-flex w-fit items-center gap-2 rounded-lg bg-jungle-700 px-4 py-3 font-bold text-white" disabled={savingActivityPrices}>
                 <Save size={17} />
-                {savingActivityPrices ? "Saving..." : "Save Activity Prices"}
+                {savingActivityPrices ? "Saving..." : "Save Water Activity Prices"}
               </button>
             </form>
           </section>
