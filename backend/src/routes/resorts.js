@@ -4,6 +4,7 @@ import { Resort } from "../models/Resort.js";
 import { Review } from "../models/Review.js";
 import { requireAuth } from "../middleware/auth.js";
 import { fileToImage, uploadImages } from "../middleware/upload.js";
+import { defaultPaidActivities } from "../utils/resortActivities.js";
 
 export const resortsRouter = express.Router();
 
@@ -103,7 +104,7 @@ export function resortPayload(body, files = []) {
     distanceToWaterActivitiesKm: optionalNumber(body.distanceToWaterActivitiesKm) ?? 0,
     meals: parseList(body.meals, ["Breakfast", "Lunch", "Dinner"]),
     amenities: parseList(body.amenities),
-    activities: parseList(body.activities),
+    activities: parseList(body.activities, defaultPaidActivities),
     checkInTime: body.checkInTime?.trim() || "",
     checkOutTime: body.checkOutTime?.trim() || "",
     images: [

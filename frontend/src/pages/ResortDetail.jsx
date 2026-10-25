@@ -6,7 +6,7 @@ import { AdminResortPanel } from "../components/AdminResortPanel";
 import { BookingForm } from "../components/BookingForm";
 import { ReviewForm } from "../components/ReviewForm";
 import { getLocalResort, getResort, resortImageUrl, useFallbackResortImage } from "../lib/api";
-import { formatPerPersonPrice } from "../lib/constants";
+import { defaultPaidActivities, formatPerPersonPrice } from "../lib/constants";
 import { usePageLoading } from "../lib/PageLoadingContext";
 import { Seo } from "../lib/Seo";
 
@@ -135,6 +135,7 @@ export function ResortDetail() {
   const resortTypeLabel = resortTypeLabels[resort?.resortType] || "Budget";
   const averageReviewRating = ratingAverage(reviews, resort?.rating);
   const meals = resortMeals(resort);
+  const paidActivities = resort.activities?.length ? resort.activities : defaultPaidActivities;
 
   useEffect(() => {
     if (!viewer) return undefined;
@@ -327,68 +328,53 @@ export function ResortDetail() {
             </div>
           </motion.section>
 
-          <motion.section
-            variants={resortInfoReveal}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, amount: 0.25 }}
-            className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm"
-          >
+          <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
             <div className="mb-4 flex items-center gap-2">
               <Wifi className="text-jungle-700" size={22} />
               <h2 className="text-2xl font-black text-slate-950">Amenities & Activities</h2>
             </div>
             <div className="grid gap-5 md:grid-cols-3">
-              <motion.div variants={resortInfoItemReveal}>
+              <div>
                 <h3 className="mb-3 font-black">Meals</h3>
                 <div className="flex flex-wrap gap-2">
-                  {meals.map((item, index) => (
-                    <motion.span
+                  {meals.map((item) => (
+                    <span
                       key={item}
-                      variants={resortInfoItemReveal}
-                      whileHover={{ y: -2, scale: 1.04 }}
                       className="rounded-full bg-orange-50 px-3 py-2 text-sm font-semibold text-orange-900 shadow-sm"
-                      transition={{ delay: index * 0.02 }}
                     >
                       {item}
-                    </motion.span>
+                    </span>
                   ))}
                 </div>
-              </motion.div>
-              <motion.div variants={resortInfoItemReveal}>
+              </div>
+              <div>
                 <h3 className="mb-3 font-black">Amenities</h3>
                 <div className="flex flex-wrap gap-2">
-                  {resort.amenities?.map((item, index) => (
-                    <motion.span
+                  {resort.amenities?.map((item) => (
+                    <span
                       key={item}
-                      variants={resortInfoItemReveal}
-                      whileHover={{ y: -2, scale: 1.04 }}
                       className="rounded-full bg-jungle-50 px-3 py-2 text-sm font-semibold text-jungle-900 shadow-sm"
-                      transition={{ delay: index * 0.02 }}
                     >
                       {item}
-                    </motion.span>
+                    </span>
                   ))}
                 </div>
-              </motion.div>
-              <motion.div variants={resortInfoItemReveal}>
-                <h3 className="mb-3 font-black">Paid Activities</h3>
+              </div>
+              <div>
+                <h3 className="mb-3 font-black">  Paid Activities</h3>
                 <div className="flex flex-wrap gap-2">
-                  {resort.activities?.map((item, index) => (
-                    <motion.span
+                  {paidActivities.map((item) => (
+                    <span
                       key={item}
-                      variants={resortInfoItemReveal}
-                      whileHover={{ y: -2, scale: 1.04 }}
                       className="rounded-full bg-sky-50 px-3 py-2 text-sm font-semibold text-river-700 shadow-sm"
-                      transition={{ delay: index * 0.02 }}
                     >
                       {item}
-                    </motion.span>
+                    </span>
                   ))}
                 </div>
-              </motion.div>
+              </div>
             </div>
-          </motion.section>
+          </section>
 
           <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
             <div className="mb-4 flex items-center gap-2">

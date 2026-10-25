@@ -14,6 +14,7 @@ import {
 } from "../utils/bookingLinks.js";
 import { calculateBookingAmounts } from "../utils/bookingAmounts.js";
 import { defaultActivityPrices } from "../utils/activityPricing.js";
+import { defaultPaidActivities } from "../utils/resortActivities.js";
 import { fileToImage, uploadImages } from "../middleware/upload.js";
 import { sendWhatsAppText } from "../utils/whatsappCloud.js";
 import { verifyGoogleCredential } from "../utils/googleAuth.js";
@@ -946,7 +947,7 @@ function memoryResortPayload(body, files = []) {
     distanceToWaterActivitiesKm: optionalNumber(body.distanceToWaterActivitiesKm) ?? 0,
     meals: parseList(body.meals, ["Breakfast", "Lunch", "Dinner"]),
     amenities: parseList(body.amenities),
-    activities: parseList(body.activities),
+    activities: parseList(body.activities, defaultPaidActivities),
     checkInTime: body.checkInTime?.trim() || "",
     checkOutTime: body.checkOutTime?.trim() || "",
     images: [

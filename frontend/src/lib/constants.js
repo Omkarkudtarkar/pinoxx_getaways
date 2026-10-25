@@ -2,6 +2,15 @@ export const HERO_VIDEO_URL = "https://cdn.pixabay.com/video/2024/08/16/226649_t
 
 export const supportPhoneNumbers = ["919353431173", "918147843271", "918431784748"];
 
+export const defaultPaidActivities = [
+  "Kayaking",
+  "River Zorbing",
+  "River Boating",
+  "Zipline Adventure",
+  "River Rafting",
+  "River swimming"
+];
+
 export const businessWhatsappNumber =
   import.meta.env.VITE_BUSINESS_WHATSAPP_NUMBER || supportPhoneNumbers[0];
 

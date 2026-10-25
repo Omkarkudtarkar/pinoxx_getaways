@@ -18,7 +18,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Navigate } from "react-router-dom";
 import { api, assetUrl, getResorts, removeCachedResort, replaceCachedResorts } from "../lib/api";
 import { useAuth } from "../lib/AuthContext";
-import { formatPerPersonPrice, whatsappUrl } from "../lib/constants";
+import { defaultPaidActivities, formatPerPersonPrice, whatsappUrl } from "../lib/constants";
 import { Seo } from "../lib/Seo";
 
 const tabs = [
@@ -60,7 +60,7 @@ const initialResortForm = {
   distanceToWaterActivitiesKm: "",
   meals: "Breakfast, Lunch, Dinner",
   amenities: "",
-  activities: "",
+  activities: defaultPaidActivities.join(", "),
   checkInTime: "",
   checkOutTime: "",
   seoTitle: "",
@@ -124,7 +124,7 @@ function resortToForm(resort) {
     distanceToWaterActivitiesKm: resort.distanceToWaterActivitiesKm || "",
     meals: toCsv(resort.meals?.length ? resort.meals : ["Breakfast", "Lunch", "Dinner"]),
     amenities: toCsv(resort.amenities),
-    activities: toCsv(resort.activities),
+    activities: toCsv(resort.activities?.length ? resort.activities : defaultPaidActivities),
     checkInTime: resort.checkInTime || "",
     checkOutTime: resort.checkOutTime || "",
     seoTitle: resort.seoTitle || "",

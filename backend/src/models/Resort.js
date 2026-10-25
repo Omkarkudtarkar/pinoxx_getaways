@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { defaultPaidActivities } from "../utils/resortActivities.js";
 
 const imageSchema = new mongoose.Schema(
   {
@@ -43,7 +44,10 @@ const resortSchema = new mongoose.Schema(
       default: ["Breakfast", "Lunch", "Dinner"]
     },
     amenities: [{ type: String, trim: true }],
-    activities: [{ type: String, trim: true }],
+    activities: {
+      type: [{ type: String, trim: true }],
+      default: defaultPaidActivities
+    },
     checkInTime: { type: String, default: "", trim: true },
     checkOutTime: { type: String, default: "", trim: true },
     images: [imageSchema],
