@@ -11,6 +11,7 @@ import { AdminDashboard } from "./pages/AdminDashboard";
 import { AuthPage } from "./pages/Auth";
 import { Contact } from "./pages/Contact";
 import { Home } from "./pages/Home";
+import { RaftingLoader } from "./components/RaftingLoader";
 import { ResortDetail } from "./pages/ResortDetail";
 import { Resorts } from "./pages/Resorts";
 import { Reviews } from "./pages/Reviews";
@@ -97,6 +98,7 @@ export function App() {
       <Footer />
       <WhatsAppLoginPrompt open={whatsappPromptOpen} onClose={() => setWhatsappPromptOpen(false)} />
       <Chatbot />
+      <RaftingLoader />
     </div>
   );
 }

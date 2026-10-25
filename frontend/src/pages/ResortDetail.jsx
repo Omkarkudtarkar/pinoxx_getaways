@@ -7,6 +7,7 @@ import { BookingForm } from "../components/BookingForm";
 import { ReviewForm } from "../components/ReviewForm";
 import { getLocalResort, getResort, resortImageUrl, useFallbackResortImage } from "../lib/api";
 import { formatPerPersonPrice } from "../lib/constants";
+import { usePageLoading } from "../lib/PageLoadingContext";
 import { Seo } from "../lib/Seo";
 
 const resortTypeLabels = {
@@ -59,6 +60,7 @@ function resortMeals(resort) {
 
 export function ResortDetail() {
   const { slug } = useParams();
+  const { beginLoading } = usePageLoading();
   const [resort, setResort] = useState(() => getLocalResort(slug).resort);
   const [reviews, setReviews] = useState(() => getLocalResort(slug).reviews);
   const [active, setActive] = useState(0);
@@ -69,6 +71,7 @@ export function ResortDetail() {
 
   useEffect(() => {
     let cancelled = false;
+    const finishLoading = beginLoading();
     const localData = getLocalResort(slug);
 
     setResort(localData.resort);
@@ -79,12 +82,17 @@ export function ResortDetail() {
       if (cancelled) return;
       setResort(item);
       setReviews(resortReviews || []);
+    }).catch((error) => {
+      console.error("Unable to load resort details.", error);
+    }).finally(() => {
+      finishLoading();
     });
 
     return () => {
       cancelled = true;
+      finishLoading();
     };
-  }, [slug]);
+  }, [beginLoading, slug]);
 
   useEffect(() => {
     if (clicks >= 20) {
@@ -337,7 +345,7 @@ export function ResortDetail() {
                 </div>
               </motion.div>
               <motion.div variants={resortInfoItemReveal}>
-                <h3 className="mb-3 font-black">Activities</h3>
+                <h3 className="mb-3 font-black">Paid Activities</h3>
                 <div className="flex flex-wrap gap-2">
                   {resort.activities?.map((item, index) => (
                     <motion.span

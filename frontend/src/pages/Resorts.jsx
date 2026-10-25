@@ -2,6 +2,7 @@ import { IndianRupee, SlidersHorizontal, Star, Trees, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { ResortCard } from "../components/ResortCard";
 import { getResorts } from "../lib/api";
+import { usePageLoading } from "../lib/PageLoadingContext";
 import { Seo } from "../lib/Seo";
 
 const priceFilters = [
@@ -87,18 +88,31 @@ function FilterFields({ filters, onFieldChange, onPriceChange, stacked = false }
 }
 
 export function Resorts() {
+  const { beginLoading } = usePageLoading();
   const [resorts, setResorts] = useState([]);
   const [filters, setFilters] = useState(initialFilters);
   const [loading, setLoading] = useState(true);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
 
   useEffect(() => {
+    let cancelled = false;
+    const finishLoading = beginLoading();
     setLoading(true);
     getResorts(filters).then((data) => {
+      if (cancelled) return;
       setResorts(data);
-      setLoading(false);
+    }).catch((error) => {
+      console.error("Unable to load resorts.", error);
+      if (!cancelled) setResorts([]);
+    }).finally(() => {
+      finishLoading();
+      if (!cancelled) setLoading(false);
     });
-  }, [filters]);
+    return () => {
+      cancelled = true;
+      finishLoading();
+    };
+  }, [beginLoading, filters]);
 
   const activePriceFilter = priceFilters.find(
     (item) => item.minPrice === filters.minPrice && item.maxPrice === filters.maxPrice

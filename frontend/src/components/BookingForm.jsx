@@ -249,7 +249,7 @@ export function BookingForm({ resort }) {
         </p>
       </div>
 
-      <form className="grid gap-3 p-5" onSubmit={submit}>
+      <form className="grid min-w-0 gap-3 p-4 sm:p-5" onSubmit={submit}>
         <select className="rounded-lg border border-slate-200 px-3 py-3 font-semibold" name="roomCategory" value={form.roomCategory} onChange={update} required>
           {resort.rooms?.map((room) => (
             <option key={room.name} value={room.name}>
@@ -278,19 +278,19 @@ export function BookingForm({ resort }) {
 
         <input className="rounded-lg border border-slate-200 px-3 py-3" name="customerName" value={form.customerName} onChange={update} placeholder="Name" required />
         <input className="rounded-lg border border-slate-200 px-3 py-3" name="phone" value={form.phone} onChange={update} placeholder="WhatsApp phone number" required />
-        <div className="grid gap-3">
-          <div className="grid gap-3 sm:grid-cols-3">
-            <label className="grid gap-1 text-xs font-black uppercase tracking-wide text-slate-500">
+        <div className="grid min-w-0 gap-3">
+          <div className="grid min-w-0 gap-3">
+            <label className="grid min-w-0 gap-1 text-xs font-black uppercase tracking-wide text-slate-500">
               Adults
-              <input className="rounded-lg border border-slate-200 px-3 py-3 text-base font-semibold text-slate-950" name="adults" value={form.adults} onChange={update} type="number" min="1" placeholder="Adults" required />
+              <input className="w-full min-w-0 rounded-lg border border-slate-200 px-3 py-3 text-base font-semibold text-slate-950" name="adults" value={form.adults} onChange={update} type="number" min="1" placeholder="Adults" required />
             </label>
-            <label className="grid gap-1 text-xs font-black uppercase tracking-wide text-slate-500">
+            <label className="grid min-w-0 gap-1 text-xs font-black uppercase tracking-wide text-slate-500">
               Kids 5-11 years
-              <input className="rounded-lg border border-slate-200 px-3 py-3 text-base font-semibold text-slate-950" name="children5To11" value={form.children5To11} onChange={update} type="number" min="0" placeholder="50% charge" />
+              <input className="w-full min-w-0 rounded-lg border border-slate-200 px-3 py-3 text-base font-semibold text-slate-950" name="children5To11" value={form.children5To11} onChange={update} type="number" min="0" placeholder="50% charge" />
             </label>
-            <label className="grid gap-1 text-xs font-black uppercase tracking-wide text-slate-500">
+            <label className="grid min-w-0 gap-1 text-xs font-black uppercase tracking-wide text-slate-500">
               Under 5 years
-              <input className="rounded-lg border border-slate-200 px-3 py-3 text-base font-semibold text-slate-950" name="childrenUnder5" value={form.childrenUnder5} onChange={update} type="number" min="0" placeholder="Free" />
+              <input className="w-full min-w-0 rounded-lg border border-slate-200 px-3 py-3 text-base font-semibold text-slate-950" name="childrenUnder5" value={form.childrenUnder5} onChange={update} type="number" min="0" placeholder="Free" />
             </label>
           </div>
           <div className="rounded-lg border border-orange-200 bg-orange-50 p-4 text-xs font-bold leading-5 text-orange-950">
