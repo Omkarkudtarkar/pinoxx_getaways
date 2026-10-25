@@ -1,4 +1,4 @@
-import { Navigate, Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Chatbot } from "./components/Chatbot";
@@ -57,7 +57,23 @@ function WhatsAppLoginPrompt({ open, onClose }) {
 
 export function App() {
   const { user } = useAuth();
+  const location = useLocation();
   const [whatsappPromptOpen, setWhatsappPromptOpen] = useState(false);
+
+  useEffect(() => {
+    const isResortDetail = /^\/resorts?\/[^/]+\/?$/.test(location.pathname);
+    const historyState = window.history.state;
+    if (!isResortDetail || historyState?.idx !== 0) return;
+
+    const currentUrl = `${location.pathname}${location.search}${location.hash}`;
+    const fallbackState = { ...historyState, idx: 0 };
+    window.history.replaceState(fallbackState, "", "/resorts");
+    window.history.pushState(
+      { ...historyState, idx: 1, key: `resort-${Date.now()}` },
+      "",
+      currentUrl
+    );
+  }, [location.hash, location.pathname, location.search]);
 
   useEffect(() => {
     if (!user || user.role === "admin") return undefined;
