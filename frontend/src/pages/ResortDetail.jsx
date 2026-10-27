@@ -31,6 +31,30 @@ const resortInfoItemReveal = {
   visible: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.35, ease: "easeOut" } }
 };
 
+const paidActivityAliases = {
+  "river rafting": "River Rafting",
+  "river boating": "River Boating",
+  boating: "River Boating",
+  "river kayaking": "River Kayaking",
+  kayaking: "River Kayaking",
+  "river zorbing": "River Zorbing",
+  "river zipline": "River Zipline",
+  "river zipline adventure": "River Zipline",
+  "zipline adventure": "River Zipline"
+};
+const paidActivityOrder = defaultPaidActivities.map((activity) => activity.toLowerCase());
+
+function orderedPaidActivities(activities) {
+  return activities
+    .map((activity, index) => {
+      const label = paidActivityAliases[activity.trim().toLowerCase()] || activity;
+      const order = paidActivityOrder.indexOf(label.toLowerCase());
+      return { label, index, order: order === -1 ? paidActivityOrder.length : order };
+    })
+    .sort((first, second) => first.order - second.order || first.index - second.index)
+    .map(({ label }) => label);
+}
+
 function formatDistance(value) {
   const distance = Number(value);
   if (!Number.isFinite(distance) || distance <= 0) return "Ask Pinoxx";
@@ -135,7 +159,9 @@ export function ResortDetail() {
   const resortTypeLabel = resortTypeLabels[resort?.resortType] || "Budget";
   const averageReviewRating = ratingAverage(reviews, resort?.rating);
   const meals = resortMeals(resort);
-  const paidActivities = resort.activities?.length ? resort.activities : defaultPaidActivities;
+  const paidActivities = orderedPaidActivities(
+    resort.activities?.length ? resort.activities : defaultPaidActivities
+  );
 
   useEffect(() => {
     if (!viewer) return undefined;

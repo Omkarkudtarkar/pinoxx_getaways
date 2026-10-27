@@ -16,7 +16,7 @@ export const sampleResorts = [
     distanceToWaterActivitiesKm: 1.4,
     meals: ["Breakfast", "Lunch", "Dinner"],
     amenities: ["River view", "Meals", "Parking", "Bonfire", "Swimming pool", "Power backup", "Guide support"],
-    activities: ["Kayaking", "River Zorbing", "River Boating", "Zipline Adventure", "River Rafting", "River swimming"],
+    activities: ["River Rafting", "River Boating", "River Kayaking", "River Zorbing", "River Zipline"],
     images: [
       {
         url: "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1400&q=80",
@@ -75,7 +75,7 @@ export const sampleResorts = [
     distanceToWaterActivitiesKm: 2.8,
     meals: ["Breakfast", "Lunch", "Dinner"],
     amenities: ["Forest view", "Meals", "Indoor games", "Campfire", "Nature trail", "Doctor on call"],
-    activities: ["Kayaking", "River Zorbing", "River Boating", "Zipline Adventure", "River Rafting", "River swimming"],
+    activities: ["River Rafting", "River Boating", "River Kayaking", "River Zorbing", "River Zipline"],
     images: [
       {
         url: "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&w=1400&q=80",
@@ -118,7 +118,7 @@ export const sampleResorts = [
     distanceToWaterActivitiesKm: 0.9,
     meals: ["Breakfast", "Lunch", "Dinner"],
     amenities: ["Swimming pool", "Meals", "DJ on request", "Parking", "Activity desk", "First-aid support"],
-    activities: ["Kayaking", "River Zorbing", "River Boating", "Zipline Adventure", "River Rafting", "River swimming"],
+    activities: ["River Rafting", "River Boating", "River Kayaking", "River Zorbing", "River Zipline"],
     images: [
       {
         url: "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1400&q=80",

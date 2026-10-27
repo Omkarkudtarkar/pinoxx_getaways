@@ -1,8 +1,7 @@
 export const defaultPaidActivities = [
-  "Kayaking",
-  "River Zorbing",
-  "River Boating",
-  "Zipline Adventure",
   "River Rafting",
-  "River swimming"
+  "River Boating",
+  "River Kayaking",
+  "River Zorbing",
+  "River Zipline"
 ];

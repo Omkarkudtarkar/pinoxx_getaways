@@ -642,7 +642,7 @@ function createStore() {
       distanceToWaterActivitiesKm: 1.4,
       meals: ["Breakfast", "Lunch", "Dinner"],
       amenities: ["River view", "Meals", "Parking", "Bonfire", "Swimming pool", "Power backup", "Guide support"],
-      activities: ["Kayaking", "River Zorbing", "River Boating", "Zipline Adventure", "River Rafting", "River swimming"],
+      activities: ["River Rafting", "River Boating", "River Kayaking", "River Zorbing", "River Zipline"],
       images: [
         { url: resortImages.river, alt: "Kali river side resort view" },
         { url: resortImages.pool, alt: "Resort swimming pool" },
@@ -686,7 +686,7 @@ function createStore() {
       distanceToWaterActivitiesKm: 2.8,
       meals: ["Breakfast", "Lunch", "Dinner"],
       amenities: ["Forest view", "Meals", "Indoor games", "Campfire", "Nature trail", "Doctor on call"],
-      activities: ["Kayaking", "River Zorbing", "River Boating", "Zipline Adventure", "River Rafting", "River swimming"],
+      activities: ["River Rafting", "River Boating", "River Kayaking", "River Zorbing", "River Zipline"],
       images: [
         { url: resortImages.forest, alt: "Forest retreat" },
         { url: resortImages.cottage, alt: "Jungle cottage" },
@@ -730,7 +730,7 @@ function createStore() {
       distanceToWaterActivitiesKm: 0.9,
       meals: ["Breakfast", "Lunch", "Dinner"],
       amenities: ["Swimming pool", "Meals", "DJ on request", "Parking", "Activity desk", "First-aid support"],
-      activities: ["Kayaking", "River Zorbing", "River Boating", "Zipline Adventure", "River Rafting", "River swimming"],
+      activities: ["River Rafting", "River Boating", "River Kayaking", "River Zorbing", "River Zipline"],
       images: [
         { url: resortImages.pool, alt: "Pool resort in Dandeli" },
         { url: resortImages.river, alt: "River adventure" },
